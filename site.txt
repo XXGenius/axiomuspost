@@ -1,0 +1,7 @@
+http://www.handmadesite.net/2012/12/pochta-rossii-dlya-prestashop-1-5-pervaya-rabochaya-versiya/
+
+Сергей, спасибо! Модуль работает уже несколько лет.
+Я вам отправила исправление для версии 1.6 в Git Hub.
+
+Для того, чтобы появились кнопки сохранения нужно заменить файл controllers/admin/adminAxiomusPost.php на обновленный. Можно взять здесь https://github.com/Cassiopeja/AxiomusPostcarrier-orig/blob/master/controllers/admin/adminAxiomusPost.php
+
