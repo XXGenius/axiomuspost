@@ -1,15 +1,17 @@
 <?php
 
-class AdminAxiomusPostController extends ModuleAdminController {
+class AdminAxiomusPostController extends ModuleAdminController
+{
 
-    public function __construct() {
+    public function __construct()
+    {
 
         $this->table = 'axiomus_post';
         $this->className = 'AxiomusPost';
         $this->identifier = 'id';
 
         //$this->context = Context::getContext();
-        $this->bootstrap	=	true;
+        $this->bootstrap = true;
         parent::__construct();
 
         $this->addRowAction('edit');
@@ -22,167 +24,97 @@ class AdminAxiomusPostController extends ModuleAdminController {
             )
         );
 
-        $this->fields_list = array(
-            'id' => array(
-                'title' => $this->l('ID'),
-                'align' => 'center',
-                'width' => 20
-            ),
-            'id_state' => array(
-                'title' => $this->l('State'),
-                'width' => 'auto',
-                'callback' => 'getStateName',
-            ),
-            'id_post_zone' => array(
-                'title' => $this->l('Zone'),
-                'width' => 'auto'
-            ),
-            'active' => array(
-                'title' => $this->l('Status'),
-                'active' => 'status',
-                'type' => 'bool',
-                'align' => 'center'
-            ),
-        );
-
         $this->fields_options = array(
-            'configuration_options' => array(
+            'general' => array(
                 'title' => $this->l('Основная конфигурация'),
                 'fields' => array(
-                    'PS_AXIOMUS_TOKEN' => array(
+                    'RS_AXIOMUS_TOKEN' => array(
                         'title' => $this->l('Токен к Axiomus API'),
                         'cast' => 'strval',
                         'type' => 'text',
                         'size' => '16'
                     ),
-                    'PS_AXIOMUS_USE_AXIOMUS' => array(
+                    'RS_AXIOMUS_CACHE_HOURLIFE' => array(
+                        'title' => $this->l('Время жизни записи в кеше (часов)'),
+                        'cast' => 'intval',
+                        'type' => 'text',
+                        'suffix' => 'час',
+                        'size' => '2' //ToDo не забыть валидацию
+                    )
+                ),
+                'submit' => array(
+                    'title' => $this->l('Сохранить'),
+                ),
+            ),
+            'use_delivery' => array(
+                'title' => $this->l('Использование доставки'),
+                'fields' => array(
+                    'RS_AXIOMUS_USE_AXIOMUS_DELIVERY' => array(
                         'title' => $this->l('Использовать доставку Axiomus'),
                         'desc' => $this->l('Если включено будет создана доставка Axiomus'),
                         'cast' => 'boolval',
                         'type' => 'bool'
                     ),
-                    'PS_AXIOMUS_USE_TOPDELIVERY' => array(
+                    'RS_AXIOMUS_USE_TOPDELIVERY_DELIVERY' => array(
                         'title' => $this->l('Использовать доставку TopDelivery'),
                         'desc' => $this->l('Если включено будет создана доставка TopDelivery через Axiomus API'),
                         'cast' => 'boolval',
                         'type' => 'bool'
                     ),
-                    'PS_AXIOMUS_USE_DPD' => array(
+                    'RS_AXIOMUS_USE_DPD_DELIVERY' => array(
                         'title' => $this->l('Использовать доставку DPD'),
                         'desc' => $this->l('Если включено будет создана доставка DPD через Axiomus API'),
                         'cast' => 'boolval',
                         'type' => 'bool'
                     ),
-                    'PS_AXIOMUS_USE_BOXBERRY' => array(
+                    'RS_AXIOMUS_USE_BOXBERRY_DELIVERY' => array(
                         'title' => $this->l('Использовать доставку BoxBerry'),
                         'desc' => $this->l('Если включено будет создана доставка BoxBerry через Axiomus API'),
                         'cast' => 'boolval',
                         'type' => 'bool'
                     ),
-                    'AxiomusPost_PONDROUS_WEIGHT' => array(
-                        'title' => $this->l('Pondreous parcel (kg)'),
-                        'cast' => 'floatval',
-                        'type' => 'text',
-                        'validation' => 'isUnsignedFloat'
-                    ),
-                    'AxiomusPost_INSURED_VALUE' => array(
-                        'title' => $this->l('The fee for the amount of the insured value parcels'),
-                        'cast' => 'intval',
-                        'type' => 'text',
-                        'validation' => 'isPercentage',
-                        'suffix' => '%'
-                    ),
                 ),
                 'submit' => array(
-                     'title'	=>	$this->l('Save'),
+                    'title' => $this->l('Сохранить'),
                 ),
             ),
-            'zones_base_price' => array(
-                'title' => $this->l('Base price for 0.5 kg parcel'),
-                'icon' => 'delivery',
+            'use_carry' => array(
+                'title' => $this->l('Использование самовывоза'),
                 'fields' => array(
-                    'AxiomusPost_ZONE1_BASE_PRICE' => array(
-                        'title' => $this->l('Zone 1'),
-                        'suffix' => $this->context->currency->getSign(),
-                        'cast' => 'floatval',
-                        'type' => 'text',
-                        'validation' => 'isPrice'
+                    'RS_AXIOMUS_USE_AXIOMUS_CARRY' => array(
+                        'title' => $this->l('Использовать пункты самовывоза Axiomus'),
+                        'desc' => $this->l('Если включено будет создана доставка Axiomus с пунктами самовывоза'),
+                        'cast' => 'boolval',
+                        'type' => 'bool'
                     ),
-                    'AxiomusPost_ZONE2_BASE_PRICE' => array(
-                        'title' => $this->l('Zone 2'),
-                        'suffix' => $this->context->currency->getSign(),
-                        'cast' => 'floatval',
-                        'type' => 'text',
-                        'validation' => 'isPrice'
+                    'RS_AXIOMUS_USE_TOPDELIVERY_CARRY' => array(
+                        'title' => $this->l('Использовать пункты самовывоза TopDelivery'),
+                        'desc' => $this->l('Если включено будет создана доставка TopDelivery через Axiomus API с пунктами самовывоза'),
+                        'cast' => 'boolval',
+                        'type' => 'bool'
                     ),
-                    'AxiomusPost_ZONE3_BASE_PRICE' => array(
-                        'title' => $this->l('Zone 3'),
-                        'suffix' => $this->context->currency->getSign(),
-                        'cast' => 'floatval',
-                        'type' => 'text',
-                        'validation' => 'isPrice'
+                    'RS_AXIOMUS_USE_DPD_CARRY' => array(
+                        'title' => $this->l('Использовать пункты самовывоза DPD'),
+                        'desc' => $this->l('Если включено будет создана доставка DPD через Axiomus API с пунктами самовывоза'),
+                        'cast' => 'boolval',
+                        'type' => 'bool'
                     ),
-                    'AxiomusPost_ZONE4_BASE_PRICE' => array(
-                        'title' => $this->l('Zone 4'),
-                        'suffix' => $this->context->currency->getSign(),
-                        'cast' => 'floatval',
-                        'type' => 'text',
-                        'validation' => 'isPrice'
+                    'RS_AXIOMUS_USE_BOXBERRY_CARRY' => array(
+                        'title' => $this->l('Использовать пункты самовывоза BoxBerry'),
+                        'desc' => $this->l('Если включено будет создана доставка BoxBerry через Axiomus API с пунктами самовывоза'),
+                        'cast' => 'boolval',
+                        'type' => 'bool'
                     ),
-                    'AxiomusPost_ZONE5_BASE_PRICE' => array(
-                        'title' => $this->l('Zone 5'),
-                        'suffix' => $this->context->currency->getSign(),
-                        'cast' => 'floatval',
-                        'type' => 'text',
-                        'validation' => 'isPrice'
+                    'RS_AXIOMUS_USE_RUSSIANPOST_CARRY' => array(
+                        'title' => $this->l('Использовать пункты самовывоза Почты России'),
+                        'desc' => $this->l('Если включено будет создана доставка Почта России через Axiomus API с пунктами самовывоза'),
+                        'cast' => 'boolval',
+                        'type' => 'bool'
                     ),
                 ),
                 'submit' => array(
-                     'title'	=>	$this->l('Save'),
-                    ),
-            ),
-            'zones_additional_weight_cost' => array(
-                'title' => $this->l('Cost of each additional 0.5 kg of parcel'),
-                'fields' => array(
-                    'AxiomusPost_ZONE1_ADD_PRICE' => array(
-                        'title' => $this->l('Zone 1'),
-                        'suffix' => $this->context->currency->getSign(),
-                        'cast' => 'floatval',
-                        'type' => 'text',
-                        'validation' => 'isPrice'
-                    ),
-                    'AxiomusPost_ZONE2_ADD_PRICE' => array(
-                        'title' => $this->l('Zone 2'),
-                        'suffix' => $this->context->currency->getSign(),
-                        'cast' => 'floatval',
-                        'type' => 'text',
-                        'validation' => 'isPrice'
-                    ),
-                    'AxiomusPost_ZONE3_ADD_PRICE' => array(
-                        'title' => $this->l('Zone 3'),
-                        'suffix' => $this->context->currency->getSign(),
-                        'cast' => 'floatval',
-                        'type' => 'text',
-                        'validation' => 'isPrice'
-                    ),
-                    'AxiomusPost_ZONE4_ADD_PRICE' => array(
-                        'title' => $this->l('Zone 4'),
-                        'suffix' => $this->context->currency->getSign(),
-                        'cast' => 'floatval',
-                        'type' => 'text',
-                        'validation' => 'isPrice'
-                    ),
-                    'AxiomusPost_ZONE5_ADD_PRICE' => array(
-                        'title' => $this->l('Zone 5'),
-                        'suffix' => $this->context->currency->getSign(),
-                        'cast' => 'floatval',
-                        'type' => 'text',
-                        'validation' => 'isPrice'
-                    ),
+                    'title' => $this->l('Сохранить'),
                 ),
-                'submit' => array(
-                     'title'	=>	$this->l('Save'),
-                    ),
             )
         );
     }
@@ -191,7 +123,8 @@ class AdminAxiomusPostController extends ModuleAdminController {
      * Form to add new
      * */
 
-    public function renderForm() {
+    public function renderForm()
+    {
 
         $this->fields_form = array(
             'legend' => array(
@@ -206,7 +139,7 @@ class AdminAxiomusPostController extends ModuleAdminController {
                         'query' => Country::getCountries($this->context->language->id, true, true),
                         'id' => 'id_country',
                         'name' => 'name',
-                    //'default' => array('value'=>$this->context->country->id, 'label'=>$this->l($this->context->country->name)),//array() or value???
+                        //'default' => array('value'=>$this->context->country->id, 'label'=>$this->l($this->context->country->name)),//array() or value???
                     ),
                     'required' => true,
                 ),
@@ -284,23 +217,102 @@ class AdminAxiomusPostController extends ModuleAdminController {
         return parent::renderForm();
     }
 
-    public function postProcess() {
+    public function postProcess()
+    {
+        if (!($object = $this->loadObject(true))) {
+            return;
+        }
+
+        if (Tools::isSubmit('submitOptionsaxiomus_post')) {
+            //Delivery
+
+            if ((boolean)$_POST['RS_AXIOMUS_USE_AXIOMUS_DELIVERY'] != (boolean)Configuration::get('RS_AXIOMUS_USE_AXIOMUS_DELIVERY')) {
+                if ((boolean)$_POST['RS_AXIOMUS_USE_AXIOMUS_DELIVERY']) {
+                    $this->module->installCarrier('Axiomus', 'DELIVERY');
+                } else {
+                    $this->module->uninstallCarrier('Axiomus', 'DELIVERY');
+                }
+            }
+            if ((boolean)$_POST['RS_AXIOMUS_USE_TOPDELIVERY_DELIVERY'] != (boolean)Configuration::get('RS_AXIOMUS_USE_TOPDELIVERY_DELIVERY')) { 
+                if ((boolean)$_POST['RS_AXIOMUS_USE_TOPDELIVERY_DELIVERY']) {
+                    $this->module->installCarrier('TopDelivery', 'DELIVERY');
+                } else {
+                    $this->module->uninstallCarrier('TopDelivery', 'DELIVERY');
+                }
+            }
+            if ((boolean)$_POST['RS_AXIOMUS_USE_DPD_DELIVERY'] != (boolean)Configuration::get('RS_AXIOMUS_USE_DPD_DELIVERY')) { 
+                if ((boolean)$_POST['RS_AXIOMUS_USE_DPD_DELIVERY']) {
+                    $this->module->installCarrier('DPD', 'DELIVERY');
+                } else {
+                    $this->module->uninstallCarrier('DPD', 'DELIVERY');
+                }
+            }
+            if ((boolean)$_POST['RS_AXIOMUS_USE_BOXBERRY_DELIVERY'] != (boolean)Configuration::get('RS_AXIOMUS_USE_BOXBERRY_DELIVERY')) { 
+                if ((boolean)$_POST['RS_AXIOMUS_USE_BOXBERRY_DELIVERY']) {
+                    $this->module->installCarrier('BoxBerry', 'DELIVERY');
+                } else {
+                    $this->module->uninstallCarrier('BoxBerry', 'DELIVERY');
+                }
+            }
+            //Carry
+            if ((boolean)$_POST['RS_AXIOMUS_USE_AXIOMUS_CARRY'] != (boolean)Configuration::get('RS_AXIOMUS_USE_AXIOMUS_CARRY')) { 
+                if ((boolean)$_POST['RS_AXIOMUS_USE_AXIOMUS_CARRY']) {
+                    $this->module->installCarrier('Axiomus', 'CARRY');
+                } else {
+                    $this->module->uninstallCarrier('Axiomus', 'CARRY');
+                }
+            }
+            if ((boolean)$_POST['RS_AXIOMUS_USE_TOPDELIVERY_CARRY'] != (boolean)Configuration::get('RS_AXIOMUS_USE_TOPDELIVERY_CARRY')) { 
+                if ((boolean)$_POST['RS_AXIOMUS_USE_TOPDELIVERY_CARRY']) {
+                    $this->module->installCarrier('TopDelivery', 'CARRY');
+                } else {
+                    $this->module->uninstallCarrier('TopDelivery', 'CARRY');
+                }
+            }
+            if ((boolean)$_POST['RS_AXIOMUS_USE_DPD_CARRY'] != (boolean)Configuration::get('RS_AXIOMUS_USE_DPD_CARRY')) { 
+                if ((boolean)$_POST['RS_AXIOMUS_USE_DPD_CARRY']) {
+                    $this->module->installCarrier('DPD', 'CARRY');
+                } else {
+                    $this->module->uninstallCarrier('DPD', 'CARRY');
+                }
+            }
+            if ((boolean)$_POST['RS_AXIOMUS_USE_BOXBERRY_CARRY'] != (boolean)Configuration::get('RS_AXIOMUS_USE_BOXBERRY_CARRY')) { 
+                if ((boolean)$_POST['RS_AXIOMUS_USE_BOXBERRY_CARRY']) {
+                    $this->module->installCarrier('BoxBerry', 'CARRY');
+                } else {
+                    $this->module->uninstallCarrier('BoxBerry', 'CARRY');
+                }
+            }
+            if ((boolean)$_POST['RS_AXIOMUS_USE_RUSSIANPOST_CARRY'] != (boolean)Configuration::get('RS_AXIOMUS_USE_RUSSIANPOST_CARRY')) { 
+                if ((boolean)$_POST['RS_AXIOMUS_USE_RUSSIANPOST_CARRY']) {
+                    $this->module->installCarrier('RussianPost', 'CARRY');
+                } else {
+                    $this->module->uninstallCarrier('RussianPost', 'CARRY');
+                }
+            }
+        }
         parent::postProcess();
     }
 
-    public function processSave() {
+
+
+    public function processSave()
+    {
         parent::processSave();
     }
 
-    public function initProcess() {
+    public function initProcess()
+    {
         parent::initProcess();
     }
 
-    protected function processUpdateOptions() {
+    protected function processUpdateOptions()
+    {
         parent::processUpdateOptions();
     }
 
-    public function getStateName($echo, $row) {
+    public function getStateName($echo, $row)
+    {
         $id_state = $row['id_state'];
 
         $state = new State($id_state);
@@ -314,7 +326,8 @@ class AdminAxiomusPostController extends ModuleAdminController {
         return $this->l('Out of the World');
     }
 
-    public function renderList() {
+    public function renderList()
+    {
         $this->tpl_list_vars['postZones'] = array(
             array(
                 'id_post_zone' => 1,

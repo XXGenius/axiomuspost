@@ -33,13 +33,13 @@ class axiomuspostcarrier extends CarrierModule {
 
         $this->AxiomusPost = new AxiomusPost();
 
-        $this->carrierIdStr = 'SR_Axiomus_POST_CARRIER_ID';
+        $this->carrierIdStr = 'RS_AXIOMUS_POST_CARRIER_ID';
     }
 
     public function getOrderShippingCost($params, $shipping_cost) { //В $params лежит  объект типа Cart.
 
         // TODO: разобраться с проверкой кук
-        if ($this->id_carrier != (int) Configuration::get('SR_Axiomus_POST_CARRIER_ID')){
+        if ($this->id_carrier != (int) Configuration::get('RS_AXIOMUS_POST_CARRIER_ID')){
             return false;
         }else {
             /*
@@ -50,28 +50,34 @@ class axiomuspostcarrier extends CarrierModule {
              */
 
             $totalsum = 0;
+            $totalPrice = 0;
             $addr = new Address($params->id_address_delivery);
-            if (!Validate::isLoadedObject($addr)) // TODO: разобраться с проверкой кук
+            if (!Validate::isLoadedObject($addr))
                 return false;
             $products = $params->getProducts();
+            $totalWeight = $params->getTotalWeight();
             foreach ($products as $product) {
-                $cacheRow = $this->AxiomusPost->getRowInCache($addr->id,$product['id_product']);
-                if ($cacheRow != false){//ToDo перепроверить в отладчике isset
-                    $totalsum += $cacheRow['price'];             //ToDo ошибка! сумма доставки должна быть одна на все товары, а не суммироваться
-                }else{
-                    $width = $product['width'];
-                    $height = $product['height'];
-                    $depth = $product['depth'];
-                    $val = $product['total_wt']; //ToDo а точно ли не total?
-                    $weight = $product['weight']; //ToDo в случае oliva вес брать из feature - переделать! добавить такую возможность в админку
-                    $addressString = $addr->city . ', ' . $addr->address1; //ToDo добавить проверку на заполнение этих параметров //ToDo не забыть про address2
-
-                    //$sum_carrier = getAxiomusResponse($addressString,$height,$width,$depth,$val,$weight);
-                    $sum_carrier = 10; //ToDo включить расчет через API, переименовать
-                    $totalsum += $sum_carrier;
-                    $this->AxiomusPost->insertRowInCache($addr->id, $product['id_product'], $sum_carrier);
-                }
+                $totalPrice += (float)$product['total_wt']; //ToDo а точно ли не total?
             }
+
+            $cachePrice = $this->AxiomusPost->getPriceInCache($addr->id, $totalWeight);
+            if ($cachePrice != false){
+                $totalsum = $cachePrice;
+            }else{
+                $width = 0;
+                $height = 0;
+                $depth = 0;
+                $val = $totalPrice;
+                $weight = $totalWeight;
+                $addressString = $addr->city . ', ' . $addr->address1; //ToDo добавить проверку на заполнение этих параметров //ToDo не забыть про address2
+
+                $axiomusResponse = getAxiomusResponse($addressString,$height,$width,$depth,$val,$weight);
+//                $sum_carrier = 10;
+                $sum_carrier = (int)$axiomusResponse['delivery'][0]['Axiomus']['delivery'][0]['price'];
+                $totalsum = $sum_carrier;
+                $this->AxiomusPost->insertRowInCache($addr->id, $totalWeight, $sum_carrier);
+            }
+
             return $totalsum;
 
 
@@ -167,14 +173,22 @@ class axiomuspostcarrier extends CarrierModule {
         // Нам будут полезны ID пункта меню и перевозчика
         // TODO: Некисло и результат этой операции проверять, конечно
         //ToDo не забыть добавить эти поля в uninstall
-        Configuration::updateValue('SR_Axiomus_POST_TAB_ID', $tab->id);
-        Configuration::updateValue('SR_Axiomus_POST_CARRIER_ID', (int)$idCarrier);
+        Configuration::updateValue('RS_AXIOMUS_POST_TAB_ID', $tab->id);
+        Configuration::updateValue('RS_AXIOMUS_POST_CARRIER_ID', (int)$idCarrier);
 
-        Configuration::updateValue('PS_AXIOMUS_TOKEN', '76793d5test0cf77');
-        Configuration::updateValue('PS_AXIOMUS_USE_AXIOMUS', true);
-        Configuration::updateValue('PS_AXIOMUS_USE_TOPDELIVERY', false);
-        Configuration::updateValue('PS_AXIOMUS_USE_DPD', false);
-        Configuration::updateValue('PS_AXIOMUS_USE_BOXBERRY', false);
+        Configuration::updateValue('RS_AXIOMUS_TOKEN', '76793d5test0cf77');
+        Configuration::updateValue('RS_AXIOMUS_CACHE_HOURLIFE', 24);
+
+        Configuration::updateValue('RS_AXIOMUS_USE_AXIOMUS_DELIVERY', 1);
+        Configuration::updateValue('RS_AXIOMUS_USE_TOPDELIVERY_DELIVERY', null);
+        Configuration::updateValue('RS_AXIOMUS_USE_DPD_DELIVERY', null);
+        Configuration::updateValue('RS_AXIOMUS_USE_BOXBERRY_DELIVERY', null);
+
+        Configuration::updateValue('RS_AXIOMUS_USE_AXIOMUS_CARRY', null);
+        Configuration::updateValue('RS_AXIOMUS_USE_TOPDELIVERY_CARRY', null);
+        Configuration::updateValue('RS_AXIOMUS_USE_DPD_CARRY', null);
+        Configuration::updateValue('RS_AXIOMUS_USE_BOXBERRY_CARRY', null);
+        Configuration::updateValue('RS_AXIOMUS_USE_RUSSIANPOST_CARRY', null);
 
         return true;
     }
@@ -189,9 +203,22 @@ class axiomuspostcarrier extends CarrierModule {
         $res = $this->uninstallCarrier();
         $res = $this->AxiomusPost->dropTable();
 
-        Configuration::updateValue('SR_Axiomus_POST_TAB_ID', NULL);
-        Configuration::updateValue('SR_Axiomus_POST_CARRIER_ID', NULL);
+        Configuration::updateValue('RS_AXIOMUS_POST_TAB_ID', null);
+        Configuration::updateValue('RS_AXIOMUS_POST_CARRIER_ID', null);
 
+        Configuration::updateValue('RS_AXIOMUS_TOKEN', null);
+        Configuration::updateValue('RS_AXIOMUS_CACHE_HOURLIFE', null);
+
+        Configuration::updateValue('RS_AXIOMUS_USE_AXIOMUS_DELIVERY', null);
+        Configuration::updateValue('RS_AXIOMUS_USE_TOPDELIVERY_DELIVERY', null);
+        Configuration::updateValue('RS_AXIOMUS_USE_DPD_DELIVERY', null);
+        Configuration::updateValue('RS_AXIOMUS_USE_BOXBERRY_DELIVERY', null);
+
+        Configuration::updateValue('RS_AXIOMUS_USE_AXIOMUS_CARRY', null);
+        Configuration::updateValue('RS_AXIOMUS_USE_TOPDELIVERY_CARRY', null);
+        Configuration::updateValue('RS_AXIOMUS_USE_DPD_CARRY', null);
+        Configuration::updateValue('RS_AXIOMUS_USE_BOXBERRY_CARRY', null);
+        Configuration::updateValue('RS_AXIOMUS_USE_RUSSIANPOST_CARRY', null);
         if (!$res || !parent::uninstall())
             return false;
 
@@ -201,88 +228,90 @@ class axiomuspostcarrier extends CarrierModule {
     // Хук на обновление информации о перевозчике
     public function hookActionCarrierUpdate($params) {
 
-        if ((int) $params['id_carrier'] == (int) Configuration::get('SR_Axiomus_POST_CARRIER_ID')) {
-            Configuration::updateValue('SR_Axiomus_POST_CARRIER_ID', (int) $params['carrier']->id);
+        if ((int) $params['id_carrier'] == (int) Configuration::get('RS_AXIOMUS_POST_CARRIER_ID')) {
+            Configuration::updateValue('RS_AXIOMUS_POST_CARRIER_ID', (int) $params['carrier']->id);
         }
     }
 
-    /*
-     * Добавление нового перевозчика
-     *
-     * */
+    public function uninstallCarrier($name = '', $type = '')
+    {
 
-    private function installCarrier() {
+        //ToDo нужно ли удалять RangePrice
+        $carrierId = (int)Configuration::get('RS_AXIOMUS_ID_' . strtoupper($name) . '_' . strtoupper($type));
 
-        $carrier = new Carrier();
+        if (!is_null($carrierId)) {
+            $carrier = new Carrier($carrierId);
 
-        $carrier->name = 'Axiomus';
+            $langDefault = (int)Configuration::get('PS_LANG_DEFAULT');
 
-        // @deprecated since 1.5.0
-        //$carrier->id_tax_rules_group' = 0;
-        // TODO: проверить -- это точно обязательно?
-        $carrier->active = true;
+            $carriers = Carrier::getCarriers($langDefault, true, false, false, NULL, PS_CARRIERS_AND_CARRIER_MODULES_NEED_RANGE);//ToDo что за PS_CARRIERS_AND_CARRIER_MODULES_NEED_RANGE
 
-        // TODO: проверить -- это точно обязательно?
-        $carrier->deleted = 0;
+            // Если наш перевозчик был по умолчанию, назначим кого-нибудь другого
+            if (Configuration::get('PS_CARRIER_DEFAULT') == $carrierId) {
+                foreach ($carriers as $c) {
+                    if ($c['active'] && !$c['deleted'] && ($c['name'] != $carrier->name)) {
+                        Configuration::updateValue('PS_CARRIER_DEFAULT', $c['id_carrier']);
+                    }
+                }
+            }
 
-        // TODO: это может быть интересным -- стоимость упаковки и пр.
-        $carrier->shipping_handling = false;
+            $zones = Zone::getZones(true);
+            foreach ($zones as $z) {
+                if ($z['id_zone'] == (int)7) { //ToDo может вынести в админку выбор зоны, не у всех она Europe (non-EU)
+                    $sql = "DELETE FROM `" . _DB_PREFIX_ . "carrier_zone` WHERE `id_carrier` = {$carrierId}";
+                    Db::getInstance()->execute($sql);
+                    $sql = "DELETE FROM `" . _DB_PREFIX_ . "delivery` WHERE `id_carrier` = {$carrierId}";
+                    Db::getInstance()->execute($sql);
+                }
+            }
 
-        // Что делать, если Out Of Range. 0 -- считать, 1 -- не считать
-        // Мы, ведь, сами определяем можем или не можем, настроек range
-        // никаких не будет.
-        $carrier->range_behavior = 0;
-
-                // that are configured in the back office
-        // Тут зависимости от языка
-        // TODO: по идее это время доставки, но для разных пунктов
-        // оно может сильно отличасться. Посмотреть, можно-ли это как-то
-        // динамически править
-        // наш код языка вообще за ISO-код считают?
-        if (Validate::isLanguageIsoCode('ru')) {
-
-            // Надеюсь, что функция возвращает false или 0 в случае отсутствия языка
-            $lang_id = Language::getIdByIso('ru');
-
-            if ($lang_id) {
-                $carrier->delay[(int) $lang_id] = 'Доставка ценной посылкой Почтой России';
+            if (!$carrier->deleted) {
+                $carrier->deleted = 1;
+                if (!$carrier->update())
+                    return false;
             }
         }
 
-        // для языка по умолчанию вот это вот
-        $carrier->delay[(int) Configuration::get('PS_LANG_DEFAULT')] = 'в течении 1-2 суток';
+        Configuration::updateValue('RS_AXIOMUS_ID_' . strtoupper($name) . '_' . strtoupper($type), null);
+        return true;
+    }
 
-        // Этот перевозчик связан с модулем
+    public function installCarrier($name = '', $type = '')
+    {
+        $carrier = new Carrier();
+        $carrier->name = $name;
+
+        $carrier->active = true; // TODO: проверить -- это точно обязательно?
+        $carrier->deleted = 0; // TODO: проверить -- это точно обязательно?
+
+
+        $carrier->shipping_handling = false; // TODO: это может быть интересным -- стоимость упаковки и пр.
+        $carrier->range_behavior = 0; //Нужно ли использовать стандартный range
+
+        $carrier->delay[(int)Configuration::get('PS_LANG_DEFAULT')] = ($type == 'DELIVERY' ? 'В течении 1-2 суток' : 'Самовывоз');
+
+        //связь с модулем
         $carrier->shipping_external = true;
         $carrier->is_module = true;
         $carrier->external_module_name = 'axiomuspostcarrier';
 
-        // Если я правильно понял, то заданные лимиты
-        // нам не уперлись, у нас внутре свои лимиты задаются
-        // UPD: Но оно в этом случае, похоже, не работает. Придется задавать лимиты
-        $carrier->need_range = true;
+        $carrier->need_range = true; //разобратся почему не работает без лимитов
 
-        // TODO: еще полезные переменные, мы ими потом займемся,
-        // надо понять, как оно считает
-        // $carrier->max_width => 1;
-        // $carrier->max_height => 1;
-        // $carrier->max_depth => 1;
-        // $carrier->max_weight => 1; // вот это вот особенно!
+        $carrier->max_width = 150; //см
+        $carrier->max_height = 150;
+        $carrier->max_depth = 150;
+        $carrier->max_weight = 25; //масимальный вес у axiomus
 
         if ($carrier->add()) {
-
-            // Добавим нашего несчастного перевозчика всем группам
+            // Добавим перевозчика всем группам пользователей
             $groups = Group::getGroups(true);
             foreach ($groups as $group)
                 Db::getInstance()->autoExecute(_DB_PREFIX_ . 'carrier_group', array(
-                    'id_carrier' => (int) $carrier->id,
-                    'id_group' => (int) $group['id_group']
-                        ), 'INSERT');
+                    'id_carrier' => (int)$carrier->id,
+                    'id_group' => (int)$group['id_group']
+                ), 'INSERT');
 
-            // Без указания пределов по весу и стоимости оно не заработало
-            // Сделаем, хотя оно нам не надо
-
-            $rangePrice = new RangePrice();
+            $rangePrice = new RangePrice(); //ToDo возможно не нужно для $carrier->need_range = false
             $rangePrice->id_carrier = $carrier->id;
             $rangePrice->delimiter1 = '0';
             $rangePrice->delimiter2 = '100500';
@@ -296,16 +325,17 @@ class axiomuspostcarrier extends CarrierModule {
 
             $zones = Zone::getZones(true); //ToDo Переработать добавление зон
             foreach ($zones as $z) {
-                Db::getInstance()->autoExecute(_DB_PREFIX_ . 'carrier_zone', array('id_carrier' => (int) $carrier->id, 'id_zone' => (int) $z['id_zone']), 'INSERT');
-                Db::getInstance()->autoExecuteWithNullValues(_DB_PREFIX_ . 'delivery', array('id_carrier' => $carrier->id, 'id_range_price' => (int) $rangePrice->id, 'id_range_weight' => NULL, 'id_zone' => (int) $z['id_zone'], 'price' => '0'), 'INSERT');
-                Db::getInstance()->autoExecuteWithNullValues(_DB_PREFIX_ . 'delivery', array('id_carrier' => $carrier->id, 'id_range_price' => NULL, 'id_range_weight' => (int) $rangeWeight->id, 'id_zone' => (int) $z['id_zone'], 'price' => '0'), 'INSERT');
+                if ($z['id_zone'] == (int)7) { //ToDo может вынести в админку выбор зоны, не у всех она Europe (non-EU)
+                    Db::getInstance()->autoExecuteWithNullValues(_DB_PREFIX_ . 'carrier_zone', array('id_carrier' => (int)$carrier->id, 'id_zone' => (int)$z['id_zone']), 'INSERT');
+                    Db::getInstance()->autoExecuteWithNullValues(_DB_PREFIX_ . 'delivery', array('id_carrier' => (int)$carrier->id, 'id_range_price' => (int)$rangePrice->id, 'id_range_weight' => NULL, 'id_zone' => (int)$z['id_zone'], 'price' => '0'), 'INSERT');
+                    Db::getInstance()->autoExecuteWithNullValues(_DB_PREFIX_ . 'delivery', array('id_carrier' => (int)$carrier->id, 'id_range_price' => NULL, 'id_range_weight' => (int)$rangeWeight->id, 'id_zone' => (int)$z['id_zone'], 'price' => '0'), 'INSERT');
+                }
             }
 
-            copy(dirname(__FILE__) . '/carrier.jpg', _PS_SHIP_IMG_DIR_ . '/' . (int) $carrier->id . '.jpg');
-
+            copy($this->getLocalPath() . $name . '.jpg', _PS_SHIP_IMG_DIR_ . '/' . (int)$carrier->id . '.jpg');
+            Configuration::updateValue('RS_AXIOMUS_ID_' . strtoupper($name) . '_' . strtoupper($type), (int)($carrier->id));
             return (int)($carrier->id);
         }
-
         return false;
     }
 
@@ -323,38 +353,7 @@ class axiomuspostcarrier extends CarrierModule {
         return $res;
     }
 
-    private function uninstallCarrier() {
 
-        $carrierId = $this->carrierId();
-
-        if (!is_null($carrierId)) {
-            $carrier = new Carrier($carrierId);
-
-            $langDefault = (int) Configuration::get('PS_LANG_DEFAULT');
-
-            $carriers = Carrier::getCarriers($langDefault, true, false, false, NULL, PS_CARRIERS_AND_CARRIER_MODULES_NEED_RANGE);
-
-            // Если наш перевозчик был по умолчанию, назначим кого-нибудь другого
-            if (Configuration::get('PS_CARRIER_DEFAULT') == $carrierId) {
-
-                foreach ($carriers as $c) {
-
-                    if ($c['active'] && !$c['deleted'] && ($c['name'] != $carrier->name)) {
-
-                        Configuration::updateValue('PS_CARRIER_DEFAULT', $c['id_carrier']);
-                    }
-                }
-            }
-
-            if (!$carrier->deleted) {
-                $carrier->deleted = 1;
-                if (!$carrier->update())
-                    return false;
-            }
-        }
-
-        return true;
-    }
 
     private function carrierId($val = NULL) {
 

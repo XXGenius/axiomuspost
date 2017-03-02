@@ -86,14 +86,37 @@ class AxiomusPost extends ObjectModel {
         //$row = $this->dbconn->getRow("SELECT ");
     }
 
-    public function getRowInCache($id_addr, $id_product){
-        $sql = "SELECT * FROM `{$this->tableCacheWithPrefix}` WHERE `id_addr` = {$id_addr} AND `id_product` = {$id_product}";
+    public function getPriceInCache($id_addr, $totalWeight){
+        if ($totalWeight<=1){
+            $left = 0;
+            $right = 1;
+        }elseif ($totalWeight>1 && $totalWeight<=3){
+            $left = 1;
+            $right = 3;
+        }elseif ($totalWeight>3 && $totalWeight<=5){
+            $left = 3;
+            $right = 5;
+        }elseif ($totalWeight>5 && $totalWeight<=10){
+            $left = 5;
+            $right = 10;
+        }elseif ($totalWeight>10 && $totalWeight<=15){
+            $left = 10;
+            $right = 15;
+        }elseif ($totalWeight>15 && $totalWeight<=25){
+            $left = 15;
+            $right = 25;
+        }elseif ($totalWeight>25){
+                $left = 0;
+                $right = 0; //ToDo добавить возможность разбить на разные доставки
+        }
+
+        $sql = "SELECT * FROM `{$this->tableCacheWithPrefix}` WHERE `id_addr` = {$id_addr} AND (`total_weight` > {$left} AND `total_weight` <= {$right})";
 
         $row = Db::getInstance()->getRow($sql);
         if (isset($row['create_datetime'])){
             $date = new DateTime();
             $date->format('Y-m-d H:i:s');
-            $date->add(DateInterval::createfromdatestring('+1 day'));
+            $date->add(DateInterval::createfromdatestring('+'.(int) Configuration::get('RS_AXIOMUS_CACHE_HOURLIFE').' hour'));
 
             $dateInBase = new DateTime($row['create_datetime']);
 
@@ -102,15 +125,15 @@ class AxiomusPost extends ObjectModel {
                 Db::getInstance()->execute($sql);
                 return false;
             }else{
-                return $row;
+                return $row['price'];
             }
         }
         return false;
     }
 
-    public function insertRowInCache($id_addr, $id_product, $price){
-        Db::getInstance()->autoExecuteWithNullValues($this->tableCacheWithPrefix, ['id_addr' => $id_addr, 'id_product' => $id_product, 'price' => $price],'INSERT'); //ToDo добавить исключения
-        //Записать в таблицу новую запись
+    public function insertRowInCache($id_addr, $totalWeight, $price){
+        Db::getInstance()->autoExecuteWithNullValues($this->tableCacheWithPrefix, ['id_addr' => $id_addr, 'total_weight' => $totalWeight, 'price' => $price],'INSERT');
+        //ToDo добавить исключения
         return true;
     }
 
