@@ -8,10 +8,12 @@ class AxiomusPost extends ObjectModel {
     public $active;
     public $tableWithPrefix;
     public $tableCacheWithPrefix; //ToDo а нужен ли public?
+    public $tableOrderWithPrefix;
     protected $dbconn;
     public static $definition = array(
-        'table' => 'axiomus_post',
+        'table' => 'axiomus_order',
         'tableCache' => 'axiomus_cache',
+        'tableOrder' => 'axiomus_order',
         'primary' => 'id',
         'multilang' => false,
         'fields' => array(
@@ -36,31 +38,76 @@ class AxiomusPost extends ObjectModel {
 
         $this->tableWithPrefix = _DB_PREFIX_ . AxiomusPost::$definition['table'];
         $this->tableCacheWithPrefix = _DB_PREFIX_. AxiomusPost::$definition['tableCache']; //ToDo может както попроще, зачем столько параметров
+        $this->tableOrderWithPrefix = _DB_PREFIX_. AxiomusPost::$definition['tableOrder']; //ToDo может както попроще, зачем столько параметров
     }
 
     public function createTable() {
-        //ToDo добавить функцию добавления базы $this->tableCache
+        $sql = "CREATE TABLE IF NOT EXISTS `{$this->tableOrderWithPrefix}` (" .
+            '`id` INT(11) NOT NULL AUTO_INCREMENT,' .
+            '`order_id` INT(11) NOT NULL,' .
+            '`order_code` VARCHAR(50) NOT NULL,' .
+            '`carry` BOOLEAN NOT NULL,' .
+            '`company_name` VARCHAR(50) NOT NULL,' .
+            '`address` VARCHAR(255) NOT NULL,' .
+            '`track_number` VARCHAR(255),' .
+            '`status` INT(11),' .
+            '`finish_datetime` DATETIME,' .
+            '`send_datetime` DATETIME,' .
+            '`create_datetime` DATETIME DEFAULT CURRENT_TIMESTAMP NULL,' .
+            'PRIMARY KEY (`id`)' .
+            ') DEFAULT CHARSET=utf8;';
 
-        $sql = "CREATE TABLE IF NOT EXISTS `{$this->tableWithPrefix}` (" .
+        if (!Db::getInstance()->execute($sql, false)) {
+            return false;
+        }
+
+        $sql = "CREATE TABLE IF NOT EXISTS `{$this->tableCacheWithPrefix}` (" .
                 '`id` INT(11) NOT NULL AUTO_INCREMENT,' .
-                '`id_state` INT(11) NOT NULL,' .
-                '`id_post_zone` INT(11) NOT NULL,' .
-                '`active` INT(11) NOT NULL,' .
+                '`id_addr` INT(11) NOT NULL,' .
+                '`create_datetime` DATETIME DEFAULT CURRENT_TIMESTAMP NULL,' .
+                '`total_weight` FLOAT NOT NULL,' .
+                '`price_axiomus_delivery` INT(11),' .
+                '`price_topdelivery_delivery` INT(11),' .
+                '`price_dpd_delivery` INT(11),' .
+                '`price_boxberry_delivery` INT(11),' .
+                '`price_axiomus_carry` INT(11),' .
+                '`price_topdelivery_carry` INT(11),' .
+                '`price_dpd_carry` INT(11),' .
+                '`price_boxberry_carry` INT(11),' .
+                '`price_russianpost_carry` INT(11),' .
                 'PRIMARY KEY (`id`)' .
                 ') DEFAULT CHARSET=utf8;';
 
         if (!Db::getInstance()->execute($sql, false)) {
             return false;
         }
-
+//        $sql = "CREATE TABLE IF NOT EXISTS `{$this->tableWithPrefix}` (" .
+//            '`id` INT(11) NOT NULL AUTO_INCREMENT,' .
+//            '`id_state` INT(11) NOT NULL,' .
+//            '`id_post_zone` INT(11) NOT NULL,' .
+//            '`active` INT(11) NOT NULL,' .
+//            'PRIMARY KEY (`id`)' .
+//            ') DEFAULT CHARSET=utf8;';
+//
+//        if (!Db::getInstance()->execute($sql, false)) {
+//            return false;
+//        }
         return true;
     }
 
     public function dropTable() {
 
         $sql = "DROP TABLE IF EXISTS `".$this->tableWithPrefix."`;";
+        if (!Db::getInstance()->execute($sql)) {
+            return false;
+        }
 
-        var_dump($sql);
+        $sql = "DROP TABLE IF EXISTS `".$this->tableCacheWithPrefix."`;";
+        if (!Db::getInstance()->execute($sql)) {
+            return false;
+        }
+
+        $sql = "DROP TABLE IF EXISTS `".$this->tableOrderWithPrefix."`;";
         if (!Db::getInstance()->execute($sql)) {
             return false;
         }
@@ -107,7 +154,7 @@ class AxiomusPost extends ObjectModel {
             $right = 25;
         }elseif ($totalWeight>25){
                 $left = 0;
-                $right = 0; //ToDo добавить возможность разбить на разные доставки
+                $right = 0;
         }
 
         $sql = "SELECT * FROM `{$this->tableCacheWithPrefix}` WHERE `id_addr` = {$id_addr} AND (`total_weight` > {$left} AND `total_weight` <= {$right})";
@@ -125,31 +172,15 @@ class AxiomusPost extends ObjectModel {
                 Db::getInstance()->execute($sql);
                 return false;
             }else{
-                return $row['price'];
+                return $row;
             }
         }
         return false;
     }
 
-    public function insertRowInCache($id_addr, $totalWeight, $price){
-        Db::getInstance()->autoExecuteWithNullValues($this->tableCacheWithPrefix, ['id_addr' => $id_addr, 'total_weight' => $totalWeight, 'price' => $price],'INSERT');
+    public function insertRowCache($id_addr, $totalWeight, $priceAxiomusDelivery, $priceTopDeliveryDelivery, $priceDPDDelivery, $priceBoxBerryDelivery, $priceAxiomusCarry, $priceTopDeliveryCarry, $priceDPDCarry, $priceBoxBerryCarry, $priceRussianPostCarry){
+        Db::getInstance()->autoExecuteWithNullValues($this->tableCacheWithPrefix, ['id_addr' => $id_addr, 'total_weight' => $totalWeight, 'price_axiomus_delivery' => $priceAxiomusDelivery, 'price_topdelivery_delivery' => $priceTopDeliveryDelivery, 'price_dpd_delivery' => $priceDPDDelivery, 'price_boxberry_delivery' => $priceBoxBerryDelivery, 'price_axiomus_carry' => $priceAxiomusCarry, 'price_topdelivery_carry' => $priceTopDeliveryCarry, 'price_dpd_carry' => $priceDPDCarry, 'price_boxberry_carry' => $priceBoxBerryCarry, 'price_russianpost_carry' => $priceRussianPostCarry],'INSERT');
         //ToDo добавить исключения
         return true;
     }
-
-    // Пришлось перегрузить этот метод. Колонка в таблице
-    // у нас не по правилам называется.
-    // Заодно довавил LIMIT на всякий случай
-    // FIXME: Поле в таблице потом переименовать! И этот метод убрать!
-    public static function existsInDatabase($id_entity, $table) {
-
-        $row = Db::getInstance()->getRow(
-                "SELECT `id` FROM `" . _DB_PREFIX_ . $table . "` e " .
-                "WHERE `e`.`id` = " . (int) $id_entity . " " .
-                "LIMIT 1"
-        );
-
-        return isset($row['id']);
-    }
-
 }

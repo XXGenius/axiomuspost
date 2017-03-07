@@ -7,6 +7,8 @@
  */
 include_once (_PS_MODULE_DIR_ . 'axiomuspostcarrier/AxiomusApi.php');
 
+
+
 function getAxiomusResponse($address, $x=0, $y=0, $z=0, $val=0, $weight=1)
 {
 //    $_POST['token'] = "76793d5test0cf77"; // Тестовый токен.
@@ -19,7 +21,7 @@ function getAxiomusResponse($address, $x=0, $y=0, $z=0, $val=0, $weight=1)
     */
 
 // Шаг 1. Создаем объект для обработки данных
-    $axiomus = new AxiomusApi(Configuration::get("PS_AXIOMUS_TOKEN"));
+    $axiomus = new AxiomusApi(Configuration::get("RS_AXIOMUS_TOKEN"));
 
     $result = array();
 // Шаг 2. Получаем данные о месте и координаты через Яндекс.Геокодер

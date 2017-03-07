@@ -1,14 +1,14 @@
 <?php
 
-class AdminAxiomusPostController extends ModuleAdminController
+class AdminAxiomusConfigController extends ModuleAdminController
 {
 
     public function __construct()
     {
 
-        $this->table = 'axiomus_post';
-        $this->className = 'AxiomusPost';
-        $this->identifier = 'id';
+//        $this->table = 'axiomus_config';
+//        $this->className = 'AxiomusPost';
+//        $this->identifier = 'id';
 
         //$this->context = Context::getContext();
         $this->bootstrap = true;
@@ -219,6 +219,7 @@ class AdminAxiomusPostController extends ModuleAdminController
 
     public function postProcess()
     {
+        //ToDo добавить проверку токена
         if (!($object = $this->loadObject(true))) {
             return;
         }

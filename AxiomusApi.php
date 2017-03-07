@@ -16,6 +16,35 @@ class AxiomusApi
     public $url_geo = "https://axiomus.ru/calc/api_geo.php"; // API Geo (география)
     public $url_calc = "https://axiomus.ru/calc/calc.php"; // API Calc (калькулятор)
 
+    public $url_test = "http://axiomus.ru/test/xml/api_xml_test.php"; //url-тестовых запросов
+    public $ukey_test = "XXcd208495d565ef66e7dff9f98764XX";
+    public $uid_test = 92;
+
+    public function sendXML(){
+
+        //load xml-data from file
+        $filename = '1.xml';
+
+        $handle = fopen($filename, "r");
+        $xml = fread($handle, filesize($filename));
+        $xml = <<<XML
+<?xml version='1.0' standalone='yes'?>
+<singleorder>
+    <mode>get_version</mode>
+</singleorder>
+XML;
+
+        fclose($handle);
+        $ch = curl_init();
+        curl_setopt($ch, CURLOPT_URL, "http://axiomus.ru/test/api_xml_test.php"); // set url to post to
+        curl_setopt($ch, CURLOPT_RETURNTRANSFER,1); // return into a variable
+        curl_setopt($ch, CURLOPT_POST, 1); // set POST method
+        curl_setopt($ch, CURLOPT_POSTFIELDS, "data=".urlencode($xml)); // add POST fields
+        $result = curl_exec($ch); // run the whole process
+        echo $result; //show result on screen
+        curl_close($ch);
+    }
+
 // Функция отправки запроса на API (возвращает ответ от API)
     public function send_data($url, $data){
 
