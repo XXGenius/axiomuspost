@@ -157,22 +157,25 @@ class AxiomusPost extends ObjectModel {
                 $right = 0;
         }
 
-        $sql = "SELECT * FROM `{$this->tableCacheWithPrefix}` WHERE `id_addr` = {$id_addr} AND (`total_weight` > {$left} AND `total_weight` <= {$right})";
+        $sql = "SELECT * FROM `{$this->tableCacheWithPrefix}` WHERE `id_addr` = {$id_addr} AND (`total_weight` >= {$left} AND `total_weight` < {$right})";
 
-        $row = Db::getInstance()->getRow($sql);
-        if (isset($row['create_datetime'])){
-            $date = new DateTime();
-            $date->format('Y-m-d H:i:s');
-            $date->add(DateInterval::createfromdatestring('+'.(int) Configuration::get('RS_AXIOMUS_CACHE_HOURLIFE').' hour'));
+        $rows = Db::getInstance()->executeS($sql);
+        if (is_array($rows)) {
+            foreach ($rows as $row) {
+                {
+                    $date = new DateTime();
+                    $date->format('Y-m-d H:i:s');
 
-            $dateInBase = new DateTime($row['create_datetime']);
+                    $dateInBase = new DateTime($row['create_datetime']);
+                    $dateInBase->add(DateInterval::createfromdatestring('+' . (int)Configuration::get('RS_AXIOMUS_CACHE_HOURLIFE') . ' hour'));
 
-            if (date_timestamp_get($date) < date_timestamp_get($dateInBase)){
-                $sql = "DELETE FROM `{$this->tableCacheWithPrefix}` WHERE `id` = {$row['id']}";
-                Db::getInstance()->execute($sql);
-                return false;
-            }else{
-                return $row;
+                    if (date_timestamp_get($dateInBase) < date_timestamp_get($date)) {
+                        $sql = "DELETE FROM `{$this->tableCacheWithPrefix}` WHERE `id` = {$row['id']}";
+                        Db::getInstance()->execute($sql);
+                    } else {
+                        return $row;
+                    }
+                }
             }
         }
         return false;
