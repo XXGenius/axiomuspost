@@ -238,6 +238,7 @@ class axiomuspostcarrier extends CarrierModule
 
         if (!$this->AxiomusPost->createTable()) {
             $this->uninstallAllCarrier();
+            return false;
         }
 
         // Здесь мы создаем пункт вехнего подменю.
@@ -359,9 +360,11 @@ class axiomuspostcarrier extends CarrierModule
 
     public function hookActionOrderStatusPostUpdate($params)
     {
-        //ToDo реализовать отправку в Axiomus
+        //ToDo реализовать запись строки в таблицу ps_axiomus_order
         //$params['newOrderStatus'] // after status changed
         $par = $params; // after order is placed
+        $this->AxiomusPost->insertRowOrder($params['id_order'], $params['cart']);
+
     }
 
     public function hookActionValidateOrder($params)

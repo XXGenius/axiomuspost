@@ -14,9 +14,9 @@ class AxiomusPost extends ObjectModel {
         'table' => 'axiomus_order',
         'tableCache' => 'axiomus_cache',
         'tableOrder' => 'axiomus_order',
-        'primary' => 'id',
+        'primary' => 'id',//ToDo нужно ли это все
         'multilang' => false,
-        'fields' => array(
+        'fields' => array( //ToDo нужно ли это все
             'id_state' => array(
                 'type' => ObjectModel::TYPE_INT,
                 'required' => true
@@ -134,7 +134,7 @@ class AxiomusPost extends ObjectModel {
     }
 
     public function getPriceInCache($id_addr, $totalWeight){
-        if ($totalWeight<=1){
+        if ($totalWeight <= 1){
             $left = 0;
             $right = 1;
         }elseif ($totalWeight>1 && $totalWeight<=3){
@@ -186,4 +186,16 @@ class AxiomusPost extends ObjectModel {
         //ToDo добавить исключения
         return true;
     }
+
+    public function insertRowOrder($orderId, $cartда){
+        $orderCode = '';
+        $address = 0;
+        $status = 0;
+        $carry = 0;
+        $companyName = '';
+//        Db::getInstance()->autoExecuteWithNullValues($this->tableOrderWithPrefix, ['order_id' => $orderId, 'order_code' => $orderCode, 'address' => $address,  'status' => $status, 'carry' => $carry, 'company_name' => $companyName,'INSERT');
+        //ToDo добавить исключения
+        return true;
+    }
+
 }
