@@ -3,6 +3,7 @@
 class AxiomusPost extends ObjectModel {
 
     public $id;
+    public $track_number;
     public $id_state;
     public $id_post_zone;
     public $active;
@@ -13,20 +14,16 @@ class AxiomusPost extends ObjectModel {
     public static $definition = array(
         'table' => 'axiomus_order',
         'tableCache' => 'axiomus_cache',
-        'tableOrder' => 'axiomus_order',
-        'primary' => 'id',//ToDo нужно ли это все
+        'tableOrder' => 'axiomus_order', //Оставить одну таблицу на класс
+        'primary' => 'id',//Это нужно для работы формы добавления
         'multilang' => false,
         'fields' => array( //ToDo нужно ли это все
-            'id_state' => array(
+            'id' => array(
                 'type' => ObjectModel::TYPE_INT,
-                'required' => true
+                'required' => false
             ),
-            'id_post_zone' => array(
-                'type' => ObjectModel::TYPE_INT,
-                'required' => true
-            ),
-            'active' => array(
-                'type' => ObjectModel::TYPE_INT,
+            'track_number' => array(
+                'type' => ObjectModel::TYPE_STRING,
                 'required' => false
             ),
         ),
@@ -187,14 +184,10 @@ class AxiomusPost extends ObjectModel {
         return true;
     }
 
-    public function insertRowOrder($orderId, $cartда){
-        $orderCode = '';
-        $address = 0;
-        $status = 0;
-        $carry = 0;
-        $companyName = '';
-//        Db::getInstance()->autoExecuteWithNullValues($this->tableOrderWithPrefix, ['order_id' => $orderId, 'order_code' => $orderCode, 'address' => $address,  'status' => $status, 'carry' => $carry, 'company_name' => $companyName,'INSERT');
-        //ToDo добавить исключения
+    public function insertRowOrder($orderId, $cartId, $statusId){
+        if(!Db::getInstance()->autoExecuteWithNullValues($this->tableOrderWithPrefix, ['order_id' => $orderId, 'status' => $statusId, 'cart_id' => $cartId],'INSERT')){
+            return false;
+        }
         return true;
     }
 

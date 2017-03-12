@@ -3,255 +3,229 @@
 class AdminAxiomusOrderController extends ModuleAdminController
 {
 
+    public $toolbar_title;
+
+    protected $statuses_array = array();
+
     public function __construct()
     {
-
-        $this->table = 'axiomus_order';
-        $this->className = 'AxiomusPost';
-        $this->identifier = 'id';
-
-        //$this->context = Context::getContext();
         $this->bootstrap = true;
-        parent::__construct();
+        $this->table = 'order';
+        $this->className = 'Order';
+        $this->lang = false;
+        $this->addRowAction('send');
+        $this->explicitSelect = true;
+        $this->allow_export = true;
+        $this->deleted = false;
+        $this->context = Context::getContext();
 
-        $this->addRowAction('edit');
-        $this->addRowAction('delete');
+        $this->_select = '
+		a.id_currency,
+		CONCAT(LEFT(c.`firstname`, 1), \'. \', c.`lastname`) AS `customer`,
+		osl.`name` AS `osname`,
+		os.`color`,
+		IF((SELECT so.id_order FROM `' . _DB_PREFIX_ . 'orders` so WHERE so.id_customer = a.id_customer AND so.id_order < a.id_order LIMIT 1) > 0, 0, 1) as new,
+		carrier.name as cname,
+		carrier.id_carrier as cid,
+		IF(a.valid, 1, 0) badge_success';
 
-        $this->bulk_actions = array(
-            'delete' => array(
-                'text' => $this->l('Delete selected'),
-                'confirm' => $this->l('Delete selected items?')
-            )
-        );
+        $this->_join = '
+		LEFT JOIN `' . _DB_PREFIX_ . 'customer` c ON (c.`id_customer` = a.`id_customer`)
+		LEFT JOIN `' . _DB_PREFIX_ . 'address` address ON address.id_address = a.id_address_delivery
+		LEFT JOIN `' . _DB_PREFIX_ . 'carrier` carrier ON carrier.id_carrier = a.id_carrier
+		LEFT JOIN `' . _DB_PREFIX_ . 'country` country ON address.id_country = country.id_country
+		LEFT JOIN `' . _DB_PREFIX_ . 'country_lang` country_lang ON (country.`id_country` = country_lang.`id_country` AND country_lang.`id_lang` = ' . (int)$this->context->language->id . ')
+		LEFT JOIN `' . _DB_PREFIX_ . 'order_state` os ON (os.`id_order_state` = a.`current_state`)
+		LEFT JOIN `' . _DB_PREFIX_ . 'order_state_lang` osl ON (os.`id_order_state` = osl.`id_order_state` AND osl.`id_lang` = ' . (int)$this->context->language->id . ')';
+        $this->_orderBy = 'id_order';
+        $this->_orderWay = 'DESC';
+        $this->_use_found_rows = true;
+
+        $statuses = OrderState::getOrderStates((int)$this->context->language->id);
+        foreach ($statuses as $status) {
+            $this->statuses_array[$status['id_order_state']] = $status['name'];
+        }
 
         $this->fields_list = array(
-            'id' => array(
-                'title' => $this->l('id'),
-                'align' => 'center',
-//                'width' => 20
+            'id_order' => array(
+                'title' => $this->l('ID'),
+                'align' => 'text-center',
+                'class' => 'fixed-width-xs'
             ),
-            'order_id' => array(
-                'title' => $this->l('id заказа'),
-                'width' => 'auto',
-//                'callback' => 'getStateName',
+            'reference' => array(
+                'title' => $this->l('Reference')
             ),
-            'order_code' => array(
-                'title' => $this->l('Код заказа'),
-                'width' => 'auto'
-            ),
-            'carry' => array(
-                'title' => $this->l('Самовывоз'),
-                'active' => 'status',
+            'new' => array(
+                'title' => $this->l('New client'),
+                'align' => 'text-center',
                 'type' => 'bool',
-                'align' => 'center'
+                'tmpTableFilter' => true,
+                'orderby' => false,
+                'callback' => 'printNewCustomer'
             ),
-            'company_name' => array(
-                'title' => $this->l('Компания'),
-                'width' => 'auto'
-            ),
-            'address' => array(
-                'title' => $this->l('Адрес'),
-                'width' => 'auto'
-            ),
-            'track_number' => array(
-                'title' => $this->l('Трек-номер'),
-                'width' => 'auto'
-            ),
-            'status' => array(
-                'title' => $this->l('Статус'),
-                'width' => 'auto'
-            ),
-            'finish_datetime' => array(
-                'title' => $this->l('Завершено'),
-                'width' => 'auto'
-            ),
-            'send_datetime' => array(
-                'title' => $this->l('Отправлено'),
-                'width' => 'auto'
-            ),
-            'create_datetime' => array(
-                'title' => $this->l('Создано'),
-                'width' => 'auto'
+            'customer' => array(
+                'title' => $this->l('Customer'),
+                'havingFilter' => true,
             ),
         );
+
+        if (Configuration::get('PS_B2B_ENABLE')) {
+            $this->fields_list = array_merge($this->fields_list, array(
+                'company' => array(
+                    'title' => $this->l('Company'),
+                    'filter_key' => 'c!company'
+                ),
+            ));
+        }
+
+        $this->fields_list = array_merge($this->fields_list, array(
+            'total_paid_tax_incl' => array(
+                'title' => $this->l('Total'),
+                'align' => 'text-right',
+                'type' => 'price',
+                'currency' => true,
+                'callback' => 'setOrderCurrency',
+                'badge_success' => true
+            ),
+            'payment' => array(
+                'title' => $this->l('Payment')
+            ),
+            'osname' => array(
+                'title' => $this->l('Status'),
+                'type' => 'select',
+                'color' => 'color',
+                'list' => $this->statuses_array,
+                'filter_key' => 'os!id_order_state',
+                'filter_type' => 'int',
+                'order_key' => 'osname'
+            ),
+            'date_add' => array(
+                'title' => $this->l('Date'),
+                'align' => 'text-right',
+                'type' => 'datetime',
+                'filter_key' => 'a!date_add'
+            ),
+//            'id_pdf' => array(
+//                'title' => $this->l('PDF'),
+//                'align' => 'text-center',
+////                'callback' => 'printPDFIcons',
+//                'orderby' => false,
+//                'search' => false,
+//                'remove_onclick' => true
+//            )
+        ));
+
+
+        $sql = '
+        SELECT c.name, c.id_carrier
+        FROM `' . _DB_PREFIX_ . 'orders` o
+        ' . Shop::addSqlAssociation('orders', 'o') . '
+        INNER JOIN `' . _DB_PREFIX_ . 'carrier` c ON o.id_carrier= c.id_carrier
+        ORDER BY c.name ASC';
+        $result = Db::getInstance(_PS_USE_SQL_SLAVE_)->ExecuteS($sql);
+
+
+        $country_array = array();
+        foreach ($result as $row) {
+            $country_array[$row['id_carrier']] = $row['name'];
+        }
+
+        $part1 = array_slice($this->fields_list, 0, 3);
+        $part2 = array_slice($this->fields_list, 3);
+        $part1['cname'] = array(
+            'title' => $this->l('Delivery'),
+            'type' => 'select',
+            'list' => $country_array,
+            'filter_key' => 'carrier!id_carrier',
+            'filter_type' => 'int',
+            'order_key' => 'cname'
+        );
+        $this->fields_list = array_merge($part1, $part2);
+
+        //Заполним массив включенными id доставок
+        $arr = [];
+        if (!empty(Configuration::get('RS_AXIOMUS_ID_TOPDELIVERY_DELIVERY')))
+            $arr[] = (int)Configuration::get('RS_AXIOMUS_ID_TOPDELIVERY_DELIVERY');
+        if (!empty(Configuration::get('RS_AXIOMUS_ID_DPD_DELIVERY')))
+            $arr[] = (int)Configuration::get('RS_AXIOMUS_ID_DPD_DELIVERY');
+        if (!empty(Configuration::get('RS_AXIOMUS_ID_BOXBERRY_DELIVERY')))
+            $arr[] = (int)Configuration::get('RS_AXIOMUS_ID_BOXBERRY_DELIVERY');
+        if (!empty(Configuration::get('RS_AXIOMUS_ID_AXIOMUS_CARRY')))
+            $arr[] = (int)Configuration::get('RS_AXIOMUS_ID_AXIOMUS_CARRY');
+        if (!empty(Configuration::get('RS_AXIOMUS_ID_TOPDELIVERY_CARRY')))
+            $arr[] = (int)Configuration::get('RS_AXIOMUS_ID_TOPDELIVERY_CARRY');
+        if (!empty(Configuration::get('RS_AXIOMUS_ID_DPD_CARRY')))
+            $arr[] = (int)Configuration::get('RS_AXIOMUS_ID_DPD_CARRY');
+        if (!empty(Configuration::get('RS_AXIOMUS_ID_BOXBERRY_CARRY')))
+            $arr[] = (int)Configuration::get('RS_AXIOMUS_ID_BOXBERRY_CARRY');
+        if (!empty(Configuration::get('RS_AXIOMUS_ID_RUSSIANPOST_CARRY')))
+            $arr[] = (int)Configuration::get('RS_AXIOMUS_ID_RUSSIANPOST_CARRY');
+        if (!empty(Configuration::get('RS_AXIOMUS_ID_AXIOMUS_DELIVERY')))
+            $arr[] = (int)Configuration::get('RS_AXIOMUS_ID_AXIOMUS_DELIVERY');
+
+        //Фильтруем выборку по нашим доставкам
+        $count = 0;
+        $wherestring = '';
+        foreach ($arr as $item){
+            if ($count == 0){
+                $wherestring = 'AND (carrier.id_carrier = '.$item;
+                $count++;
+            }else{
+                $wherestring .= 'OR carrier.id_carrier = '.$item;
+            }
+        }
+        if (!empty($wherestring)){
+            $wherestring .= ')';
+            $this->_where = $wherestring;
+        }
+
+
+        $this->shopLinkType = 'shop';
+        $this->shopShareDatas = Shop::SHARE_ORDER;
+
+        if (Tools::isSubmit('id_order')) {
+            // Save context (in order to apply cart rule)
+            $order = new Order((int)Tools::getValue('id_order'));
+            $this->context->cart = new Cart($order->id_cart);
+            $this->context->customer = new Customer($order->id_customer);
+        }
+
+        $this->bulk_actions = array(
+            'updateOrderStatus' => array('text' => $this->l('Change Order Status'), 'icon' => 'icon-refresh')
+        );
+
+        parent::__construct();
     }
 
-    /*******************************************
-     * Form to add new
-     * */
-//
-//    public function renderForm()
-//    {
-//
-//        $this->fields_form = array(
-//            'legend' => array(
-//                'title' => 'Legend',
-//            ),
-//            'input' => array(
-//                array(
-//                    'type' => 'select',
-//                    'label' => $this->l('Country'),
-//                    'name' => 'id_country',
-//                    'options' => array(
-//                        'query' => Country::getCountries($this->context->language->id, true, true),
-//                        'id' => 'id_country',
-//                        'name' => 'name',
-//                        //'default' => array('value'=>$this->context->country->id, 'label'=>$this->l($this->context->country->name)),//array() or value???
-//                    ),
-//                    'required' => true,
-//                ),
-//                array(
-//                    'type' => 'select',
-//                    'label' => $this->l('State'),
-//                    'name' => 'id_state',
-//                    'required' => true,
-//                    'options' => array(
-//                        'query' => State::getStates(),
-//                        'id' => 'id_state',
-//                        'name' => 'name'
-//                    ),
-//                ),
-//                array(
-//                    'type' => 'select',
-//                    'label' => 'Tariff Zone',
-//                    'name' => 'id_post_zone',
-//                    'options' => array(
-//                        'query' => array(
-//                            array(
-//                                'id' => 1,
-//                                'value' => 'Zone 1'
-//                            ),
-//                            array(
-//                                'id' => 2,
-//                                'value' => 'Zone 2'
-//                            ),
-//                            array(
-//                                'id' => 3,
-//                                'value' => 'Zone 3'
-//                            ),
-//                            array(
-//                                'id' => 4,
-//                                'value' => 'Zone 4'
-//                            ),
-//                            array(
-//                                'id' => 5,
-//                                'value' => 'Zone 5'
-//                            ),
-//                        ),
-//                        'id' => 'id',
-//                        'name' => 'value'
-//                    ),
-//                    'required' => true
-//                ),
-//                array(
-//                    'type' => 'radio',
-//                    'label' => $this->l('Status'),
-//                    'name' => 'active',
-//                    'required' => false,
-//                    'is_bool' => true,
-//                    'class' => 't',
-//                    'values' => array(
-//                        array(
-//                            'id' => 'active_on',
-//                            'value' => 1,
-//                            'label' => $this->l('Enabled')
-//                        ),
-//                        array(
-//                            'id' => 'active_off',
-//                            'value' => 0,
-//                            'label' => $this->l('Disabled')
-//                        ),
-//                    ),
-//                    'desc' => $this->l('Enable delivery to this Country/State'),
-//                ),
-//            ),
-//            'submit' => array(
-//                'title' => $this->l('Save'),
-//                'class' => 'button',
-//            ),
-//        );
-//
-//        return parent::renderForm();
-//    }
+    public function printNewCustomer($id_order, $tr)
+    {
+        return ($tr['new'] ? $this->l('Yes') : $this->l('No'));
+    }
+    public static function setOrderCurrency($echo, $tr)
+    {
+        $order = new Order($tr['id_order']);
+        return Tools::displayPrice($echo, (int)$order->id_currency);
+    }
 
     public function postProcess()
     {
-        //ToDo добавить проверку токена
-        if (!($object = $this->loadObject(true))) {
+        //ToDo добавить везде такую же проверку токена
+        if (isset($_GET['token']))
+            if ($_GET['token']!=$this->token)
+                return;
+        if (!($object = $this->loadObject(true)))
             return;
-        }
 
-        if (Tools::isSubmit('submitOptionsaxiomus_post')) {
-            //Delivery
+        if (isset($_GET['send_to_axiomus'])){
+            //ToDo здесь отправка в axiomus, присвоение кода отслеживания и изменение статуса
+            $order = new Order((int)$_GET['id_order']);
 
-            if ((boolean)$_POST['RS_AXIOMUS_USE_AXIOMUS_DELIVERY'] != (boolean)Configuration::get('RS_AXIOMUS_USE_AXIOMUS_DELIVERY')) {
-                if ((boolean)$_POST['RS_AXIOMUS_USE_AXIOMUS_DELIVERY']) {
-                    $this->module->installCarrier('Axiomus', 'DELIVERY');
-                } else {
-                    $this->module->uninstallCarrier('Axiomus', 'DELIVERY');
-                }
-            }
-            if ((boolean)$_POST['RS_AXIOMUS_USE_TOPDELIVERY_DELIVERY'] != (boolean)Configuration::get('RS_AXIOMUS_USE_TOPDELIVERY_DELIVERY')) { 
-                if ((boolean)$_POST['RS_AXIOMUS_USE_TOPDELIVERY_DELIVERY']) {
-                    $this->module->installCarrier('TopDelivery', 'DELIVERY');
-                } else {
-                    $this->module->uninstallCarrier('TopDelivery', 'DELIVERY');
-                }
-            }
-            if ((boolean)$_POST['RS_AXIOMUS_USE_DPD_DELIVERY'] != (boolean)Configuration::get('RS_AXIOMUS_USE_DPD_DELIVERY')) { 
-                if ((boolean)$_POST['RS_AXIOMUS_USE_DPD_DELIVERY']) {
-                    $this->module->installCarrier('DPD', 'DELIVERY');
-                } else {
-                    $this->module->uninstallCarrier('DPD', 'DELIVERY');
-                }
-            }
-            if ((boolean)$_POST['RS_AXIOMUS_USE_BOXBERRY_DELIVERY'] != (boolean)Configuration::get('RS_AXIOMUS_USE_BOXBERRY_DELIVERY')) { 
-                if ((boolean)$_POST['RS_AXIOMUS_USE_BOXBERRY_DELIVERY']) {
-                    $this->module->installCarrier('BoxBerry', 'DELIVERY');
-                } else {
-                    $this->module->uninstallCarrier('BoxBerry', 'DELIVERY');
-                }
-            }
-            //Carry
-            if ((boolean)$_POST['RS_AXIOMUS_USE_AXIOMUS_CARRY'] != (boolean)Configuration::get('RS_AXIOMUS_USE_AXIOMUS_CARRY')) { 
-                if ((boolean)$_POST['RS_AXIOMUS_USE_AXIOMUS_CARRY']) {
-                    $this->module->installCarrier('Axiomus', 'CARRY');
-                } else {
-                    $this->module->uninstallCarrier('Axiomus', 'CARRY');
-                }
-            }
-            if ((boolean)$_POST['RS_AXIOMUS_USE_TOPDELIVERY_CARRY'] != (boolean)Configuration::get('RS_AXIOMUS_USE_TOPDELIVERY_CARRY')) { 
-                if ((boolean)$_POST['RS_AXIOMUS_USE_TOPDELIVERY_CARRY']) {
-                    $this->module->installCarrier('TopDelivery', 'CARRY');
-                } else {
-                    $this->module->uninstallCarrier('TopDelivery', 'CARRY');
-                }
-            }
-            if ((boolean)$_POST['RS_AXIOMUS_USE_DPD_CARRY'] != (boolean)Configuration::get('RS_AXIOMUS_USE_DPD_CARRY')) { 
-                if ((boolean)$_POST['RS_AXIOMUS_USE_DPD_CARRY']) {
-                    $this->module->installCarrier('DPD', 'CARRY');
-                } else {
-                    $this->module->uninstallCarrier('DPD', 'CARRY');
-                }
-            }
-            if ((boolean)$_POST['RS_AXIOMUS_USE_BOXBERRY_CARRY'] != (boolean)Configuration::get('RS_AXIOMUS_USE_BOXBERRY_CARRY')) { 
-                if ((boolean)$_POST['RS_AXIOMUS_USE_BOXBERRY_CARRY']) {
-                    $this->module->installCarrier('BoxBerry', 'CARRY');
-                } else {
-                    $this->module->uninstallCarrier('BoxBerry', 'CARRY');
-                }
-            }
-            if ((boolean)$_POST['RS_AXIOMUS_USE_RUSSIANPOST_CARRY'] != (boolean)Configuration::get('RS_AXIOMUS_USE_RUSSIANPOST_CARRY')) { 
-                if ((boolean)$_POST['RS_AXIOMUS_USE_RUSSIANPOST_CARRY']) {
-                    $this->module->installCarrier('RussianPost', 'CARRY');
-                } else {
-                    $this->module->uninstallCarrier('RussianPost', 'CARRY');
-                }
-            }
+            $history = new OrderHistory();
+            $history->id_order = (int)$order->id;
+            $history->changeIdOrderState(Configuration::get('RS_AXIOMUS_ADMIN_ORDER_STATUS_ID'), (int)($order->id));
         }
         parent::postProcess();
     }
-
 
 
     public function processSave()
@@ -268,22 +242,42 @@ class AdminAxiomusOrderController extends ModuleAdminController
     {
         parent::processUpdateOptions();
     }
-//
-//    public function getStateName($echo, $row)
-//    {
-//        $id_state = $row['id_state'];
-//
-//        $state = new State($id_state);
-//        $cn = new Country(177);
-//
-//        if ($state->id) {
-//            $country = Country::getNameById(Context::getContext()->language->id, $state->id_country);
-//            return "{$state->name} ({$country})";
-//        }
-//
-//        return $this->l('Out of the World');
-//    }
-//
+
+    public function renderList($params = null)
+    {
+        $this->addRowAction('test');
+        return parent::renderList();
+    }
+
+    public function displayTestLink($token = null, $id, $name = null)
+    {
+        $tpl = $this->createTemplate('helpers/list/list_action_edit.tpl');
+        if (!array_key_exists('Test', self::$cache_lang))
+            self::$cache_lang['Test'] = $this->l('Отправить в Axiomus', 'Helper');
+
+        $tpl->assign(array(
+           'href' => 'index.php?controller='.$this->controller_name.'&'.$this->identifier.'='.$id.'&send_to_axiomus=true&token='.($token != null ? $token : $this->token),
+            'action' => self::$cache_lang['Test'],
+            'id' => $id
+        ));
+
+        return $tpl->fetch();
+    }
+
+    public function hookActionAdminAxiomusOrderListingFieldsModifier($params)
+    {
+        if (isset($params['select'])) {
+            $params['join'] .= ' LEFT JOIN ' . _DB_PREFIX_ . 'customer cst ON (a.id_customer = cst.id_customer)';
+            $params['select'] .= ', cst.email as customer_email';
+            $params['fields']['customer_email'] = array(
+                'title' => 'Email',
+                'align' => 'center',
+                'search' => true,
+                'havingFilter' => true,
+                'filter_key' => 'cst!email'
+            );
+        }
+    }
 //    public function renderList()
 //    {
 //        $this->tpl_list_vars['postZones'] = array(

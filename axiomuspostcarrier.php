@@ -228,7 +228,7 @@ class axiomuspostcarrier extends CarrierModule
     {
 
         $idCarrier = $this->installCarrier('Axiomus', 'DELIVERY');
-
+        $this->installOrderStatus();
         $res = false;
 
         // Не удалось создать
@@ -333,6 +333,7 @@ class axiomuspostcarrier extends CarrierModule
         $res = $this->unregisterHook('actionOrderStatusPostUpdate');
         $res = $this->uninstallTab();
         $res = $this->uninstallAllCarrier();
+        $res = $this->uninstallOrderStatus();
         $res = $this->AxiomusPost->dropTable();
 
         Configuration::updateValue('RS_AXIOMUS_POST_TAB_ID', null);
@@ -358,19 +359,15 @@ class axiomuspostcarrier extends CarrierModule
         return true;
     }
 
-    public function hookActionOrderStatusPostUpdate($params)
-    {
-        //ToDo реализовать запись строки в таблицу ps_axiomus_order
-        //$params['newOrderStatus'] // after status changed
-        $par = $params; // after order is placed
-        $this->AxiomusPost->insertRowOrder($params['id_order'], $params['cart']);
-
-    }
+//    public function hookActionOrderStatusPostUpdate($params)
+//    {
+//        $this->AxiomusPost->insertRowOrder($params['id_order'], $params['cart']->id, $params['newOrderStatus']->id);
+//    }
 
     public function hookActionValidateOrder($params)
     {
         $carrier_id = $params['cart']->id_carrier;
-        //ToDo реализовать добавление записи в таблицу axiomus_order
+        //ToDo реализовать добавление записи в таблицу axiomus_order?
         //do whatever with the carrier
     }
 
@@ -439,6 +436,32 @@ class axiomuspostcarrier extends CarrierModule
         return true;
     }
 
+    public function installOrderStatus(){
+        if (!Configuration::get('RS_AXIOMUS_ADMIN_ORDER_STATUS_ID'))//if status does not exist
+        {
+            $orderState = new OrderState();
+            $orderState->name =  array_fill(0,10,'Отправлено в Axiomus');
+            $orderState->send_email = false;
+            $orderState->color = '#0cd6ff';
+            $orderState->shipped = true;
+            $orderState->moduleName = 'axiomuspostcarrier';
+            $orderState->hidden = false;
+            $orderState->delivery = true;
+            $orderState->logable = false;
+            $orderState->invoice = false;
+            if ($orderState->add())//save new order status
+            {
+                Configuration::updateValue('RS_AXIOMUS_ADMIN_ORDER_STATUS_ID', (int)$orderState->id);
+            }
+        }
+    }
+    public function uninstallOrderStatus(){
+        if(!Configuration::get('RS_AXIOMUS_ADMIN_ORDER_STATUS_ID')) {
+            $orderState = new OrderState((int)Configuration::get('RS_AXIOMUS_ADMIN_ORDER_STATUS_ID'));
+            $orderState->delete();
+            Configuration::updateValue('RS_AXIOMUS_ADMIN_ORDER_STATUS_ID', '');
+        }
+    }
     public function installCarrier($name = '', $type = '')
     {
         $carrier = new Carrier();
