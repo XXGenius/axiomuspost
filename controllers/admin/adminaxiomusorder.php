@@ -1,4 +1,5 @@
 <?php
+require_once(_PS_MODULE_DIR_ . 'axiomuspostcarrier/models/AxiomusXml.php');
 
 class AdminAxiomusOrderController extends ModuleAdminController
 {
@@ -218,6 +219,10 @@ class AdminAxiomusOrderController extends ModuleAdminController
 
         if (isset($_GET['send_to_axiomus'])){
             //ToDo здесь отправка в axiomus, присвоение кода отслеживания и изменение статуса
+            $sendNewAxiomus = new AxiomusXml();
+            $sendNewAxiomus->sendTo((int)$_GET['id_order']);
+
+
             $order = new Order((int)$_GET['id_order']);
 
             $history = new OrderHistory();
@@ -264,20 +269,8 @@ class AdminAxiomusOrderController extends ModuleAdminController
         return $tpl->fetch();
     }
 
-    public function hookActionAdminAxiomusOrderListingFieldsModifier($params)
-    {
-        if (isset($params['select'])) {
-            $params['join'] .= ' LEFT JOIN ' . _DB_PREFIX_ . 'customer cst ON (a.id_customer = cst.id_customer)';
-            $params['select'] .= ', cst.email as customer_email';
-            $params['fields']['customer_email'] = array(
-                'title' => 'Email',
-                'align' => 'center',
-                'search' => true,
-                'havingFilter' => true,
-                'filter_key' => 'cst!email'
-            );
-        }
-    }
+
+
 //    public function renderList()
 //    {
 //        $this->tpl_list_vars['postZones'] = array(
