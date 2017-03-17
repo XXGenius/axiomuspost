@@ -467,10 +467,14 @@ class axiomuspostcarrier extends CarrierModule
 
                 if (!$carrier->deleted) {
                     $carrier->deleted = 1;
-                    if (!$carrier->update())
+                    if (!$carrier->update()) {
                         return false;
+                    }
                 }
+                return true;
             }
+        }else{
+            return false;
         }
 
         Configuration::updateValue('RS_AXIOMUS_ID_' . strtoupper($name) . '_' . strtoupper($type), null);
