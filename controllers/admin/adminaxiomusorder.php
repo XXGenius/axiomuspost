@@ -31,6 +31,7 @@ class AdminAxiomusOrderController extends ModuleAdminController
 		IF(a.valid, 1, 0) badge_success';
 
         $this->_join = '
+        LEFT JOIN `'._DB_PREFIX_.'order_carrier` oc ON a.`id_order` = oc.`id_order`
 		LEFT JOIN `' . _DB_PREFIX_ . 'customer` c ON (c.`id_customer` = a.`id_customer`)
 		LEFT JOIN `' . _DB_PREFIX_ . 'address` address ON address.id_address = a.id_address_delivery
 		LEFT JOIN `' . _DB_PREFIX_ . 'carrier` carrier ON carrier.id_carrier = a.id_carrier
@@ -55,6 +56,10 @@ class AdminAxiomusOrderController extends ModuleAdminController
             ),
             'reference' => array(
                 'title' => $this->l('Reference')
+            ),
+            'tracking_number' => array(
+                'title' => $this->l('tracking number'),
+                'havingFilter' => true,
             ),
             'new' => array(
                 'title' => $this->l('New client'),
@@ -220,14 +225,15 @@ class AdminAxiomusOrderController extends ModuleAdminController
         if (isset($_GET['send_to_axiomus'])){
             //ToDo здесь отправка в axiomus, присвоение кода отслеживания и изменение статуса
             $sendNewAxiomus = new AxiomusXml();
-            $sendNewAxiomus->sendTo((int)$_GET['id_order']);
+            $oid = $sendNewAxiomus->sendTo((int)$_GET['id_order']);
 
 
             $order = new Order((int)$_GET['id_order']);
-
+            $order->setWsShippingNumber($oid); //ToDo а точно ли oid = номер отслеживания?
+            $order->shipping_number = $oid;
             $history = new OrderHistory();
             $history->id_order = (int)$order->id;
-            $history->changeIdOrderState(Configuration::get('RS_AXIOMUS_ADMIN_ORDER_STATUS_ID'), (int)($order->id));
+            $history->changeIdOrderState((int)Configuration::get('RS_AXIOMUS_200_SEND_ORDER_STATUS_ID'), (int)($order->id));
         }
         parent::postProcess();
     }

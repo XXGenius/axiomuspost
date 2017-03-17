@@ -27,6 +27,7 @@ class axiomuspostcarrier extends CarrierModule
         $this->tab = 'shipping_logistics';
         $this->version = '1.0.6';
         $this->author = 'Robert Spectrum';
+        $this->controllers = array('changecarrieroptions');
 
         parent::__construct();
 
@@ -300,9 +301,14 @@ class axiomuspostcarrier extends CarrierModule
             return false;
         }
 
+        $this->registerHook('displayBeforeCarrier');
+        $this->registerHook('displayCarrierList');
+        $this->registerHook('actionCarrierProcess');
+
         $this->registerHook('actionCarrierUpdate');
         $this->registerHook('actionValidateOrder');
         $this->registerHook('actionOrderStatusPostUpdate');
+
 
         Configuration::updateValue('RS_AXIOMUS_ID_AXIOMUS_DELIVERY', (int)$idCarrier);
 
@@ -331,6 +337,10 @@ class axiomuspostcarrier extends CarrierModule
         $res = $this->unregisterHook('ActionCarrierUpdate');
         $res = $this->unregisterHook('actionValidateOrder');
         $res = $this->unregisterHook('actionOrderStatusPostUpdate');
+        $this->unregisterHook('displayBeforeCarrier');
+        $this->unregisterHook('displayCarrierList');
+        $this->unregisterHook('actionCarrierProcess');
+
         $res = $this->uninstallTab();
         $res = $this->uninstallAllCarrier();
         $res = $this->uninstallOrderStatus();
@@ -378,6 +388,37 @@ class axiomuspostcarrier extends CarrierModule
         if ((int)$params['id_carrier'] == (int)Configuration::get('RS_AXIOMUS_POST_CARRIER_ID')) {
             Configuration::updateValue('RS_AXIOMUS_POST_CARRIER_ID', (int)$params['carrier']->id);
         }
+    }
+
+    /**
+     * Срабатывает до выбора Доставки
+     * @param $params
+     */
+    public function hookDisplayBeforeCarrier($params){
+//        exit;
+    }
+
+    /**
+     * Срабатывает после выбора Доставки
+     * @param $params
+     */
+    public function hookActionCarrierProcess($params){
+
+        $this->smarty->assign(array(
+            'this_path' => $this->_path, //ToDo надо ли это
+            'this_path_bw' => $this->_path,
+            'this_path_ssl' => Tools::getShopDomainSsl(true, true).__PS_BASE_URI__.'modules/'.$this->name.'/'
+        ));
+        $sendparams = [];
+        $link = $this->context->link->getModuleLink('axiomuspostcarrier', 'changecarrieroptions', $sendparams);
+        Tools::redirectAdmin($link);
+    }
+
+
+
+    public function hookDisplayCarrierList($arr){
+//        exit;
+        //ToDo Добавить адреса пунктов самовывоза
     }
 
     private function uninstallAllCarrier(){
@@ -437,7 +478,7 @@ class axiomuspostcarrier extends CarrierModule
     }
 
     public function installOrderStatus(){
-        if (!Configuration::get('RS_AXIOMUS_ADMIN_ORDER_STATUS_ID'))//if status does not exist
+        if (!Configuration::get('RS_AXIOMUS_200_SEND_ORDER_STATUS_ID'))//if status does not exist
         {
             $orderState = new OrderState();
             $orderState->name =  array_fill(0,10,'Отправлено в Axiomus');
@@ -451,17 +492,438 @@ class axiomuspostcarrier extends CarrierModule
             $orderState->invoice = false;
             if ($orderState->add())//save new order status
             {
-                Configuration::updateValue('RS_AXIOMUS_ADMIN_ORDER_STATUS_ID', (int)$orderState->id);
+                Configuration::updateValue('RS_AXIOMUS_200_SEND_ORDER_STATUS_ID', (int)$orderState->id);
+            }
+        }
+        if (!Configuration::get('RS_AXIOMUS_10_RETURN_ORDER_STATUS_ID'))//if status does not exist
+        {
+            $orderState = new OrderState();
+            $orderState->name =  array_fill(0,10,'Заказ отклонен (измените или отмените)');
+            $orderState->send_email = false;
+            $orderState->color = '#8f0621';
+            $orderState->shipped = true;
+            $orderState->moduleName = 'axiomuspostcarrier';
+            $orderState->hidden = false;
+            $orderState->delivery = true;
+            $orderState->logable = false;
+            $orderState->invoice = false;
+            if ($orderState->add())//save new order status
+            {
+                Configuration::updateValue('RS_AXIOMUS_10_RETURN_ORDER_STATUS_ID', (int)$orderState->id);
+            }
+        }
+        if (!Configuration::get('RS_AXIOMUS_0_PROGRES_ORDER_STATUS_ID'))//if status does not exist
+        {
+            $orderState = new OrderState();
+            $orderState->name =  array_fill(0,10,'В обработке(ожидайте)');
+            $orderState->send_email = false;
+            $orderState->color = '#ffde40';
+            $orderState->shipped = true;
+            $orderState->moduleName = 'axiomuspostcarrier';
+            $orderState->hidden = false;
+            $orderState->delivery = true;
+            $orderState->logable = false;
+            $orderState->invoice = false;
+            if ($orderState->add())//save new order status
+            {
+                Configuration::updateValue('RS_AXIOMUS_0_PROGRES_ORDER_STATUS_ID', (int)$orderState->id);
+            }
+        }
+        if (!Configuration::get('RS_AXIOMUS_1_COMPLETE_ORDER_STATUS_ID'))//if status does not exist
+        {
+            $orderState = new OrderState();
+            $orderState->name =  array_fill(0,10,'Укомплектован на складе');
+            $orderState->send_email = false;
+            $orderState->color = '#FF8C00';
+            $orderState->shipped = true;
+            $orderState->moduleName = 'axiomuspostcarrier';
+            $orderState->hidden = false;
+            $orderState->delivery = true;
+            $orderState->logable = false;
+            $orderState->invoice = false;
+            if ($orderState->add())//save new order status
+            {
+                Configuration::updateValue('RS_AXIOMUS_1_COMPLETE_ORDER_STATUS_ID', (int)$orderState->id);
+            }
+        }
+        if (!Configuration::get('RS_AXIOMUS_2_INSTOCK_ORDER_STATUS_ID'))//if status does not exist
+        {
+            $orderState = new OrderState();
+            $orderState->name =  array_fill(0,10,'Принят на складе');
+            $orderState->send_email = false;
+            $orderState->color = '#b0ff4c';
+            $orderState->shipped = true;
+            $orderState->moduleName = 'axiomuspostcarrier';
+            $orderState->hidden = false;
+            $orderState->delivery = true;
+            $orderState->logable = false;
+            $orderState->invoice = false;
+            if ($orderState->add())//save new order status
+            {
+                Configuration::updateValue('RS_AXIOMUS_2_INSTOCK_ORDER_STATUS_ID', (int)$orderState->id);
+            }
+        }
+        if (!Configuration::get('RS_AXIOMUS_3_NOPRODUCT_ORDER_STATUS_ID'))//if status does not exist
+        {
+            $orderState = new OrderState();
+            $orderState->name =  array_fill(0,10,'Нет товара');
+            $orderState->send_email = false;
+            $orderState->color = '#ffae88';
+            $orderState->shipped = true;
+            $orderState->moduleName = 'axiomuspostcarrier';
+            $orderState->hidden = false;
+            $orderState->delivery = true;
+            $orderState->logable = false;
+            $orderState->invoice = false;
+            if ($orderState->add())//save new order status
+            {
+                Configuration::updateValue('RS_AXIOMUS_3_NOPRODUCT_ORDER_STATUS_ID', (int)$orderState->id);
+            }
+        }
+        if (!Configuration::get('RS_AXIOMUS_4_PERFORMANCE_ORDER_STATUS_ID'))//if status does not exist
+        {
+            $orderState = new OrderState();
+            $orderState->name =  array_fill(0,10,'Исполняется');
+            $orderState->send_email = false;
+            $orderState->color = '#00bfdb';
+            $orderState->shipped = true;
+            $orderState->moduleName = 'axiomuspostcarrier';
+            $orderState->hidden = false;
+            $orderState->delivery = true;
+            $orderState->logable = false;
+            $orderState->invoice = false;
+            if ($orderState->add())//save new order status
+            {
+                Configuration::updateValue('RS_AXIOMUS_4_PERFORMANCE_ORDER_STATUS_ID', (int)$orderState->id);
+            }
+        }
+        if (!Configuration::get('RS_AXIOMUS_5_INPROCESS_ORDER_STATUS_ID'))//if status does not exist
+        {
+            $orderState = new OrderState();
+            $orderState->name =  array_fill(0,10,'Сложности с заказом');
+            $orderState->send_email = false;
+            $orderState->color = '#ffde1c';
+            $orderState->shipped = true;
+            $orderState->moduleName = 'axiomuspostcarrier';
+            $orderState->hidden = false;
+            $orderState->delivery = true;
+            $orderState->logable = false;
+            $orderState->invoice = false;
+            if ($orderState->add())//save new order status
+            {
+                Configuration::updateValue('RS_AXIOMUS_5_INPROCESS_ORDER_STATUS_ID', (int)$orderState->id);
+            }
+        }
+        if (!Configuration::get('RS_AXIOMUS_6_TRANSFERDELIVERY_ORDER_STATUS_ID'))//if status does not exist
+        {
+            $orderState = new OrderState();
+            $orderState->name =  array_fill(0,10,'Перенос на другую дату');
+            $orderState->send_email = false;
+            $orderState->color = '#e190ff';
+            $orderState->shipped = true;
+            $orderState->moduleName = 'axiomuspostcarrier';
+            $orderState->hidden = false;
+            $orderState->delivery = true;
+            $orderState->logable = false;
+            $orderState->invoice = false;
+            if ($orderState->add())//save new order status
+            {
+                Configuration::updateValue('RS_AXIOMUS_6_TRANSFERDELIVERY_ORDER_STATUS_ID', (int)$orderState->id);
+            }
+        }
+        if (!Configuration::get('RS_AXIOMUS_20_COMPLETED_ORDER_STATUS_ID'))//if status does not exist
+        {
+            $orderState = new OrderState();
+            $orderState->name =  array_fill(0,10,'Комплектуется');
+            $orderState->send_email = false;
+            $orderState->color = '#6fd300';
+            $orderState->shipped = true;
+            $orderState->moduleName = 'axiomuspostcarrier';
+            $orderState->hidden = false;
+            $orderState->delivery = true;
+            $orderState->logable = false;
+            $orderState->invoice = false;
+            if ($orderState->add())//save new order status
+            {
+                Configuration::updateValue('RS_AXIOMUS_20_COMPLETED_ORDER_STATUS_ID', (int)$orderState->id);
+            }
+        }
+        if (!Configuration::get('RS_AXIOMUS_30_SORT_ORDER_STATUS_ID'))//if status does not exist
+        {
+            $orderState = new OrderState();
+            $orderState->name =  array_fill(0,10,'Сортировка');
+            $orderState->send_email = false;
+            $orderState->color = '#6fd300';
+            $orderState->shipped = true;
+            $orderState->moduleName = 'axiomuspostcarrier';
+            $orderState->hidden = false;
+            $orderState->delivery = true;
+            $orderState->logable = false;
+            $orderState->invoice = false;
+            if ($orderState->add())//save new order status
+            {
+                Configuration::updateValue('RS_AXIOMUS_30_SORT_ORDER_STATUS_ID', (int)$orderState->id);
+            }
+        }
+        if (!Configuration::get('RS_AXIOMUS_70_INPVZ_ORDER_STATUS_ID'))//if status does not exist
+        {
+            $orderState = new OrderState();
+            $orderState->name =  array_fill(0,10,'Поступил в ПВЗ');
+            $orderState->send_email = false;
+            $orderState->color = '#7cd6ff';
+            $orderState->shipped = true;
+            $orderState->moduleName = 'axiomuspostcarrier';
+            $orderState->hidden = false;
+            $orderState->delivery = true;
+            $orderState->logable = false;
+            $orderState->invoice = false;
+            if ($orderState->add())//save new order status
+            {
+                Configuration::updateValue('RS_AXIOMUS_70_INPVZ_ORDER_STATUS_ID', (int)$orderState->id);
+            }
+        }
+        if (!Configuration::get('RS_AXIOMUS_80_FULFILLED_ORDER_STATUS_ID'))//if status does not exist
+        {
+            $orderState = new OrderState();
+            $orderState->name =  array_fill(0,10,'Исполнен(доставляется на склад)');
+            $orderState->send_email = false;
+            $orderState->color = '#7cd6ff';
+            $orderState->shipped = true;
+            $orderState->moduleName = 'axiomuspostcarrier';
+            $orderState->hidden = false;
+            $orderState->delivery = true;
+            $orderState->logable = false;
+            $orderState->invoice = false;
+            if ($orderState->add())//save new order status
+            {
+                Configuration::updateValue('RS_AXIOMUS_80_FULFILLED_ORDER_STATUS_ID', (int)$orderState->id);
+            }
+        }
+        if (!Configuration::get('RS_AXIOMUS_81_PRECANCEL_ORDER_STATUS_ID'))//if status does not exist
+        {
+            $orderState = new OrderState();
+            $orderState->name =  array_fill(0,10,'Предотмена');
+            $orderState->send_email = false;
+            $orderState->color = '#8f0621';
+            $orderState->shipped = true;
+            $orderState->moduleName = 'axiomuspostcarrier';
+            $orderState->hidden = false;
+            $orderState->delivery = true;
+            $orderState->logable = false;
+            $orderState->invoice = false;
+            if ($orderState->add())//save new order status
+            {
+                Configuration::updateValue('RS_AXIOMUS_81_PRECANCEL_ORDER_STATUS_ID', (int)$orderState->id);
+            }
+        }
+        if (!Configuration::get('RS_AXIOMUS_90_CANCEL_ORDER_STATUS_ID'))//if status does not exist
+        {
+            $orderState = new OrderState();
+            $orderState->name =  array_fill(0,10,'Отменен');
+            $orderState->send_email = false;
+            $orderState->color = '#8f0621';
+            $orderState->shipped = true;
+            $orderState->moduleName = 'axiomuspostcarrier';
+            $orderState->hidden = false;
+            $orderState->delivery = true;
+            $orderState->logable = false;
+            $orderState->invoice = false;
+            if ($orderState->add())//save new order status
+            {
+                Configuration::updateValue('RS_AXIOMUS_90_CANCEL_ORDER_STATUS_ID', (int)$orderState->id);
+            }
+        }
+        if (!Configuration::get('RS_AXIOMUS_100_FINISHED_STATUS_ID'))//if status does not exist
+        {
+            $orderState = new OrderState();
+            $orderState->name =  array_fill(0,10,'Выполнен');
+            $orderState->send_email = false;
+            $orderState->color = '#c5c5c5';
+            $orderState->shipped = true;
+            $orderState->moduleName = 'axiomuspostcarrier';
+            $orderState->hidden = false;
+            $orderState->delivery = true;
+            $orderState->logable = false;
+            $orderState->invoice = false;
+            if ($orderState->add())//save new order status
+            {
+                Configuration::updateValue('RS_AXIOMUS_100_FINISHED_STATUS_ID', (int)$orderState->id);
+            }
+        }
+        if (!Configuration::get('RS_AXIOMUS_105_SENDPARTNER_ORDER_STATUS_ID'))//if status does not exist
+        {
+            $orderState = new OrderState();
+            $orderState->name =  array_fill(0,10,'Отправлен(в внешнуюю службу)');
+            $orderState->send_email = false;
+            $orderState->color = '#c5c5c5';
+            $orderState->shipped = true;
+            $orderState->moduleName = 'axiomuspostcarrier';
+            $orderState->hidden = false;
+            $orderState->delivery = true;
+            $orderState->logable = false;
+            $orderState->invoice = false;
+            if ($orderState->add())//save new order status
+            {
+                Configuration::updateValue('RS_AXIOMUS_105_SENDPARTNER_ORDER_STATUS_ID', (int)$orderState->id);
+            }
+        }
+        if (!Configuration::get('RS_AXIOMUS_107_AWARDED_ORDER_STATUS_ID'))//if status does not exist
+        {
+            $orderState = new OrderState();
+            $orderState->name =  array_fill(0,10,'Вручен покупателю');
+            $orderState->send_email = false;
+            $orderState->color = '#e5dcff';
+            $orderState->shipped = true;
+            $orderState->moduleName = 'axiomuspostcarrier';
+            $orderState->hidden = false;
+            $orderState->delivery = true;
+            $orderState->logable = false;
+            $orderState->invoice = false;
+            if ($orderState->add())//save new order status
+            {
+                Configuration::updateValue('RS_AXIOMUS_107_AWARDED_ORDER_STATUS_ID', (int)$orderState->id);
+            }
+        }
+        if (!Configuration::get('RS_AXIOMUS_110_FAILURE_ORDER_STATUS_ID'))//if status does not exist
+        {
+            $orderState = new OrderState();
+            $orderState->name =  array_fill(0,10,'Частичный отказ');
+            $orderState->send_email = false;
+            $orderState->color = '#ffcd98';
+            $orderState->shipped = true;
+            $orderState->moduleName = 'axiomuspostcarrier';
+            $orderState->hidden = false;
+            $orderState->delivery = true;
+            $orderState->logable = false;
+            $orderState->invoice = false;
+            if ($orderState->add())//save new order status
+            {
+                Configuration::updateValue('RS_AXIOMUS_110_FAILURE_ORDER_STATUS_ID', (int)$orderState->id);
+            }
+        }
+        if (!Configuration::get('RS_AXIOMUS_120_FULLFAILURE_ORDER_STATUS_ID'))//if status does not exist
+        {
+            $orderState = new OrderState();
+            $orderState->name =  array_fill(0,10,'Полный отказ');
+            $orderState->send_email = false;
+            $orderState->color = '#8f0621';
+            $orderState->shipped = true;
+            $orderState->moduleName = 'axiomuspostcarrier';
+            $orderState->hidden = false;
+            $orderState->delivery = true;
+            $orderState->logable = false;
+            $orderState->invoice = false;
+            if ($orderState->add())//save new order status
+            {
+                Configuration::updateValue('RS_AXIOMUS_120_FULLFAILURE_ORDER_STATUS_ID', (int)$orderState->id);
             }
         }
     }
+
     public function uninstallOrderStatus(){
-        if(!Configuration::get('RS_AXIOMUS_ADMIN_ORDER_STATUS_ID')) {
-            $orderState = new OrderState((int)Configuration::get('RS_AXIOMUS_ADMIN_ORDER_STATUS_ID'));
+        if(!Configuration::get('RS_AXIOMUS_200_SEND_ORDER_STATUS_ID')) {
+            $orderState = new OrderState((int)Configuration::get('RS_AXIOMUS_200_SEND_ORDER_STATUS_ID'));
             $orderState->delete();
-            Configuration::updateValue('RS_AXIOMUS_ADMIN_ORDER_STATUS_ID', '');
+            Configuration::updateValue('RS_AXIOMUS_200_SEND_ORDER_STATUS_ID', '');
         }
+        if(!Configuration::get('RS_AXIOMUS_10_RETURN_ORDER_STATUS_ID')) {
+            $orderState = new OrderState((int)Configuration::get('RS_AXIOMUS_10_RETURN_ORDER_STATUS_ID'));
+            $orderState->delete();
+            Configuration::updateValue('RS_AXIOMUS_10_RETURN_ORDER_STATUS_ID', '');
+        }
+        if(!Configuration::get('RS_AXIOMUS_0_PROGRES_ORDER_STATUS_ID')) {
+            $orderState = new OrderState((int)Configuration::get('RS_AXIOMUS_0_PROGRES_ORDER_STATUS_ID'));
+            $orderState->delete();
+            Configuration::updateValue('RS_AXIOMUS_0_PROGRES_ORDER_STATUS_ID', '');
+        }
+        if(!Configuration::get('RS_AXIOMUS_1_COMPLETE_ORDER_STATUS_ID')) {
+            $orderState = new OrderState((int)Configuration::get('RS_AXIOMUS_1_COMPLETE_ORDER_STATUS_ID'));
+            $orderState->delete();
+            Configuration::updateValue('RS_AXIOMUS_1_COMPLETE_ORDER_STATUS_ID', '');
+        }
+        if(!Configuration::get('RS_AXIOMUS_2_INSTOCK_ORDER_STATUS_ID')) {
+            $orderState = new OrderState((int)Configuration::get('RS_AXIOMUS_2_INSTOCK_ORDER_STATUS_ID'));
+            $orderState->delete();
+            Configuration::updateValue('RS_AXIOMUS_2_INSTOCK_ORDER_STATUS_ID', '');
+        }
+        if(!Configuration::get('RS_AXIOMUS_3_NOPRODUCT_ORDER_STATUS_ID')) {
+            $orderState = new OrderState((int)Configuration::get('RS_AXIOMUS_3_NOPRODUCT_ORDER_STATUS_ID'));
+            $orderState->delete();
+            Configuration::updateValue('RS_AXIOMUS_3_NOPRODUCT_ORDER_STATUS_ID', '');
+        }
+        if(!Configuration::get('RS_AXIOMUS_4_PERFORMANCE_ORDER_STATUS_ID')) {
+            $orderState = new OrderState((int)Configuration::get('RS_AXIOMUS_4_PERFORMANCE_ORDER_STATUS_ID'));
+            $orderState->delete();
+            Configuration::updateValue('RS_AXIOMUS_4_PERFORMANCE_ORDER_STATUS_ID', '');
+        }
+        if(!Configuration::get('RS_AXIOMUS_5_INPROCESS_ORDER_STATUS_ID')) {
+            $orderState = new OrderState((int)Configuration::get('RS_AXIOMUS_5_INPROCESS_ORDER_STATUS_ID'));
+            $orderState->delete();
+            Configuration::updateValue('RS_AXIOMUS_5_INPROCESS_ORDER_STATUS_ID', '');
+        }
+        if(!Configuration::get('RS_AXIOMUS_6_TRANSFERDELIVERY_ORDER_STATUS_ID')) {
+            $orderState = new OrderState((int)Configuration::get('RS_AXIOMUS_6_TRANSFERDELIVERY_ORDER_STATUS_ID'));
+            $orderState->delete();
+            Configuration::updateValue('RS_AXIOMUS_6_TRANSFERDELIVERY_ORDER_STATUS_ID', '');
+        }
+        if(!Configuration::get('RS_AXIOMUS_20_COMPLETED_ORDER_STATUS_ID')) {
+            $orderState = new OrderState((int)Configuration::get('RS_AXIOMUS_20_COMPLETED_ORDER_STATUS_ID'));
+            $orderState->delete();
+            Configuration::updateValue('RS_AXIOMUS_20_COMPLETED_ORDER_STATUS_ID', '');
+        }
+        if(!Configuration::get('RS_AXIOMUS_30_SORT_ORDER_STATUS_ID')) {
+            $orderState = new OrderState((int)Configuration::get('RS_AXIOMUS_30_SORT_ORDER_STATUS_ID'));
+            $orderState->delete();
+            Configuration::updateValue('RS_AXIOMUS_30_SORT_ORDER_STATUS_ID', '');
+        }
+        if(!Configuration::get('RS_AXIOMUS_70_INPVZ_ORDER_STATUS_ID')) {
+            $orderState = new OrderState((int)Configuration::get('RS_AXIOMUS_70_INPVZ_ORDER_STATUS_ID'));
+            $orderState->delete();
+            Configuration::updateValue('RS_AXIOMUS_70_INPVZ_ORDER_STATUS_ID', '');
+        }
+        if(!Configuration::get('RS_AXIOMUS_80_FULFILLED_ORDER_STATUS_ID')) {
+            $orderState = new OrderState((int)Configuration::get('RS_AXIOMUS_80_FULFILLED_ORDER_STATUS_ID'));
+            $orderState->delete();
+            Configuration::updateValue('RS_AXIOMUS_80_FULFILLED_ORDER_STATUS_ID', '');
+        }
+        if(!Configuration::get('RS_AXIOMUS_81_PRECANCEL_ORDER_STATUS_ID')) {
+            $orderState = new OrderState((int)Configuration::get('RS_AXIOMUS_81_PRECANCEL_ORDER_STATUS_ID'));
+            $orderState->delete();
+            Configuration::updateValue('RS_AXIOMUS_81_PRECANCEL_ORDER_STATUS_ID', '');
+        }
+        if(!Configuration::get('RS_AXIOMUS_90_CANCEL_ORDER_STATUS_ID')) {
+            $orderState = new OrderState((int)Configuration::get('RS_AXIOMUS_90_CANCEL_ORDER_STATUS_ID'));
+            $orderState->delete();
+            Configuration::updateValue('RS_AXIOMUS_90_CANCEL_ORDER_STATUS_ID', '');
+        }
+        if(!Configuration::get('RS_AXIOMUS_100_FINISHED_STATUS_ID')) {
+            $orderState = new OrderState((int)Configuration::get('RS_AXIOMUS_100_FINISHED_STATUS_ID'));
+            $orderState->delete();
+            Configuration::updateValue('RS_AXIOMUS_100_FINISHED_STATUS_ID', '');
+        }
+        if(!Configuration::get('RS_AXIOMUS_105_SENDPARTNER_ORDER_STATUS_ID')) {
+            $orderState = new OrderState((int)Configuration::get('RS_AXIOMUS_105_SENDPARTNER_ORDER_STATUS_ID'));
+            $orderState->delete();
+            Configuration::updateValue('RS_AXIOMUS_105_SENDPARTNER_ORDER_STATUS_ID', '');
+        }
+        if(!Configuration::get('RS_AXIOMUS_107_AWARDED_ORDER_STATUS_ID')) {
+            $orderState = new OrderState((int)Configuration::get('RS_AXIOMUS_107_AWARDED_ORDER_STATUS_ID'));
+            $orderState->delete();
+            Configuration::updateValue('RS_AXIOMUS_107_AWARDED_ORDER_STATUS_ID', '');
+        }
+        if(!Configuration::get('RS_AXIOMUS_110_FAILURE_ORDER_STATUS_ID')) {
+            $orderState = new OrderState((int)Configuration::get('RS_AXIOMUS_110_FAILURE_ORDER_STATUS_ID'));
+            $orderState->delete();
+            Configuration::updateValue('RS_AXIOMUS_110_FAILURE_ORDER_STATUS_ID', '');
+        }
+        if(!Configuration::get('RS_AXIOMUS_120_FULLFAILURE_ORDER_STATUS_ID')) {
+            $orderState = new OrderState((int)Configuration::get('RS_AXIOMUS_120_FULLFAILURE_ORDER_STATUS_ID'));
+            $orderState->delete();
+            Configuration::updateValue('RS_AXIOMUS_120_FULLFAILURE_ORDER_STATUS_ID', '');
+        }
+
     }
+
     public function installCarrier($name = '', $type = '')
     {
         $carrier = new Carrier();
@@ -542,7 +1004,6 @@ class axiomuspostcarrier extends CarrierModule
 
         return $res; //ToDo Возвращает переписанный res
     }
-
 
     private function carrierId($val = NULL)
     {
