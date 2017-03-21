@@ -43,22 +43,22 @@ class axiomuspostcarrier extends CarrierModule
     {
         if (Configuration::get('RS_AXIOMUS_USE_AXIOMUS_DELIVERY')) {
             if ($this->id_carrier == (int)Configuration::get('RS_AXIOMUS_ID_AXIOMUS_DELIVERY')) {
-                return 'Axiomus delivery';
+                return 'Axiomus';
             }
         }
         if (Configuration::get('RS_AXIOMUS_USE_TOPDELIVERY_DELIVERY')) {
             if ($this->id_carrier == (int)Configuration::get('RS_AXIOMUS_ID_TOPDELIVERY_DELIVERY')) {
-                return 'TopDelivery delivery';
+                return 'TopDelivery';
             }
         }
         if (Configuration::get('RS_AXIOMUS_USE_DPD_DELIVERY')) {
             if ($this->id_carrier == (int)Configuration::get('RS_AXIOMUS_ID_DPD_DELIVERY')) {
-                return 'DPD delivery';
+                return 'DPD';
             }
         }
         if (Configuration::get('RS_AXIOMUS_USE_BOXBERRY_DELIVERY')) {
             if ($this->id_carrier == (int)Configuration::get('RS_AXIOMUS_ID_BOXBERRY_DELIVERY')) {
-                return 'BoxBerry delivery';
+                return 'BoxBerry';
             }
         }
         if (Configuration::get('RS_AXIOMUS_USE_AXIOMUS_CARRY')) {
@@ -89,7 +89,7 @@ class axiomuspostcarrier extends CarrierModule
         return '';
     }
 
-    public function getOrderShippingCost($params, $shipping_cost)
+    public function getOrderShippingCost($cart, $shipping_cost)
     { //В $params лежит  объект типа Cart.
 
 //        $axiomus = new AxiomusApi(Configuration::get("RS_AXIOMUS_TOKEN"));
@@ -106,65 +106,74 @@ class axiomuspostcarrier extends CarrierModule
         $carrierName = $this->getCarrierName();
         $totalsum = 0;
         $totalPrice = 0;
-        $addr = new Address($params->id_address_delivery);
-        if (!Validate::isLoadedObject($addr))
-            return false;
-        $products = $params->getProducts();
-        $totalWeight = $params->getTotalWeight();
+        $totalWeight = $cart->getTotalWeight();
+        $products = $cart->getProducts();
+
         foreach ($products as $product) {
             $totalPrice += (float)$product['total_wt']; //ToDo а точно ли не total?
         }
+        $addr = new Address($cart->id_address_delivery);
+        if (!Validate::isLoadedObject($addr))
+            return false;
 
-        $cachePrice = $this->AxiomusPost->getPriceInCache($addr->id, $totalWeight);
-        if ($cachePrice != false) {
-            if ($carrierName == 'Axiomus delivery') {
-                $sum_carrier = $cachePrice['price_axiomus_delivery'];
-            } elseif ($carrierName == 'TopDelivery delivery') {
-                $sum_carrier = $cachePrice['price_topdelivery_delivery'];
-            } elseif ($carrierName == 'DPD delivery') {
-                $sum_carrier = $cachePrice['price_dpd_delivery'];
-            } elseif ($carrierName == 'BoxBerry delivery') {
-                $sum_carrier = $cachePrice['price_boxberry_delivery'];
-            } elseif ($carrierName == 'Axiomus carry') {
-                $sum_carrier = $cachePrice['price_axiomus_carry'];
-            } elseif ($carrierName == 'TopDelivery carry') {
-                $sum_carrier = $cachePrice['price_topdelivery_carry'];
-            } elseif ($carrierName == 'DPD carry') {
-                $sum_carrier = $cachePrice['price_dpd_carry'];
-            } elseif ($carrierName == 'BoxBerry carry') {
-                $sum_carrier = $cachePrice['price_boxberry_carry'];
-            } elseif ($carrierName == 'RussianPost carry') {
-                $sum_carrier = $cachePrice['price_russianpost_carry'];
-            } else {
-                $sum_carrier = 0; //Заглушка
+        if((boolean)Configuration::get('RS_AXIOMUS_MSCW_AXIOMUS_MANUAL')){
+            if($this->AxiomusPost->issetOrder($cart->id)){
+                $price = $this->AxiomusPost->getPriceByCartId($cart->id);
+                return $price['price_weight']+$price['price_condition'];
             }
-            $totalsum = $sum_carrier; //Тут отдавать цену для всех доставок если они включены
-        } else {
-            $width = 0;
-            $height = 0;
-            $depth = 0;
-            $val = $totalPrice;
-            $weight = $totalWeight;
-            $addressString = $addr->city . ', ' . $addr->address1; //ToDo добавить проверку на заполнение этих параметров //ToDo не забыть про address2
+            return false;
+        }else{
 
-            $axiomusResponse = getAxiomusResponse($addressString, $height, $width, $depth, $val, $weight);
-            if (empty($axiomusResponse['error'])) {
-                $priceAxiomusDelivery = null;
-                $priceTopDeliveryDelivery = null;
-                $priceDPDDelivery = null;
-                $priceBoxBerryDelivery = null;
-                $priceAxiomusCarry = null;
-                $priceTopDeliveryCarry = null;
-                $priceDPDCarry = null;
-                $priceBoxBerryCarry = null;
-                $priceRussianPostCarry = null;
-                foreach ($axiomusResponse['delivery'] as $delivery){
-                    if (isset($delivery['Axiomus']['delivery'][0]['price'])) $priceAxiomusDelivery = $delivery['Axiomus']['delivery'][0]['price'];
-                    if (isset($delivery['TopDelivery']['delivery'][0]['price'])) $priceTopDeliveryDelivery = $delivery['TopDelivery']['delivery'][0]['price'];
-                    if (isset($delivery['DPD']['delivery'][0]['price'])) $priceDPDDelivery = $delivery['DPD']['delivery'][0]['price'];
-                    if (isset($delivery['BoxBerry']['delivery'][0]['price'])) $priceBoxBerryDelivery = $delivery['BoxBerry']['delivery'][0]['price'];
+            $cachePrice = $this->AxiomusPost->getPriceInCache($addr->id, $totalWeight);
+            if ($cachePrice != false) {
+                if ($carrierName == 'Axiomus') {
+                    $sum_carrier = $cachePrice['price_axiomus_delivery'];
+                } elseif ($carrierName == 'TopDelivery') {
+                    $sum_carrier = $cachePrice['price_topdelivery_delivery'];
+                } elseif ($carrierName == 'DPD') {
+                    $sum_carrier = $cachePrice['price_dpd_delivery'];
+                } elseif ($carrierName == 'BoxBerry') {
+                    $sum_carrier = $cachePrice['price_boxberry_delivery'];
+                } elseif ($carrierName == 'Axiomus-carry') {
+                    $sum_carrier = $cachePrice['price_axiomus_carry'];
+                } elseif ($carrierName == 'TopDelivery-carry') {
+                    $sum_carrier = $cachePrice['price_topdelivery_carry'];
+                } elseif ($carrierName == 'DPD-carry') {
+                    $sum_carrier = $cachePrice['price_dpd_carry'];
+                } elseif ($carrierName == 'BoxBerry-carry') {
+                    $sum_carrier = $cachePrice['price_boxberry_carry'];
+                } elseif ($carrierName == 'RussianPost-carry') {
+                    $sum_carrier = $cachePrice['price_russianpost_carry'];
+                } else {
+                    $sum_carrier = 0; //Заглушка
                 }
-                //ToDo переработать самовывоз
+                $totalsum = $sum_carrier; //Тут отдавать цену для всех доставок если они включены
+            } else {
+                $width = 0;
+                $height = 0;
+                $depth = 0;
+                $val = $totalPrice;
+                $weight = $totalWeight;
+                $addressString = $addr->city . ', ' . $addr->address1; //ToDo добавить проверку на заполнение этих параметров //ToDo не забыть про address2
+
+                $axiomusResponse = getAxiomusResponse($addressString, $height, $width, $depth, $val, $weight);
+                if (empty($axiomusResponse['error'])) {
+                    $priceAxiomusDelivery = null;
+                    $priceTopDeliveryDelivery = null;
+                    $priceDPDDelivery = null;
+                    $priceBoxBerryDelivery = null;
+                    $priceAxiomusCarry = null;
+                    $priceTopDeliveryCarry = null;
+                    $priceDPDCarry = null;
+                    $priceBoxBerryCarry = null;
+                    $priceRussianPostCarry = null;
+                    foreach ($axiomusResponse['delivery'] as $delivery) {
+                        if (isset($delivery['Axiomus']['delivery'][0]['price'])) $priceAxiomusDelivery = $delivery['Axiomus']['delivery'][0]['price'];
+                        if (isset($delivery['TopDelivery']['delivery'][0]['price'])) $priceTopDeliveryDelivery = $delivery['TopDelivery']['delivery'][0]['price'];
+                        if (isset($delivery['DPD']['delivery'][0]['price'])) $priceDPDDelivery = $delivery['DPD']['delivery'][0]['price'];
+                        if (isset($delivery['BoxBerry']['delivery'][0]['price'])) $priceBoxBerryDelivery = $delivery['BoxBerry']['delivery'][0]['price'];
+                    }
+                    //ToDo переработать самовывоз
 //                foreach ($axiomusResponse['carry'] as $carry){
 //                    if (isset($carry['calc']['Axiomus'])){
 //
@@ -185,34 +194,35 @@ class axiomuspostcarrier extends CarrierModule
 //                    }
 //
 //                }
-                $this->AxiomusPost->insertRowCache($addr->id, $totalWeight, $priceAxiomusDelivery, $priceTopDeliveryDelivery, $priceDPDDelivery, $priceBoxBerryDelivery, $priceAxiomusCarry, $priceTopDeliveryCarry, $priceDPDCarry, $priceBoxBerryCarry, $priceRussianPostCarry);
+                    $this->AxiomusPost->insertRowCache($addr->id, $totalWeight, $priceAxiomusDelivery, $priceTopDeliveryDelivery, $priceDPDDelivery, $priceBoxBerryDelivery, $priceAxiomusCarry, $priceTopDeliveryCarry, $priceDPDCarry, $priceBoxBerryCarry, $priceRussianPostCarry);
 
-                //ToDo не забыть проверить на неправильных адресах
-                if ($carrierName == 'Axiomus delivery') {
-                    $sum_carrier = $priceAxiomusDelivery;
-                } elseif ($carrierName == 'TopDelivery delivery') {
-                    $sum_carrier = $priceTopDeliveryDelivery;
-                } elseif ($carrierName == 'DPD delivery') {
-                    $sum_carrier = $priceDPDDelivery;
-                } elseif ($carrierName == 'BoxBerry delivery') {
-                    $sum_carrier = $priceBoxBerryDelivery;
-                } elseif ($carrierName == 'Axiomus carry') {
-                    $sum_carrier = $priceAxiomusCarry;
-                } elseif ($carrierName == 'TopDelivery carry') {
-                    $sum_carrier = $priceTopDeliveryCarry;
-                } elseif ($carrierName == 'DPD carry') {
-                    $sum_carrier = $priceDPDCarry;
-                } elseif ($carrierName == 'BoxBerry carry') {
-                    $sum_carrier = $priceBoxBerryCarry;
-                } elseif ($carrierName == 'RussianPost carry') {
-                    $sum_carrier = $priceRussianPostCarry;
+                    //ToDo не забыть проверить на неправильных адресах
+                    if ($carrierName == 'Axiomus delivery') {
+                        $sum_carrier = $priceAxiomusDelivery;
+                    } elseif ($carrierName == 'TopDelivery delivery') {
+                        $sum_carrier = $priceTopDeliveryDelivery;
+                    } elseif ($carrierName == 'DPD delivery') {
+                        $sum_carrier = $priceDPDDelivery;
+                    } elseif ($carrierName == 'BoxBerry delivery') {
+                        $sum_carrier = $priceBoxBerryDelivery;
+                    } elseif ($carrierName == 'Axiomus carry') {
+                        $sum_carrier = $priceAxiomusCarry;
+                    } elseif ($carrierName == 'TopDelivery carry') {
+                        $sum_carrier = $priceTopDeliveryCarry;
+                    } elseif ($carrierName == 'DPD carry') {
+                        $sum_carrier = $priceDPDCarry;
+                    } elseif ($carrierName == 'BoxBerry carry') {
+                        $sum_carrier = $priceBoxBerryCarry;
+                    } elseif ($carrierName == 'RussianPost carry') {
+                        $sum_carrier = $priceRussianPostCarry;
+                    } else {
+                        $sum_carrier = 0; //Заглушка
+                    }
+
+                    $totalsum = $sum_carrier;
                 } else {
-                    $sum_carrier = 0; //Заглушка
+                    $totalsum = 0;
                 }
-
-                $totalsum = $sum_carrier;
-            }else{
-                $totalsum = 0;
             }
         }
         return ($totalsum==0?false:$totalsum);
@@ -237,7 +247,27 @@ class axiomuspostcarrier extends CarrierModule
             return false;
         }
 
-        if (!$this->AxiomusPost->createTable()) {
+        if (!$this->AxiomusPost->createTables()) {
+            $this->uninstallAllCarrier();
+            return false;
+        }
+
+        if (!$this->AxiomusPost->insertStartTimeType()) {
+            $this->uninstallAllCarrier();
+            return false;
+        }
+
+        if (!$this->AxiomusPost->insertStartWeightType()) {
+            $this->uninstallAllCarrier();
+            return false;
+        }
+
+        if (!$this->AxiomusPost->insertStartWeightPrice()) {
+            $this->uninstallAllCarrier();
+            return false;
+        }
+
+        if (!$this->AxiomusPost->insertStartConditionPrice()) {
             $this->uninstallAllCarrier();
             return false;
         }
@@ -297,7 +327,7 @@ class axiomuspostcarrier extends CarrierModule
             parent::uninstall();
             $this->uninstallTab($tab->id);
             $this->uninstallAllCarrier();
-            $this->AxiomusPost->dropTable();
+            $this->AxiomusPost->dropTables();
             return false;
         }
 
@@ -344,7 +374,7 @@ class axiomuspostcarrier extends CarrierModule
         $res = $this->uninstallTab();
         $res = $this->uninstallAllCarrier();
         $res = $this->uninstallOrderStatus();
-        $res = $this->AxiomusPost->dropTable();
+        $res = $this->AxiomusPost->dropTables();
 
         Configuration::updateValue('RS_AXIOMUS_POST_TAB_ID', null);
         Configuration::updateValue('RS_AXIOMUS_POST_CARRIER_ID', null);
@@ -395,15 +425,6 @@ class axiomuspostcarrier extends CarrierModule
      * @param $params
      */
     public function hookDisplayBeforeCarrier($params){
-//        exit;
-    }
-
-    /**
-     * Срабатывает после выбора Доставки
-     * @param $params
-     */
-    public function hookActionCarrierProcess($params){
-
         $this->smarty->assign(array(
             'this_path' => $this->_path, //ToDo надо ли это
             'this_path_bw' => $this->_path,
@@ -412,6 +433,15 @@ class axiomuspostcarrier extends CarrierModule
         $sendparams = [];
         $link = $this->context->link->getModuleLink('axiomuspostcarrier', 'changecarrieroptions', $sendparams);
         Tools::redirectAdmin($link);
+    }
+
+    /**
+     * Срабатывает после выбора Доставки
+     * @param $params
+     */
+    public function hookActionCarrierProcess($params){
+
+
     }
 
 

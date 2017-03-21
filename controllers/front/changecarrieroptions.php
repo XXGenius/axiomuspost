@@ -18,11 +18,22 @@ class axiomuspostcarrierChangeCarrierOptionsModuleFrontController extends Module
         parent::initContent();
 
         $cart = $this->context->cart;
+        $totalWeight = $cart->getTotalWeight();
+        $products = $cart->getProducts();
+        $totalPrice = 0;
+        foreach ($products as $product) {
+            $totalPrice += (float)$product['total_wt']; //ToDo а точно ли не total?
+        }
+
 //        if (!$this->module->checkCurrency($cart))
 //            Tools::redirect('index.php?controller=order');
 
         $this->context->smarty->assign(array(
             'tomorrow' => strtotime('+1 day'),
+
+            'city' => 'mscw',
+            'weight' =>  $totalWeight,
+            'productprice' => $totalPrice,
 
             'nbProducts' => $cart->nbProducts(),
             'cust_currency' => $cart->id_currency,
@@ -33,5 +44,12 @@ class axiomuspostcarrierChangeCarrierOptionsModuleFrontController extends Module
         ));
 
         $this->setTemplate('mypage.tpl'); //ToDo добавить вывод мест carry
+    }
+
+    public function postProcess()
+    {
+
+
+        parent::postProcess();
     }
 }

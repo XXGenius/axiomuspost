@@ -1,16 +1,21 @@
 <?php
 
+include_once (_PS_MODULE_DIR_ . 'axiomuspostcarrier/models/AxiomusPost.php');
+
 class AdminAxiomusConfigController extends ModuleAdminController
 {
 
     public $settingsArray = [];
+    public $maintab = 0;
+    public $subtab = 0;
 
     public function __construct()
     {
+        Configuration::updateValue('RS_AXIOMUS_MSCW_AXIOMUS_PRICE', $this->getArrPrice('MSCW','AXIOMUS'));
         $this->settingsArray = $this->getSettingsArray(); //ToDo может в приват?
 
 //        $this->table = 'axiomus_config';
-//        $this->className = 'AxiomusPost';
+        $this->AxiomusPost = new AxiomusPost();
 //        $this->identifier = 'id';
 
         //$this->context = Context::getContext();
@@ -137,8 +142,15 @@ class AdminAxiomusConfigController extends ModuleAdminController
     }
 
     public function initContent(){
+        $this->_path = _PS_ROOT_DIR_.$this->module->getPathUri();
+        $this->context->controller->addJS($this->_path.'/views/js/jquery.timepicker.min.js');
+        $this->context->controller->addCSS($this->_path.'/views/css/jquery.timepicker.css', 'all');
+
         parent::initContent();
+
         $this->context->smarty->assign($this->getSettingsArray());
+        $this->context->smarty->assign($this->AxiomusPost->getWeightPriceArray());
+        $this->context->smarty->assign('AxiomusPost', $this->AxiomusPost);
         $this->setTemplate('view.tpl');
 
         /* DO STUFF HERE */
@@ -150,6 +162,9 @@ class AdminAxiomusConfigController extends ModuleAdminController
 
     public function getSettingsArray(){
         return [
+            //CPU
+            'maintab' => $this->maintab,
+            'subtab' => $this->subtab,
             //Moscow
             'use_mscw_axiomus'              => Configuration::get('RS_AXIOMUS_MSCW_USE_AXIOMUS'),
             'use_mscw_topdelivery'          => Configuration::get('RS_AXIOMUS_MSCW_USE_TOPDELIVERY'),
@@ -173,108 +188,11 @@ class AdminAxiomusConfigController extends ModuleAdminController
             //Settings
             'axiomus_token'                => Configuration::get('RS_AXIOMUS_TOKEN'),
             'axiomus_cache_hourlife'       => Configuration::get('RS_AXIOMUS_CACHE_HOURLIFE'),
+            //Moscow
+            'mscw_axiomus_manual'          => Configuration::get('RS_AXIOMUS_MSCW_AXIOMUS_MANUAL'),
+            'mscw_axiomus_increment'       => Configuration::get('RS_AXIOMUS_MSCW_AXIOMUS_INCREMENT'),
+//            'mscw_axiomus_weight'          => Configuration::getMultiple('RS_AXIOMUS_MSCW_AXIOMUS_PRICE'),
         ];
-    }
-
-    public function getContent()
-    {
-        global $smarty;
-        $smarty->display(_PS_MODULE_DIR_ .'axiomuspostcarrier/views/templates/admin/view.tpl');
-        exit;
-    }
-
-    public function renderForm()
-    {
-
-        $this->fields_form = array(
-            'legend' => array(
-                'title' => 'Legend',
-            ),
-            'input' => array(
-                array(
-                    'type' => 'select',
-                    'label' => $this->l('Country'),
-                    'name' => 'id_country',
-                    'options' => array(
-                        'query' => Country::getCountries($this->context->language->id, true, true),
-                        'id' => 'id_country',
-                        'name' => 'name',
-                        //'default' => array('value'=>$this->context->country->id, 'label'=>$this->l($this->context->country->name)),//array() or value???
-                    ),
-                    'required' => true,
-                ),
-                array(
-                    'type' => 'select',
-                    'label' => $this->l('State'),
-                    'name' => 'id_state',
-                    'required' => true,
-                    'options' => array(
-                        'query' => State::getStates(),
-                        'id' => 'id_state',
-                        'name' => 'name'
-                    ),
-                ),
-                array(
-                    'type' => 'select',
-                    'label' => 'Tariff Zone',
-                    'name' => 'id_post_zone',
-                    'options' => array(
-                        'query' => array(
-                            array(
-                                'id' => 1,
-                                'value' => 'Zone 1'
-                            ),
-                            array(
-                                'id' => 2,
-                                'value' => 'Zone 2'
-                            ),
-                            array(
-                                'id' => 3,
-                                'value' => 'Zone 3'
-                            ),
-                            array(
-                                'id' => 4,
-                                'value' => 'Zone 4'
-                            ),
-                            array(
-                                'id' => 5,
-                                'value' => 'Zone 5'
-                            ),
-                        ),
-                        'id' => 'id',
-                        'name' => 'value'
-                    ),
-                    'required' => true
-                ),
-                array(
-                    'type' => 'radio',
-                    'label' => $this->l('Status'),
-                    'name' => 'active',
-                    'required' => false,
-                    'is_bool' => true,
-                    'class' => 't',
-                    'values' => array(
-                        array(
-                            'id' => 'active_on',
-                            'value' => 1,
-                            'label' => $this->l('Enabled')
-                        ),
-                        array(
-                            'id' => 'active_off',
-                            'value' => 0,
-                            'label' => $this->l('Disabled')
-                        ),
-                    ),
-                    'desc' => $this->l('Enable delivery to this Country/State'),
-                ),
-            ),
-            'submit' => array(
-                'title' => $this->l('Save'),
-                'class' => 'button',
-            ),
-        );
-
-        return parent::renderForm();
     }
 
     public function postProcess()
@@ -287,8 +205,9 @@ class AdminAxiomusConfigController extends ModuleAdminController
         $this->settingsArray = $this->getSettingsArray();
 
         if (Tools::isSubmit('submitUseDelivery')) {
+            $this->maintab = 0;
+            $this->subtab = 0;
             //Delivery
-
             if ((boolean)$_POST['use-mscw-axiomus'] != $this->settingsArray['use_mscw_axiomus']) {
                 if ((boolean)$_POST['use-mscw-axiomus']) {
                     $res = $this->module->installCarrier('Axiomus', 'DELIVERY');
@@ -384,6 +303,8 @@ class AdminAxiomusConfigController extends ModuleAdminController
             }
         }
         if (Tools::isSubmit('submitSettings')) {
+            $this->maintab = 2;
+            $this->subtab = 0;
             if ($_POST['axiomus-token'] != $this->settingsArray['axiomus_token']) {
                 Configuration::updateValue('RS_AXIOMUS_TOKEN', $_POST['axiomus-token']);
             }
@@ -391,10 +312,49 @@ class AdminAxiomusConfigController extends ModuleAdminController
                 Configuration::updateValue('RS_AXIOMUS_CACHE_HOURLIFE', $_POST['axiomus-cache-hourlife']);
             }
         }
+        if (Tools::isSubmit('submitMscwAxiomusSettings')){
+            $this->maintab = 0;
+            $this->subtab = 1;
+            if ((boolean)$_POST['mscw-axiomus-manual'] != $this->settingsArray['mscw_axiomus_manual']) {
+                Configuration::updateValue('RS_AXIOMUS_MSCW_AXIOMUS_MANUAL', $_POST['mscw-axiomus-manual']);
+            }
+        }
+        if (Tools::isSubmit('submitMscwAxiomusIncrement')) {
+            $this->maintab = 0;
+            $this->subtab = 1;
+            if ($_POST['mscw-axiomus-increment'] != $this->settingsArray['mscw_axiomus_increment']) {
+                Configuration::updateValue('RS_AXIOMUS_MSCW_AXIOMUS_INCREMENT', $_POST['mscw-axiomus-increment']);
+            }
+        }
+        if (Tools::isSubmit('submitMscwAxiomusWeightPrice')) {
+            $this->maintab = 0;
+            $this->subtab = 1;
+
+            foreach ($this->AxiomusPost->priceTypes as $type) { //ToDo валидация POST
+                $this->AxiomusPost->setWeightPrice('mscw', 'axiomus', $type, $_POST['mscw-axiomus-price-'.$type]);
+            }
+        }
+        if (Tools::isSubmit('submitMscwAxiomusConditionPrice')) {
+            $this->maintab = 0;
+            $this->subtab = 1;
+
+            $this->AxiomusPost->insertConditionPrice('mscw', 'axiomus', $_POST['mscw-axiomus-price-sumfrom'], $_POST['mscw-axiomus-price-sumto'], $_POST['mscw-axiomus-price-timefrom'], $_POST['mscw-axiomus-price-timeto'], $_POST['mscw-axiomus-price-kadfrom'], $_POST['mscw-axiomus-price-kadto'], $_POST['mscw-axiomus-price-sum']);
+        }
+        if (Tools::isSubmit('deleteMscwAxiomusConditionPrice')) {
+            $this->maintab = 0;
+            $this->subtab = 1;
+
+            $this->AxiomusPost->deleteConditionPrice((int)$_POST['mscw-axiomus-price-id']);
+        }
+
         parent::postProcess();
     }
 
-
+    public function getArrPrice($city, $delivery){
+        //ToDo Запрос к бд
+        $arr = [0 => '00', 1=>'11',3=>'33', 5=>'55',10=>'1010',15=>'1515',25=>2525];
+        return $arr;
+    }
 
     public function processSave()
     {
