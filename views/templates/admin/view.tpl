@@ -71,24 +71,27 @@
                         {l s='Надбавка по условию'}
                     </a>
                 </li>
-
+                {if ($use_mscw_axiomus_carry)}
                 <li {if $subtab == 6}class="active"{/if}>
                     <a href="#mscw-carry-axiomus">
                         {l s='Самовывоз Axiomus'}
                     </a>
                 </li>
-
+                {/if}
+                {if ($use_mscw_dpd_carry)}
                 <li {if $subtab == 7}class="active"{/if}>
                     <a href="#mscw-carry-dpd">
                         {l s='Самовывоз DPD'}
                     </a>
                 </li>
-
+                {/if}
+                {if ($use_mscw_boxberry_carry)}
                 <li {if $subtab == 8}class="active"{/if}>
                     <a href="#mscw-carry-boxberry">
                         {l s='Самовывоз BoxBerry'}
                     </a>
                 </li>
+                {/if}
                     {*<li {if $subtab == 6}class="active"{/if}>*}
                         {*<a href="#mscw-topdelivery-carry">*}
                             {*{l s='TopDelivery(самовывоз)'}*}

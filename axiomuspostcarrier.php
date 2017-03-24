@@ -13,12 +13,12 @@ require_once(_PS_MODULE_DIR_ . 'axiomuspostcarrier/axiomusFunctions.php');
 
 class axiomuspostcarrier extends CarrierModule
 {
-    public $model;
+    private $model;
 //    public $AxiomusPost;
     // Хоть и неочевидно, но здесь это должно быть. Кем-то присваивается.
     public $id_carrier;
     public $value_prefix = 'RS_AXIOMUS';
-    public $deliveryNames = ['axiomus', 'strizh', 'Pek'];
+    public $deliveryNames = ['axiomus', 'strizh', 'pek'];
     public $carryNames = ['axiomus', 'dpd', 'boxberry', 'russianpost'];
     private $_postErrors = array();
 
@@ -254,7 +254,7 @@ class axiomuspostcarrier extends CarrierModule
         $this->AxiomusPost->refreshCarryAddressCacheBoxBerry();
 
         $this->_createMenuTab();
-        $this->_registerHooks();
+
         $this->_setSettingsValues();
 
 
@@ -263,7 +263,17 @@ class axiomuspostcarrier extends CarrierModule
             $this->uninstall();
             return false;
         }
+        $this->_registerHooks();
+        $this->registerHook('displayBeforeCarrier');
+        $this->registerHook('displayCarrierList');
+        $this->registerHook('actionCarrierProcess');
 
+        $this->registerHook('actionCarrierUpdate');
+        $this->registerHook('actionValidateOrder');
+        $this->registerHook('actionOrderStatusPostUpdate');
+
+        $this->registerHook('displayAdminOrderTabShip');
+        $this->registerHook('displayAdminOrderContentShip');
         return true;
     }
 
@@ -274,6 +284,7 @@ class axiomuspostcarrier extends CarrierModule
         foreach ($this->carryNames as $carryName){
             $this->_installCarrier($carryName, 'CARRY');
         }
+        return true;
     }
 
     private function _installCarrier($name = '', $type = '')
@@ -332,7 +343,7 @@ class axiomuspostcarrier extends CarrierModule
                 }
             }
 
-            copy($this->getLocalPath() . $name . '.jpg', _PS_SHIP_IMG_DIR_ . '/' . (int)$carrier->id . '.jpg');
+            copy($this->getLocalPath() .'img/'. $name . '.jpg', _PS_SHIP_IMG_DIR_ . '/' . (int)$carrier->id . '.jpg');
             Configuration::updateValue($this->getCarrierValueIdName($name, $type), (int)($carrier->id));
             return (int)($carrier->id);
         }
@@ -763,20 +774,39 @@ class axiomuspostcarrier extends CarrierModule
     }
 
     private function _registerHooks(){
-        $this->registerHook('displayBeforeCarrier');
-        $this->registerHook('displayCarrierList');
-        $this->registerHook('actionCarrierProcess');
 
-        $this->registerHook('actionCarrierUpdate');
-        $this->registerHook('actionValidateOrder');
-        $this->registerHook('actionOrderStatusPostUpdate');
-
-        $this->registerHook('displayAdminOrderTabShip');
-        $this->registerHook('displayAdminOrderContentShip');
         return true;
     }
 
     private function _setSettingsValues(){
+
+        Configuration::updateValue('RS_AXIOMUS_MSCW_USE_AXIOMUS', 1);
+        Configuration::updateValue('RS_AXIOMUS_MSCW_USE_STRIZH', 1);
+        Configuration::updateValue('RS_AXIOMUS_MSCW_USE_PEK', 1);
+        Configuration::updateValue('RS_AXIOMUS_MSCW_USE_AXIOMUS_CARRY', 1);
+        Configuration::updateValue('RS_AXIOMUS_MSCW_USE_DPD_CARRY', 1);
+        Configuration::updateValue('RS_AXIOMUS_MSCW_USE_BOXBERRY_CARRY', 1);
+        Configuration::updateValue('RS_AXIOMUS_MSCW_USE_RUSSIANPOST_CARRY', 1);
+            //Piter
+        Configuration::updateValue('RS_AXIOMUS_PTR_USE_AXIOMUS', 1);
+        Configuration::updateValue('RS_AXIOMUS_PTR_USE_STRIZH', 1);
+        Configuration::updateValue('RS_AXIOMUS_PTR_USE_PEK', 1);
+        Configuration::updateValue('RS_AXIOMUS_PTR_USE_AXIOMUS_CARRY', 1);
+        Configuration::updateValue('RS_AXIOMUS_PTR_USE_DPD_CARRY', 1);
+        Configuration::updateValue('RS_AXIOMUS_PTR_USE_BOXBERRY_CARRY', 1);
+        Configuration::updateValue('RS_AXIOMUS_PTR_USE_RUSSIANPOST_CARRY', 1);
+            //region
+        Configuration::updateValue('RS_AXIOMUS_REGION_USE_AXIOMUS_CARRY', 1);
+        Configuration::updateValue('RS_AXIOMUS_REGION_USE_DPD_CARRY', 1);
+        Configuration::updateValue('RS_AXIOMUS_REGION_USE_BOXBERRY_CARRY', 1);
+        Configuration::updateValue('RS_AXIOMUS_REGION_USE_RUSSIANPOST_CARRY', 1);
+            //Settings
+        Configuration::updateValue('RS_AXIOMUS_TOKEN', 1);
+        Configuration::updateValue('RS_AXIOMUS_CACHE_HOURLIFE', 1);
+            //Moscow
+        Configuration::updateValue('RS_AXIOMUS_MSCW_AXIOMUS_MANUAL', 1);
+        Configuration::updateValue('RS_AXIOMUS_MSCW_AXIOMUS_INCREMENT', 0);
+
         Configuration::updateValue('RS_AXIOMUS_ID_AXIOMUS_DELIVERY', null); //ToDo пересмотреть
 
         Configuration::updateValue('RS_AXIOMUS_TOKEN', '76793d5test0cf77');

@@ -31,7 +31,7 @@ class AxiomusPost extends ObjectModel {
 
     public $AxiomusXML;
     public static $definition = array(
-        'table' => 'axiomus_order',
+        'table' => 'axiomus',
         'tableOrder' => 'axiomus_order',
         'tableConditionPrice' => 'axiomus_condition_price',
         'tableWeightPrice' => 'axiomus_weight_price',
@@ -44,18 +44,8 @@ class AxiomusPost extends ObjectModel {
         'tableCacheCarryBoxBerry' => 'axiomus_cache_carry_boxberry',
         'tableCarryPrice' => 'axiomus_carry_price',
 
-//        'primary' => 'id',//Это нужно для работы формы добавления
+        'primary' => 'id',//Это нужно для работы формы добавления
         'multilang' => false,
-//        'fields' => array( //ToDo нужно ли это все
-//            'id' => array(
-//                'type' => ObjectModel::TYPE_INT,
-//                'required' => false
-//            ),
-//            'track_number' => array(
-//                'type' => ObjectModel::TYPE_STRING,
-//                'required' => false
-//            ),
-//        ),
     );
 
     public function __construct($id = null, $id_lang = null, $id_shop = NULL) {
@@ -513,7 +503,7 @@ class AxiomusPost extends ObjectModel {
 
         //определение типа веса
         if ($carry){
-            $delivery = $this->getActiveCarry()[$carrytype-1];
+            $delivery = $this->getActiveCarry()[$carrytype];
             return $this->getCarryPriceByName($city, $delivery);
         }else {
             $weighttype = $this->getWeightTypeId($weight);
@@ -830,21 +820,61 @@ class AxiomusPost extends ObjectModel {
         }
     }
     //Carry
-    public function getActiveCarry(){
-
-        return [0 => 'axiomus',1 => 'dpd', 2=>'boxberry'];
+    public function getActiveCarry($city){
+        $arr = [];
+        if ($city=='Москва') {
+            if (Configuration::get('RS_AXIOMUS_MSCW_USE_AXIOMUS_CARRY')) {
+                $arr[Configuration::get('RS_AXIOMUS_ID_AXIOMUS_CARRY')] = 'axiomus';
+            }
+            if (Configuration::get('RS_AXIOMUS_MSCW_USE_DPD_CARRY')) {
+                $arr[Configuration::get('RS_AXIOMUS_ID_DPD_CARRY')] = 'dpd';
+            }
+            if (Configuration::get('RS_AXIOMUS_MSCW_USE_BOXBERRY_CARRY')) {
+                $arr[Configuration::get('RS_AXIOMUS_ID_BOXBERRY_CARRY')] = 'boxberry';
+            }
+            if (Configuration::get('RS_AXIOMUS_MSCW_USE_RUSSIANPOST_CARRY')) {
+                $arr[Configuration::get('RS_AXIOMUS_ID_RUSSIANPOST_CARRY')] = 'russianpost';
+            }
+        }elseif ($city='Санкт-Петербург'){
+            if (Configuration::get('RS_AXIOMUS_PTR_USE_AXIOMUS_CARRY')) {
+                $arr[Configuration::get('RS_AXIOMUS_ID_AXIOMUS_CARRY')] = 'axiomus';
+            }
+            if (Configuration::get('RS_AXIOMUS_PTR_USE_DPD_CARRY')) {
+                $arr[Configuration::get('RS_AXIOMUS_ID_DPD_CARRY')] = 'dpd';
+            }
+            if (Configuration::get('RS_AXIOMUS_PTR_USE_BOXBERRY_CARRY')) {
+                $arr[Configuration::get('RS_AXIOMUS_ID_BOXBERRY_CARRY')] = 'boxberry';
+            }
+            if (Configuration::get('RS_AXIOMUS_PTR_USE_RUSSIANPOST_CARRY')) {
+                $arr[Configuration::get('RS_AXIOMUS_ID_RUSSIANPOST_CARRY')] = 'russianpost';
+            }
+        }else{
+            if (Configuration::get('RS_AXIOMUS_REGION_USE_AXIOMUS_CARRY')) {
+                $arr[Configuration::get('RS_AXIOMUS_ID_AXIOMUS_CARRY')] = 'axiomus';
+            }
+            if (Configuration::get('RS_AXIOMUS_REGION_USE_DPD_CARRY')) {
+                $arr[Configuration::get('RS_AXIOMUS_ID_DPD_CARRY')] = 'dpd';
+            }
+            if (Configuration::get('RS_AXIOMUS_REGION_USE_BOXBERRY_CARRY')) {
+                $arr[Configuration::get('RS_AXIOMUS_ID_BOXBERRY_CARRY')] = 'boxberry';
+            }
+            if (Configuration::get('RS_AXIOMUS_REGION_USE_RUSSIANPOST_CARRY')) {
+                $arr[Configuration::get('RS_AXIOMUS_ID_RUSSIANPOST_CARRY')] = 'russianpost';
+            }
+        }
+        return $arr;
     }
 
     public function getCarryAddressesArray($carry_id, $city){
-        if ($carry_id == 0+1) { //axiomus
+        if ($carry_id == (int)Configuration::get('RS_AXIOMUS_ID_AXIOMUS_CARRY')) { //axiomus
             $activeTable = $this->tableCacheCarryAxiomusWithPrefix;
             $data = Db::getInstance()->ExecuteS("SELECT * FROM `{$activeTable}` WHERE `city_name` = '{$city}'");
             return $data;
-        }elseif ($carry_id == 1+1){ //dpd
+        }elseif ($carry_id == (int)Configuration::get('RS_AXIOMUS_ID_DPD_CARRY')){ //dpd
             $activeTable = $this->tableCacheCarryDPDWithPrefix;
             $data = Db::getInstance()->ExecuteS("SELECT * FROM `{$activeTable}` WHERE `city` = '{$city}'");
             return $data;
-        }elseif ($carry_id == 2+1){ //boxberry
+        }elseif ($carry_id == (int)Configuration::get('RS_AXIOMUS_ID_BOXBERRY_CARRY')){ //boxberry
             $activeTable = $this->tableCacheCarryBoxBerryWithPrefix;
             $data = Db::getInstance()->ExecuteS("SELECT * FROM `{$activeTable}` WHERE `city_name` = '{$city}'");
             return $data;

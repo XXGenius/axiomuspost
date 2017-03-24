@@ -88,8 +88,8 @@
                 <div class="row" id="rowCarry" style="display: none">
                     <div class="col-lg-2">
                         <div class="form-group">
-                            {foreach from=$AxiomusPost->getActiveCarry() key=k item=line}
-                            <label class="radio-inline"><input class="carry-type" type="radio" name="carry-name" value="{$k+1}" id="carry_{$k+1}">{$line}</label><br>
+                            {foreach from=$AxiomusPost->getActiveCarry($city) key=k item=line}
+                            <label class="radio-inline"><input class="carry-type" type="radio" name="carry-name" value="{$k}" id="carry_{$k}">{$line}</label><br>
                             {/foreach}
                         </div>
                     </div>
@@ -162,11 +162,6 @@
             radioInputDelivery.prop('checked', true);
             $('#carry_address_block').hide();
 
-            carryarr = {
-            {foreach from=$AxiomusPost->getActiveCarry() key=k item=line}
-            {$k+1} : '{$line}',
-            {/foreach}
-            };
 
             $('.carry-type').click(function () {
                 updateCarry();
@@ -240,6 +235,7 @@
                             console.log('get carry... end.');
 
                             jsonArray = JSON.parse(data);
+                            console.log(jsonArray);
                             $('#carry_address').text('');
                             for (var i in jsonArray) {
                                 $('#carry_address').append('<option value="' + jsonArray[i].id + '">' + jsonArray[i].address + '</option>');
