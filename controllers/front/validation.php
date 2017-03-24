@@ -18,10 +18,18 @@ class axiomuspostcarrierValidationModuleFrontController extends ModuleFrontContr
             $customer = new Customer($cart->id_customer);
 
             $this->AxiomusPost = new AxiomusPost();
-            $this->AxiomusPost->insertOrder($cart->id, 'axiomus', (int)$_POST['delivery-type'], (int)$_POST['kad-type'], (int)$_POST['time-type']);
-//            $id_cart, $delivery, $carry, $kad, $time
-            //ToDo добавить валидацию и запись параметров в бд
-            Tools::redirect('index.php?controller=order&step=3');
+            $this->AxiomusPost->setOrder($cart->id, 'axiomus',$_POST['delivery-date'], (int)$_POST['delivery-type'], (int)$_POST['kad-type'], (int)$_POST['time-type']);
+
+            $this->context->cart->update();
+            $carrier_id =  (int)Configuration::get('RS_AXIOMUS_ID_AXIOMUS_DELIVERY');
+            $cart->id_carrier = $carrier_id;
+            $delivery_option = $this->context->cart->getDeliveryOption();
+            $delivery_option[(int)$this->context->cart->id_address_delivery] = $carrier_id.',';
+            $this->context->cart->setDeliveryOption($delivery_option);
+            $this->context->cart->save();
+
+            //ToDo добавить валидацию
+            Tools::redirect('index.php?controller=order&step=3&cgv=1');
         }else{
             Tools::redirect('index.php');
         }

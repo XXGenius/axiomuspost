@@ -44,26 +44,24 @@
         <div class="row">
             <div class="col-lg-8">
                 <div class="row">
-                    <div class="col-lg-4">
-                        <select class="form-control" id="kad_type" name="kad-type">
-                            <option value="1">в пределах МКАД</option>
-                            <option value="2">в пределах 5км. от МКАД</option>
-                            <option value="3">от 5 до 10км. от МКАД</option>
-                            <option value="4">от 10 до 25км. от МКАД</option>
-                            <option value="5">от 25 до 40км. от МКАД</option>
-                        </select>
-                    </div>
                     <div class="col-lg-6">
                         <div class="required form-group">
-                            <label class="radio-inline"><input type="radio" name="delivery-type" value="0" id="opt-delivery">Доставка до двери</label>
-                            {if $city=='mscw' or $city=='ptr'}<label class="radio-inline"><input type="radio" name="delivery-type" value="1" id="opt-carry">Самовывоз</label>{/if}
+                            <label class="radio-inline delivery-type"><input type="radio" name="delivery-type" value="0" id="opt-delivery">Доставка до двери</label>
+                            <label class="radio-inline delivery-type"><input type="radio" name="delivery-type" value="1" id="opt-carry">Самовывоз</label>
                         </div>
                     </div>
                 </div>
                 <br>
-                {if $city=='mscw' or $city=='ptr'}
-                <div class="row" id="rowDateTime">
-                    <div class="col-lg-8">
+
+                <div class="row" id="rowDelivery">
+                    <div class="col-lg-3">
+                        <select class="form-control" id="kad_type" name="kad-type">
+                            {foreach from=$AxiomusPost->getAllKadType('Москва') key=k item=line}
+                                <option value="{$line.id}">{$line.name}</option>
+                            {/foreach}
+                        </select>
+                    </div>
+                    <div class="col-lg-6">
                         <div class="required form-group">
                             <div class="row">
                                 <div class="col-lg-8">
@@ -76,19 +74,49 @@
                         </div>
                     </div>
 
-                    <div class="col-lg-4">
+                    <div class="col-lg-3">
                         <select class="form-control" id="time_type" name="time-type">
-                            <option value="1">c 10:00 до 14:00</option>
-                            <option value="2">c 14:00 до 18:00</option>
-                            <option value="3">с 18:00 до 22:00</option>
-                            <option value="4">c 23:00 до 03:00</option>
-                            <option value="5">c 3:00 до 6:00</option>
+                            {foreach from=$AxiomusPost->getAllTimeType('Москва') key=k item=line}
+                                <option value="{$line.id}">{$line.name}</option>
+                            {/foreach}
                         </select>
 
                     </div>
                 </div>
-                <br>
-                {/if}
+
+
+                <div class="row" id="rowCarry" style="display: none">
+                    <div class="col-lg-2">
+                        <div class="form-group">
+                            {foreach from=$AxiomusPost->getActiveCarry() key=k item=line}
+                            <label class="radio-inline"><input class="carry-type" type="radio" name="carry-name" value="{$k+1}" id="carry_{$k+1}">{$line}</label><br>
+                            {/foreach}
+                        </div>
+                    </div>
+                    <div class="col-lg-1" id="progress_img_carry_address" style="display: none"><img src="/img/loader.gif"></div>
+                    <div class="col-lg-9" id="carry_address_block">
+                        <select class="input-large" id="carry_address" name="carry-address">
+                        </select>
+                        <div class="">
+                            <div class="row">
+                                <table id="carry-address-description">
+                                    <tr>
+                                        <td>Адрес:</td>
+                                        <td id="address"></td>
+                                    </tr>
+                                    <tr>
+                                        <td>Время работы:</td>
+                                        <td id="work-schedule"></td>
+                                    </tr>
+                                    <tr>
+                                        <td></td>
+                                        <td id="path"></td>
+                                    </tr>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
             </div>
             <div class="col-lg-4">
                 <div class="row">
@@ -107,7 +135,9 @@
                     <div class="col-lg-4 progress-img" style="display: none"><img src="/img/loader.gif"></div>
                 </div>
             </div>
+            <input type="hidden" name="cgv" value="1"><!-- Соглашение на условия -->
         </div>
+
         <p class="cart_navigation clearfix">
             <input type="hidden" name="step" value="4" />
                     <a href="{$link->getPageLink('order', true, NULL, "step=4{if $multi_shipping}&multi-shipping={$multi_shipping}{/if}")|escape:'html':'UTF-8'}" title="{l s='Previous' mod='axiomuspostcarrier'}" class="button-exclusive btn btn-default">
@@ -127,48 +157,109 @@
     <script>
         $(document).ready(function () {
             $('#delivery_date').datepicker();
-//            $('.customTimePicker').timepicker({
-//                'step': 60,
-//                'timeFormat': 'H:i',
-//                'useSelect': 'true',
-////                'disableTimeRanges': [
-////                    ['0', '9'],
-////                    ['22', '24']
-////                ],
-//                'minTime': '10',
-//                'maxTime': '22',
-//                'showDuration': false
-//            });
-//
-//            $('#time_from').timepicker('setTime', new Date(0, 0, 0, 10, 0, 0, 0));
-//            $('#time_to').timepicker('setTime', new Date(0, 0, 0, 22, 0, 0, 0));
 
             var radioInputDelivery = $('#opt-delivery');
             radioInputDelivery.prop('checked', true);
+            $('#carry_address_block').hide();
 
-            {if $city=='mscw' or $city=='ptr'}
-                $("body").on("change", "input[type=radio]", function () {
-                    if(radioInputDelivery.prop('checked')){
-                        $('#rowDateTime').show();
-                    }else{
-                        $('#rowDateTime').hide();
+            carryarr = {
+            {foreach from=$AxiomusPost->getActiveCarry() key=k item=line}
+            {$k+1} : '{$line}',
+            {/foreach}
+            };
+
+            $('.carry-type').click(function () {
+                updateCarry();
+                updatePrice(1);
+            });
+
+//            $('.delivery-type').click(function () {
+//                updatePrice();
+//            });
+
+            $('.delivery-type').change(function () {
+                if(radioInputDelivery.prop('checked')){
+                    $('#rowDelivery').show();
+                    $('#rowCarry').hide();
+                }else{
+                    $('#rowDelivery').hide();
+                    $('#rowCarry').show();
+                }
+            });
+
+            $('#time_type').change(function () {
+                updatePrice(0);
+            });
+
+            $('#kad_type').change(function () {
+                updatePrice(0);
+            });
+
+            var jsonArray;
+
+            $('#carry_address').change(function () {
+                selectedcarryaddress = $('#carry_address option:selected').val();
+
+                console.log(selectedcarryaddress);
+                for (var i in jsonArray) {
+                    if(jsonArray[i].id == selectedcarryaddress){
+                        $('#address').text(jsonArray[i].address);
+                        $('#work-schedule').text(jsonArray[i].work_schedule);
+                        if (jsonArray[i].path != null) {
+                            $('#path').text(jsonArray[i].path);
+                        }else{
+                            $('#path').text('');
+                        }
                     }
-                });
-            {/if}
-
-            $('.radio-inline').click(function () {
-                updatePrice();
+                }
             });
 
-            $('select').change(function () {
-                updatePrice();
-            });
+//            $('select').change(function () {
+//                updatePrice();
+//            });
 //            $('input').change(function () {
 //                updatePrice();
 //            });
 
-            function updatePrice() {
-                carry = $("input[name=delivery-type]").val();
+            function updateCarry() {
+                carry = $('.carry-type:checked').val();
+                data = 'carry='+carry+'&city='+'{$city}';
+                $.ajax({
+                    type: 'POST',
+                    url: '/index.php?fc=module&module=axiomuspostcarrier&controller=getcarry',
+                    data: data,
+                    beforeSend: function () {
+                        $('#progress_img_carry_address').show();
+                        $('#carry_address_block').hide();
+                        console.log('get carry...');
+                    },
+                    success: function(data) {
+                        if (data!='false') {
+                            $('#progress_img_carry_address').hide();
+
+                            console.log('get carry... end.');
+
+                            jsonArray = JSON.parse(data);
+                            $('#carry_address').text('');
+                            for (var i in jsonArray) {
+                                $('#carry_address').append('<option value="' + jsonArray[i].id + '">' + jsonArray[i].address + '</option>');
+                            }
+                            $('#carry_address_block').show();
+
+                            $('#address').text(jsonArray[0].address);
+                            $('#work-schedule').text(jsonArray[0].work_schedule);
+                            if (jsonArray[0].path != null) {
+                                $('#path').text(jsonArray[0].path);
+                            }else{
+                                $('#path').text('');
+                            }
+                        }
+                    }
+                });
+            }
+
+            function updatePrice(carry) {
+
                 data = 'carry='+carry+'&city='+'{$city}&weight={$weight}&price={$productprice}';
                 if (carry=='0'){
                     kadtype = $("#kad_type").val();
@@ -177,9 +268,12 @@
 
                     data += '&kad='+kadtype+'&date='+deliveryDate;
                     data += '&time='+timetype;
-                    console.log(data);
+
                 }else{
                     //Для самовывоза
+                    carrytype = $('input[name=carry-name]:checked').val();
+                    console.log(carrytype);
+                    data += '&carrytype='+carrytype;
                 }
                 $.ajax({
                     type: 'POST',
@@ -193,7 +287,11 @@
                         $('.post-progress').show();
                         $('.progress-img').hide();
                         productPrice = {$productprice};
-                        $('#deliveryPrice').text(price+'р.');
+                        if(price==0){
+                            $('#deliveryPrice').text('бесплатно');
+                        }else{
+                            $('#deliveryPrice').text(price+'р.');
+                        }
                         $('#sumPrice').text((parseFloat(productPrice)+parseFloat(price)).toFixed(2)+'р.');
                     }
                 });

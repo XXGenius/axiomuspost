@@ -11,7 +11,7 @@ class AdminAxiomusConfigController extends ModuleAdminController
 
     public function __construct()
     {
-        Configuration::updateValue('RS_AXIOMUS_MSCW_AXIOMUS_PRICE', $this->getArrPrice('MSCW','AXIOMUS'));
+
         $this->settingsArray = $this->getSettingsArray(); //ToDo может в приват?
 
 //        $this->table = 'axiomus_config';
@@ -195,6 +195,9 @@ class AdminAxiomusConfigController extends ModuleAdminController
         ];
     }
 
+    /**
+     *
+     */
     public function postProcess()
     {
         //ToDo добавить проверку токена
@@ -326,34 +329,129 @@ class AdminAxiomusConfigController extends ModuleAdminController
                 Configuration::updateValue('RS_AXIOMUS_MSCW_AXIOMUS_INCREMENT', $_POST['mscw-axiomus-increment']);
             }
         }
+
+
+        //weightype
+        if (Tools::isSubmit('submitMscwAxiomusWeightType')) {
+            $this->maintab = 0;
+            $this->subtab = 0;
+            $this->AxiomusPost->insertWeightType($_POST['mscw-axiomus-weighttype-name'], $_POST['mscw-axiomus-weighttype-weightfrom'], $_POST['mscw-axiomus-weighttype-weightto']);
+        }
+        if (Tools::isSubmit('updateMscwAxiomusWeightType')) {
+            $this->maintab = 0;
+            $this->subtab = 0;
+            $this->AxiomusPost->updateWeightType($_POST['mscw-axiomus-weighttype-id'], $_POST['mscw-axiomus-weighttype-name'], $_POST['mscw-axiomus-weighttype-weightfrom'], $_POST['mscw-axiomus-weighttype-weightto']);
+        }
+        if (Tools::isSubmit('deleteMscwAxiomusWeightType')) {
+            $this->maintab = 0;
+            $this->subtab = 0;
+            $this->AxiomusPost->deleteWeightType((int)$_POST['mscw-axiomus-weighttype-id']);
+        }
+        //timetype
+        if (Tools::isSubmit('submitMscwAxiomusTimeType')) {
+            $this->maintab = 0;
+            $this->subtab = 0;
+            $this->AxiomusPost->insertTimeType($_POST['mscw-axiomus-timetype-name'], $_POST['mscw-axiomus-timetype-timefrom'], $_POST['mscw-axiomus-timetype-timeto']);
+        }
+        if (Tools::isSubmit('updateMscwAxiomusTimeType')) {
+            $this->maintab = 0;
+            $this->subtab = 0;
+            $this->AxiomusPost->updateTimeType($_POST['mscw-axiomus-timetype-id'], $_POST['mscw-axiomus-timetype-name'], $_POST['mscw-axiomus-timetype-timefrom'], $_POST['mscw-axiomus-timetype-timeto']);
+        }
+        if (Tools::isSubmit('deleteMscwAxiomusTimeType')) {
+            $this->maintab = 0;
+            $this->subtab = 0;
+            $this->AxiomusPost->deleteTimeType((int)$_POST['mscw-axiomus-timetype-id']);
+        }
+        //kadtype
+        if (Tools::isSubmit('submitMscwAxiomusKadType')) {
+            $this->maintab = 0;
+            $this->subtab = 1;
+            $this->AxiomusPost->insertKadType('Москва', $_POST['mscw-axiomus-kadtype-name'], $_POST['mscw-axiomus-kadtype-rangefrom'], $_POST['mscw-axiomus-kadtype-rangeto']);
+        }
+        if (Tools::isSubmit('updateMscwAxiomusKadType')) {
+            $this->maintab = 0;
+            $this->subtab = 1;
+            $this->AxiomusPost->updateKadType($_POST['mscw-axiomus-kadtype-id'], 'Москва', $_POST['mscw-axiomus-kadtype-name'], $_POST['mscw-axiomus-kadtype-rangefrom'], $_POST['mscw-axiomus-kadtype-rangeto']);
+        }
+        if (Tools::isSubmit('deleteMscwAxiomusKadType')) {
+            $this->maintab = 0;
+            $this->subtab = 1;
+            $this->AxiomusPost->deleteKadType((int)$_POST['mscw-axiomus-kadtype-id']);
+        }
+        //weightprice
         if (Tools::isSubmit('submitMscwAxiomusWeightPrice')) {
             $this->maintab = 0;
             $this->subtab = 1;
-
-            foreach ($this->AxiomusPost->priceTypes as $type) { //ToDo валидация POST
-                $this->AxiomusPost->setWeightPrice('mscw', 'axiomus', $type, $_POST['mscw-axiomus-price-'.$type]);
-            }
+            $this->AxiomusPost->insertWeightPrice('Москва', 'axiomus',$_POST['mscw-axiomus-weightprice-carry'], $_POST['mscw-axiomus-weightprice-type'], $_POST['mscw-axiomus-weightprice-sum']);
         }
+        if (Tools::isSubmit('updateMscwAxiomusWeightPrice')) {
+            $this->maintab = 0;
+            $this->subtab = 1;
+            $this->AxiomusPost->updateWeightPrice($_POST['mscw-axiomus-weightprice-id'], 'Москва', 'axiomus',$_POST['mscw-axiomus-weightprice-carry'], $_POST['mscw-axiomus-weightprice-type'], $_POST['mscw-axiomus-weightprice-sum']);
+        }
+        if (Tools::isSubmit('deleteMscwAxiomusWeightPrice')) {
+            $this->maintab = 0;
+            $this->subtab = 1;
+            $this->AxiomusPost->deleteConditionPrice((int)$_POST['mscw-axiomus-weightprice-id']);
+        }
+        //conditionprice
         if (Tools::isSubmit('submitMscwAxiomusConditionPrice')) {
             $this->maintab = 0;
             $this->subtab = 1;
-
-            $this->AxiomusPost->insertConditionPrice('mscw', 'axiomus', $_POST['mscw-axiomus-price-sumfrom'], $_POST['mscw-axiomus-price-sumto'], $_POST['mscw-axiomus-price-timefrom'], $_POST['mscw-axiomus-price-timeto'], $_POST['mscw-axiomus-price-kadfrom'], $_POST['mscw-axiomus-price-kadto'], $_POST['mscw-axiomus-price-sum']);
+            if(isset($_POST['mscw-axiomus-conditionprice-carry'])){
+                $carry = ($_POST['mscw-axiomus-conditionprice-carry']=='on')?true:false;
+            }else{
+                $carry = false;
+            }
+            $this->AxiomusPost->insertConditionPrice('Москва', 'axiomus', $carry, $_POST['mscw-axiomus-conditionprice-sumfrom'], $_POST['mscw-axiomus-conditionprice-sumto'], $_POST['mscw-axiomus-conditionprice-timetype'], $_POST['mscw-axiomus-conditionprice-kadtype'], $_POST['mscw-axiomus-conditionprice-sum']);
+        }
+        if (Tools::isSubmit('updateMscwAxiomusConditionPrice')) {
+            $this->maintab = 0;
+            $this->subtab = 1;
+            $this->AxiomusPost->updateConditionPrice($_POST['mscw-axiomus-conditionprice-id'], 'Москва', 'axiomus', ($_POST['mscw-axiomus-conditionprice-carry']=='on')?true:false, $_POST['mscw-axiomus-conditionprice-sumfrom'], $_POST['mscw-axiomus-conditionprice-sumto'], $_POST['mscw-axiomus-conditionprice-timetype'], $_POST['mscw-axiomus-conditionprice-kadtype'], $_POST['mscw-axiomus-conditionprice-sum']);
         }
         if (Tools::isSubmit('deleteMscwAxiomusConditionPrice')) {
             $this->maintab = 0;
             $this->subtab = 1;
-
-            $this->AxiomusPost->deleteConditionPrice((int)$_POST['mscw-axiomus-price-id']);
+            $this->AxiomusPost->deleteConditionPrice((int)$_POST['mscw-axiomus-conditionprice-id']);
+        }
+        //cachecarry
+        if (Tools::isSubmit('submitRefreshCacheCarryAddressesAxiomus')){
+            $this->maintab = 0;
+            $this->subtab = 1;
+            $this->AxiomusPost->refreshCarryAddressCacheAxiomus();
+        }
+        if (Tools::isSubmit('submitRefreshCacheCarryAddressesDPD')){
+            $this->maintab = 0;
+            $this->subtab = 1;
+            $this->AxiomusPost->refreshCarryAddressCacheDPD();
+        }
+        if (Tools::isSubmit('submitRefreshCacheCarryAddressesBoxBerry')){
+            $this->maintab = 0;
+            $this->subtab = 1;
+            $this->AxiomusPost->refreshCarryAddressCacheBoxBerry();
+        }
+        //carry
+        if (Tools::isSubmit('submitMscwAxiomusCarryPrice')){
+            $this->maintab = 0;
+            $this->subtab = 6;
+            $this->AxiomusPost->setCarryPrice('Москва', 'axiomus', (int)$_POST['mscw-carry-axiomus-price']);
+        }
+        if (Tools::isSubmit('submitMscwDPDPrice')){
+            $this->maintab = 0;
+            $this->subtab = 7;
+            $this->AxiomusPost->setCarryPrice('Москва', 'dpd', (int)$_POST['mscw-carry-dpd-price']);
+        }
+        if (Tools::isSubmit('submitMscwBoxBerryPrice')){
+            $this->maintab = 0;
+            $this->subtab = 8;
+            $this->AxiomusPost->setCarryPrice('Москва', 'boxberry', (int)$_POST['mscw-carry-boxberry-price']);
         }
 
-        parent::postProcess();
-    }
 
-    public function getArrPrice($city, $delivery){
-        //ToDo Запрос к бд
-        $arr = [0 => '00', 1=>'11',3=>'33', 5=>'55',10=>'1010',15=>'1515',25=>2525];
-        return $arr;
+
+        parent::postProcess();
     }
 
     public function processSave()

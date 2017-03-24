@@ -239,39 +239,44 @@ class axiomuspostcarrier extends CarrierModule
     {
 
         $idCarrier = $this->installCarrier('Axiomus', 'DELIVERY');
-        $this->installOrderStatus();
-        $res = false;
 
         // Не удалось создать
         if (!$idCarrier) {
             return false;
         }
 
-        if (!$this->AxiomusPost->createTables()) {
-            $this->uninstallAllCarrier();
+        if (!$this->installOrderStatus() || !$this->AxiomusPost->createTables() || !$this->AxiomusPost->insertStartValueDb()) {
+            $this->uninstall();
             return false;
         }
 
-        if (!$this->AxiomusPost->insertStartTimeType()) {
-            $this->uninstallAllCarrier();
-            return false;
-        }
+        $this->AxiomusPost->refreshCarryAddressCacheAxiomus();
+        $this->AxiomusPost->refreshCarryAddressCacheDPD();
+        $this->AxiomusPost->refreshCarryAddressCacheBoxBerry();
 
-        if (!$this->AxiomusPost->insertStartWeightType()) {
-            $this->uninstallAllCarrier();
-            return false;
-        }
+// Здесь мы создаем пункт вехнего подменю.
+        $idTab = Tab::getIdFromClassName('AdminAxiomusSend');
+        if (!$idTab) {
+            $tab = new Tab();
+            $tab->class_name = 'AdminAxiomusSend';
+            $tab->module = 'axiomuspostcarrier';
+            $tab->id_parent = Tab::getIdFromClassName('AdminParentShipping');
 
-        if (!$this->AxiomusPost->insertStartWeightPrice()) {
-            $this->uninstallAllCarrier();
-            return false;
-        }
+            $tab->active = false;
+            $languages = Language::getLanguages(false);
+            foreach ($languages as $lang) {
+                $tab->name[$lang['id_lang']] = 'Axiomus Send';
+            }
 
-        if (!$this->AxiomusPost->insertStartConditionPrice()) {
-            $this->uninstallAllCarrier();
-            return false;
+            $res = $tab->save();
+            // Если что-то пошло не так, удалим перевозчика и закруглимся
+            if (!$res) {
+                $this->uninstallAllCarrier();
+                return false;
+            }
+        } else {
+            $tab = new Tab($idTab);
         }
-
         // Здесь мы создаем пункт вехнего подменю.
         $idTab = Tab::getIdFromClassName('AdminAxiomusConfig');
         if (!$idTab) {
@@ -321,15 +326,7 @@ class axiomuspostcarrier extends CarrierModule
         Configuration::updateValue('RS_AXIOMUS_ORDER_TAB_ID', $tab->id);
 
 
-        // Если родительский метод не срабатывает, то все удаляем,
-        // и самоустраняемся
-        if (!parent::install()) {
-            parent::uninstall();
-            $this->uninstallTab($tab->id);
-            $this->uninstallAllCarrier();
-            $this->AxiomusPost->dropTables();
-            return false;
-        }
+
 
         $this->registerHook('displayBeforeCarrier');
         $this->registerHook('displayCarrierList');
@@ -338,6 +335,9 @@ class axiomuspostcarrier extends CarrierModule
         $this->registerHook('actionCarrierUpdate');
         $this->registerHook('actionValidateOrder');
         $this->registerHook('actionOrderStatusPostUpdate');
+
+        $this->registerHook('displayAdminOrderTabShip');
+        $this->registerHook('displayAdminOrderContentShip');
 
 
         Configuration::updateValue('RS_AXIOMUS_ID_AXIOMUS_DELIVERY', (int)$idCarrier);
@@ -356,6 +356,16 @@ class axiomuspostcarrier extends CarrierModule
         Configuration::updateValue('RS_AXIOMUS_USE_BOXBERRY_CARRY', null);
         Configuration::updateValue('RS_AXIOMUS_USE_RUSSIANPOST_CARRY', null);
 
+        // Если родительский метод не срабатывает, то все удаляем,
+        // и самоустраняемся
+        if (!parent::install()) {
+            parent::uninstall();
+            $this->uninstallTab($tab->id);
+            $this->uninstallAllCarrier();
+            $this->AxiomusPost->dropTables();
+            return false;
+        }
+
         return true;
     }
 
@@ -370,6 +380,9 @@ class axiomuspostcarrier extends CarrierModule
         $this->unregisterHook('displayBeforeCarrier');
         $this->unregisterHook('displayCarrierList');
         $this->unregisterHook('actionCarrierProcess');
+
+        $this->unregisterHook('displayAdminOrderTabShip');
+        $this->unregisterHook('displayAdminOrderContentShip');
 
         $res = $this->uninstallTab();
         $res = $this->uninstallAllCarrier();
@@ -399,6 +412,34 @@ class axiomuspostcarrier extends CarrierModule
         return true;
     }
 
+    public function hookDisplayAdminOrderTabShip($params = null){
+
+
+
+//        $this->context->smarty->assign('mapregions', $mapRegions);
+
+        return $this->display('axiomuspostcarrier', 'views/templates/admin/tabship.tpl');
+    }
+
+    public function hookDisplayAdminOrderContentShip($params = null){
+        if(!empty($params['order']->shipping_number)){
+            $axiomusSucces = true;
+            $axiomusSuccesCode = (int)$params['order']->shipping_number;
+        }else{
+            $axiomusSucces = false;
+            $axiomusSuccesCode = '';
+        }
+
+        $link = $this->context->link->getAdminLink('AdminAxiomusSend');
+        $this->context->smarty->assign('axiomus_succes', $axiomusSucces);
+        $this->context->smarty->assign('axiomus_succes_code', $axiomusSuccesCode);
+        $this->context->smarty->assign('order_id', $params['order']->id);
+        $this->context->smarty->assign('cart_id', $params['cart']->id);
+        $this->context->smarty->assign('_axiomus_module_path', _PS_MODULE_DIR_.$this->name);
+        $this->context->smarty->assign('_axiomus_sendto_link', $link);
+        return $this->display('axiomuspostcarrier', 'views/templates/admin/contentship.tpl');
+
+    }
 //    public function hookActionOrderStatusPostUpdate($params)
 //    {
 //        $this->AxiomusPost->insertRowOrder($params['id_order'], $params['cart']->id, $params['newOrderStatus']->id);
@@ -425,8 +466,9 @@ class axiomuspostcarrier extends CarrierModule
      * @param $params
      */
     public function hookDisplayBeforeCarrier($params){
-        $this->smarty->assign(array(
-            'this_path' => $this->_path, //ToDo надо ли это
+
+        $this->smarty->assign(array(//ToDo надо ли это
+            'this_path' => $this->_path,
             'this_path_bw' => $this->_path,
             'this_path_ssl' => Tools::getShopDomainSsl(true, true).__PS_BASE_URI__.'modules/'.$this->name.'/'
         ));
@@ -1031,6 +1073,11 @@ class axiomuspostcarrier extends CarrierModule
             $res = $tab->delete();
         }
         $idTab = Tab::getIdFromClassName('AdminAxiomusOrder');
+        if ($idTab) {
+            $tab = new Tab($idTab);
+            $res = $tab->delete();
+        }
+        $idTab = Tab::getIdFromClassName('AdminAxiomusSend');
         if ($idTab) {
             $tab = new Tab($idTab);
             $res = $tab->delete();

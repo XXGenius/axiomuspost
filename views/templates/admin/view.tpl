@@ -38,626 +38,766 @@
                         {l s='Настройки'} <span class="badge"></span>
                     </a>
                 </li>
-                {if $use_mscw_axiomus}
-                    <li {if $subtab == 1}class="active"{/if}>
-                        <a href="#mscw-axiomus">
-                            {l s='Axiomus'} <span class="badge"></span>
-                        </a>
-                    </li>
-                {/if}
-                {if $use_mscw_topdelivery}
-                    <li {if $subtab == 2}class="active"{/if}>
-                        <a href="#mscw-topdelivery">
-                            {l s='TopDelivery'}
-                        </a>
-                    </li>
-                {/if}
-                {if $use_mscw_dpd}
-                    <li {if $subtab == 3}class="active"{/if}>
-                        <a href="#mscw-dpd">
-                            {l s='DPD'}
-                        </a>
-                    </li>
-                {/if}
-                {if $use_mscw_boxberry}
-                    <li {if $subtab == 4}class="active"{/if}>
-                        <a href="#mscw-boxberry">
-                            {l s='BoxBerry'}
-                        </a>
-                    </li>
-                {/if}
-                {if $use_mscw_axiomus_carry}
-                    <li {if $subtab == 5}class="active"{/if}>
-                        <a href="#mscw-axiomus-carry">
-                            {l s='axiomus(самовывоз)'}
-                        </a>
-                    </li>
-                {/if}
-                {if $use_mscw_topdelivery_carry}
-                    <li {if $subtab == 6}class="active"{/if}>
-                        <a href="#mscw-topdelivery-carry">
-                            {l s='TopDelivery(самовывоз)'}
-                        </a>
-                    </li>
-                {/if}
-                {if $use_mscw_dpd_carry}
-                    <li {if $subtab == 7}class="active"{/if}>
-                        <a href="#mscw-dpd-carry">
-                            {l s='DPD(самовывоз)'}
-                        </a>
-                    </li>
-                {/if}
-                {if $use_mscw_boxberry_carry}
-                    <li {if $subtab == 8}class="active"{/if}>
-                        <a href="#mscw-boxberry-carry">
-                            {l s='BoxBerry(самовывоз)'}
-                        </a>
-                    </li>
-                {/if}
-                {if $use_mscw_russianpost_carry}
-                    <li {if $subtab == 9}class="active"{/if}>
-                        <a href="#mscw-russianpost-carry">
-                            {l s='RussianPost(самовывоp)'}
-                        </a>
-                    </li>
-                {/if}
+
+                <li {if $subtab == 1}class="active"{/if}>
+                    <a href="#mscw-weighttype">
+                        {l s='Интервалы веса'} <span class="badge"></span>
+                    </a>
+                </li>
+
+
+                <li {if $subtab == 2}class="active"{/if}>
+                    <a href="#mscw-timetype">
+                        {l s='Временные интервалы'}
+                    </a>
+                </li>
+
+
+                <li {if $subtab == 3}class="active"{/if}>
+                    <a href="#mscw-kadtype">
+                        {l s='МКАД'}
+                    </a>
+                </li>
+
+
+                <li {if $subtab == 4}class="active"{/if}>
+                    <a href="#mscw-weightprice">
+                        {l s='Прайс по весу'}
+                    </a>
+                </li>
+
+                <li {if $subtab == 5}class="active"{/if}>
+                    <a href="#mscw-conditionprice">
+                        {l s='Надбавка по условию'}
+                    </a>
+                </li>
+
+                <li {if $subtab == 6}class="active"{/if}>
+                    <a href="#mscw-carry-axiomus">
+                        {l s='Самовывоз Axiomus'}
+                    </a>
+                </li>
+
+                <li {if $subtab == 7}class="active"{/if}>
+                    <a href="#mscw-carry-dpd">
+                        {l s='Самовывоз DPD'}
+                    </a>
+                </li>
+
+                <li {if $subtab == 8}class="active"{/if}>
+                    <a href="#mscw-carry-boxberry">
+                        {l s='Самовывоз BoxBerry'}
+                    </a>
+                </li>
+                    {*<li {if $subtab == 6}class="active"{/if}>*}
+                        {*<a href="#mscw-topdelivery-carry">*}
+                            {*{l s='TopDelivery(самовывоз)'}*}
+                        {*</a>*}
+                    {*</li>*}
+               {**}
+                    {*<li {if $subtab == 7}class="active"{/if}>*}
+                        {*<a href="#mscw-dpd-carry">*}
+                            {*{l s='DPD(самовывоз)'}*}
+                        {*</a>*}
+                    {*</li>*}
+            {**}
+                    {*<li {if $subtab == 8}class="active"{/if}>*}
+                        {*<a href="#mscw-boxberry-carry">*}
+                            {*{l s='BoxBerry(самовывоз)'}*}
+                        {*</a>*}
+                    {*</li>*}
+                {**}
+                    {*<li {if $subtab == 9}class="active"{/if}>*}
+                        {*<a href="#mscw-russianpost-carry">*}
+                            {*{l s='RussianPost(самовывоp)'}*}
+                        {*</a>*}
+                    {*</li>*}
             </ul>
             <!-- Tab Moscow content -->
             <div class="tab-content panel">
-
                 <!-- Tab mscw-setting -->
                 <div class="tab-pane {if $subtab == 0}active{/if}" id="mscw-settings">
-                    <div class="row">
-                        <div class="panel">
-                            <div class="panel-heading">
-                                <i class="icon-money"></i>
-                                Создание доставки
-                            </div>
-                            <form action="{$smarty.server.REQUEST_URI|escape:'html':'UTF-8'}&amp;" method="post"">
-                                <div id="mscw-setting-form" class="form-horizontal">
-                                    <div class="form-group">
-                                        <div class="col-lg-12 alert alert-info">
-                                            <strong>Внимание!</strong> При изменении параметров идущих ниже будет <strong>создан/удален</strong> соответствующий перевозчик
-                                        </div>
-                                    </div>
-                                    <!-- Доставки -->
-                                    <div class="form-group">
-                                        <label class="control-label col-lg-3">{l s='Использовать доставку Axiomus'}</label>
-                                         <div class="col-lg-1">
-                                            <span class="switch prestashop-switch fixed-width-lg">
-                                                <input type="radio" name="use-mscw-axiomus" id="use-mscw-axiomus-on" value="1" {if $use_mscw_axiomus} checked="checked"{/if}>
-                                                <label for="use-mscw-axiomus-on">{l s='Да'}</label>
-                                                <input type="radio" name="use-mscw-axiomus" id="use-mscw-axiomus-off" value="0" {if !$use_mscw_axiomus} checked="checked"{/if} />
-                                                <label for="use-mscw-axiomus-off">{l s='Нет'}</label>
-                                                <a class="slide-button btn"></a>
-                                            </span>
-                                        </div>
-                                    </div>
-                                    <div class="form-group">
-                                        <label class="control-label col-lg-3">{l s='Использовать доставку TopDelivery'}</label>
-                                        <div class="col-lg-1">
-                                            <span class="switch prestashop-switch fixed-width-lg">
-                                                <input type="radio" name="use-mscw-topdelivery" id="use-mscw-topdelivery-on" value="1" {if $use_mscw_topdelivery} checked="checked"{/if}>
-                                                <label for="use-mscw-topdelivery-on">{l s='Да'}</label>
-                                                <input type="radio" name="use-mscw-topdelivery" id="use-mscw-topdelivery-off" value="0" {if !$use_mscw_topdelivery} checked="checked"{/if}/>
-                                                <label for="use-mscw-topdelivery-off">{l s='Нет'}</label>
-                                                <a class="slide-button btn"></a>
-                                            </span>
-                                        </div>
-                                    </div>
-                                    <div class="form-group">
-                                        <label class="control-label col-lg-3">{l s='Использовать доставку DPD'}</label>
-                                        <div class="col-lg-1">
-                                            <span class="switch prestashop-switch fixed-width-lg">
-                                                <input type="radio" name="use-mscw-dpd" id="use-mscw-dpd-on" value="1" {if $use_mscw_dpd} checked="checked"{/if}>
-                                                <label for="use-mscw-dpd-on">{l s='Да'}</label>
-                                                <input type="radio" name="use-mscw-dpd" id="use-mscw-dpd-off" value="0" {if !$use_mscw_dpd} checked="checked"{/if}/>
-                                                <label for="use-mscw-dpd-off">{l s='Нет'}</label>
-                                                <a class="slide-button btn"></a>
-                                            </span>
-                                        </div>
-                                    </div>
-                                    <div class="form-group">
-                                        <label class="control-label col-lg-3">{l s='Использовать доставку Boxberry'}</label>
-                                        <div class="col-lg-1">
-                                            <span class="switch prestashop-switch fixed-width-lg">
-                                                <input type="radio" name="use-mscw-boxberry" id="use-mscw-boxberry-on" value="1" {if $use_mscw_boxberry} checked="checked"{/if}>
-                                                <label for="use-mscw-boxberry-on">{l s='Да'}</label>
-                                                <input type="radio" name="use-mscw-boxberry" id="use-mscw-boxberry-off" value="0" {if !$use_mscw_boxberry} checked="checked"{/if} />
-                                                <label for="use-mscw-boxberry-off">{l s='Нет'}</label>
-                                                <a class="slide-button btn"></a>
-                                            </span>
-                                        </div>
-                                    </div>
-                                    <hr>
-                                    <!-- Самовывоз -->
-                                    <div class="form-group">
-                                        <label class="control-label col-lg-3">{l s='Использовать самовывоз Axiomus'}</label>
-                                        <div class="col-lg-1">
-                                            <span class="switch prestashop-switch fixed-width-lg">
-                                                <input type="radio" name="use-mscw-axiomus-carry" id="use-mscw-axiomus-carry-on" value="1" {if $use_mscw_axiomus_carry} checked="checked"{/if}>
-                                                <label for="use-mscw-axiomus-carry-on">{l s='Да'}</label>
-                                                <input type="radio" name="use-mscw-axiomus-carry" id="use-mscw-axiomus-carry-off" value="0" {if !$use_mscw_axiomus_carry} checked="checked"{/if} />
-                                                <label for="use-mscw-axiomus-carry-off">{l s='Нет'}</label>
-                                                <a class="slide-button btn"></a>
-                                            </span>
-                                        </div>
-                                    </div>
-                                    <div class="form-group">
-                                        <label class="control-label col-lg-3">{l s='Использовать самовывоз TopDelivery'}</label>
-                                        <div class="col-lg-1">
-                                            <span class="switch prestashop-switch fixed-width-lg">
-                                                <input type="radio" name="use-mscw-topdelivery-carry" id="use-mscw-topdelivery-carry-on" value="1" {if $use_mscw_topdelivery_carry} checked="checked"{/if}>
-                                                <label for="use-mscw-topdelivery-carry-on">{l s='Да'}</label>
-                                                <input type="radio" name="use-mscw-topdelivery-carry" id="use-mscw-topdelivery-carry-off" value="0" {if !$use_mscw_topdelivery_carry} checked="checked"{/if} />
-                                                <label for="use-mscw-topdelivery-carry-off">{l s='Нет'}</label>
-                                                <a class="slide-button btn"></a>
-                                            </span>
-                                        </div>
-                                    </div>
-                                    <div class="form-group">
-                                        <label class="control-label col-lg-3">{l s='Использовать самовывоз DPD'}</label>
-                                        <div class="col-lg-1">
-                                            <span class="switch prestashop-switch fixed-width-lg">
-                                                <input type="radio" name="use-mscw-dpd-carry" id="use-mscw-dpd-carry-on" value="1" {if $use_mscw_dpd_carry} checked="checked"{/if}>
-                                                <label for="use-mscw-dpd-carry-on">{l s='Да'}</label>
-                                                <input type="radio" name="use-mscw-dpd-carry" id="use-mscw-dpd-carry-off" value="0" {if !$use_mscw_dpd_carry} checked="checked"{/if} />
-                                                <label for="use-mscw-dpd-carry-off">{l s='Нет'}</label>
-                                                <a class="slide-button btn"></a>
-                                            </span>
-                                        </div>
-                                    </div>
-                                    <div class="form-group">
-                                        <label class="control-label col-lg-3">{l s='Использовать самовывоз Boxberry'}</label>
-                                        <div class="col-lg-1">
-                                            <span class="switch prestashop-switch fixed-width-lg">
-                                                <input type="radio" name="use-mscw-boxberry-carry" id="use-mscw-boxberry-carry-on" value="1" {if $use_mscw_boxberry_carry} checked="checked"{/if}>
-                                                <label for="use-mscw-boxberry-carry-on">{l s='Да'}</label>
-                                                <input type="radio" name="use-mscw-boxberry-carry" id="use-mscw-boxberry-carry-off" value="0" {if !$use_mscw_boxberry_carry} checked="checked"{/if} />
-                                                <label for="use-mscw-boxberry-carry-off">{l s='Нет'}</label>
-                                                <a class="slide-button btn"></a>
-                                            </span>
-                                        </div>
-                                    </div>
-                                    <div class="form-group">
-                                        <label class="control-label col-lg-3">{l s='Использовать самовывоз RussianPost'}</label>
-                                        <div class="col-lg-1">
-                                            <span class="switch prestashop-switch fixed-width-lg">
-                                                <input type="radio" name="use-mscw-russianpost-carry" id="use-mscw-russianpost-carry-on" value="1" {if $use_mscw_russianpost_carry} checked="checked"{/if}>
-                                                <label for="use-mscw-russianpost-carry-on">{l s='Да'}</label>
-                                                <input type="radio" name="use-mscw-russianpost-carry" id="use-mscw-russianpost-carry-off" value="0" {if !$use_mscw_russianpost_carry} checked="checked"{/if}" />
-                                                <label for="use-mscw-russianpost-carry-off">{l s='Нет'}</label>
-                                                <a class="slide-button btn"></a>
-                                            </span>
-                                        </div>
-                                    </div>
-                                    <br>
-                                    <div class="row">
-                                        <div class="col-lg-5">
-                                            <button type="submit" id="submitUseDelivery" class="btn btn-primary pull-right" name="submitUseDelivery">
-                                                {l s='Сохранить'}
-                                            </button>
-                                        </div>
-                                    </div>
 
-                                </div>
-                            </form>
-                        </div>
-                    </div>
                     <div class="row">
-                        <div class="col-lg-6"><!-- WeightType -->
+                        <div class="col-lg-6">
                             <div class="panel">
                                 <div class="panel-heading">
                                     <i class="icon-money"></i>
-                                    Виды веса
+                                    Создание доставки
                                 </div>
-                                <div class="table-responsive">
-                                    <table class="table">
-                                        <thead>
-                                        <tr>
-                                            <th><span class="title_box ">id</span></th>
-                                            <th><span class="title_box ">Имя</span></th>
-                                            <th><span class="title_box ">Вес от(кг.)</span></th>
-                                            <th><span class="title_box ">Вес до(кг.)</span></th>
-                                            <th></th>
-                                        </tr>
-                                        </thead>
-                                        <tfoot>
-                                        <form action="{$smarty.server.REQUEST_URI|escape:'html':'UTF-8'}&amp;" method="post"">
-
-                                        <tr class="current-edit">
-                                            <td></td>
-                                            <td>
-                                                <input type=text name="mscw-axiomus-weighttype-name" class="form-control">
-                                            </td>
-                                            <td>
-                                                <input type=text name="mscw-axiomus-weighttype-weightfrom" class="form-control">
-                                            </td>
-                                            <td>
-                                                <input type=text name="mscw-axiomus-weighttype-weightfrom" class="form-control">
-                                            </td>
-                                            <td>
-                                                <button type="submit" id="submitMscwAxiomusWeightType" class="btn btn-primary pull-right" name="submitMscwAxiomusWeightType">
-                                                    {l s='Добавить'}
+                                <form action="{$smarty.server.REQUEST_URI|escape:'html':'UTF-8'}&amp;" method="post"">
+                                    <div id="mscw-setting-form" class="form-horizontal">
+                                        <div class="form-group">
+                                            <div class="col-lg-12 alert alert-info">
+                                                <strong>Внимание!</strong> При изменении параметров идущих ниже будет <strong>создан/удален</strong> соответствующий перевозчик
+                                            </div>
+                                        </div>
+                                        <!-- Доставки -->
+                                        <div class="form-group">
+                                            <label class="control-label col-lg-3">{l s='Использовать доставку Axiomus'}</label>
+                                             <div class="col-lg-1">
+                                                <span class="switch prestashop-switch fixed-width-lg">
+                                                    <input type="radio" name="use-mscw-axiomus" id="use-mscw-axiomus-on" value="1" {if $use_mscw_axiomus} checked="checked"{/if}>
+                                                    <label for="use-mscw-axiomus-on">{l s='Да'}</label>
+                                                    <input type="radio" name="use-mscw-axiomus" id="use-mscw-axiomus-off" value="0" {if !$use_mscw_axiomus} checked="checked"{/if} />
+                                                    <label for="use-mscw-axiomus-off">{l s='Нет'}</label>
+                                                    <a class="slide-button btn"></a>
+                                                </span>
+                                            </div>
+                                        </div>
+                                        <div class="form-group">
+                                            <label class="control-label col-lg-3">{l s='Использовать доставку TopDelivery'}</label>
+                                            <div class="col-lg-1">
+                                                <span class="switch prestashop-switch fixed-width-lg">
+                                                    <input type="radio" name="use-mscw-topdelivery" id="use-mscw-topdelivery-on" value="1" {if $use_mscw_topdelivery} checked="checked"{/if}>
+                                                    <label for="use-mscw-topdelivery-on">{l s='Да'}</label>
+                                                    <input type="radio" name="use-mscw-topdelivery" id="use-mscw-topdelivery-off" value="0" {if !$use_mscw_topdelivery} checked="checked"{/if}/>
+                                                    <label for="use-mscw-topdelivery-off">{l s='Нет'}</label>
+                                                    <a class="slide-button btn"></a>
+                                                </span>
+                                            </div>
+                                        </div>
+                                        <div class="form-group">
+                                            <label class="control-label col-lg-3">{l s='Использовать доставку DPD'}</label>
+                                            <div class="col-lg-1">
+                                                <span class="switch prestashop-switch fixed-width-lg">
+                                                    <input type="radio" name="use-mscw-dpd" id="use-mscw-dpd-on" value="1" {if $use_mscw_dpd} checked="checked"{/if}>
+                                                    <label for="use-mscw-dpd-on">{l s='Да'}</label>
+                                                    <input type="radio" name="use-mscw-dpd" id="use-mscw-dpd-off" value="0" {if !$use_mscw_dpd} checked="checked"{/if}/>
+                                                    <label for="use-mscw-dpd-off">{l s='Нет'}</label>
+                                                    <a class="slide-button btn"></a>
+                                                </span>
+                                            </div>
+                                        </div>
+                                        <div class="form-group">
+                                            <label class="control-label col-lg-3">{l s='Использовать доставку Boxberry'}</label>
+                                            <div class="col-lg-1">
+                                                <span class="switch prestashop-switch fixed-width-lg">
+                                                    <input type="radio" name="use-mscw-boxberry" id="use-mscw-boxberry-on" value="1" {if $use_mscw_boxberry} checked="checked"{/if}>
+                                                    <label for="use-mscw-boxberry-on">{l s='Да'}</label>
+                                                    <input type="radio" name="use-mscw-boxberry" id="use-mscw-boxberry-off" value="0" {if !$use_mscw_boxberry} checked="checked"{/if} />
+                                                    <label for="use-mscw-boxberry-off">{l s='Нет'}</label>
+                                                    <a class="slide-button btn"></a>
+                                                </span>
+                                            </div>
+                                        </div>
+                                        <hr>
+                                        <!-- Самовывоз -->
+                                        <div class="form-group">
+                                            <label class="control-label col-lg-3">{l s='Использовать самовывоз Axiomus'}</label>
+                                            <div class="col-lg-1">
+                                                <span class="switch prestashop-switch fixed-width-lg">
+                                                    <input type="radio" name="use-mscw-axiomus-carry" id="use-mscw-axiomus-carry-on" value="1" {if $use_mscw_axiomus_carry} checked="checked"{/if}>
+                                                    <label for="use-mscw-axiomus-carry-on">{l s='Да'}</label>
+                                                    <input type="radio" name="use-mscw-axiomus-carry" id="use-mscw-axiomus-carry-off" value="0" {if !$use_mscw_axiomus_carry} checked="checked"{/if} />
+                                                    <label for="use-mscw-axiomus-carry-off">{l s='Нет'}</label>
+                                                    <a class="slide-button btn"></a>
+                                                </span>
+                                            </div>
+                                        </div>
+                                        <div class="form-group">
+                                            <label class="control-label col-lg-3">{l s='Использовать самовывоз TopDelivery'}</label>
+                                            <div class="col-lg-1">
+                                                <span class="switch prestashop-switch fixed-width-lg">
+                                                    <input type="radio" name="use-mscw-topdelivery-carry" id="use-mscw-topdelivery-carry-on" value="1" {if $use_mscw_topdelivery_carry} checked="checked"{/if}>
+                                                    <label for="use-mscw-topdelivery-carry-on">{l s='Да'}</label>
+                                                    <input type="radio" name="use-mscw-topdelivery-carry" id="use-mscw-topdelivery-carry-off" value="0" {if !$use_mscw_topdelivery_carry} checked="checked"{/if} />
+                                                    <label for="use-mscw-topdelivery-carry-off">{l s='Нет'}</label>
+                                                    <a class="slide-button btn"></a>
+                                                </span>
+                                            </div>
+                                        </div>
+                                        <div class="form-group">
+                                            <label class="control-label col-lg-3">{l s='Использовать самовывоз DPD'}</label>
+                                            <div class="col-lg-1">
+                                                <span class="switch prestashop-switch fixed-width-lg">
+                                                    <input type="radio" name="use-mscw-dpd-carry" id="use-mscw-dpd-carry-on" value="1" {if $use_mscw_dpd_carry} checked="checked"{/if}>
+                                                    <label for="use-mscw-dpd-carry-on">{l s='Да'}</label>
+                                                    <input type="radio" name="use-mscw-dpd-carry" id="use-mscw-dpd-carry-off" value="0" {if !$use_mscw_dpd_carry} checked="checked"{/if} />
+                                                    <label for="use-mscw-dpd-carry-off">{l s='Нет'}</label>
+                                                    <a class="slide-button btn"></a>
+                                                </span>
+                                            </div>
+                                        </div>
+                                        <div class="form-group">
+                                            <label class="control-label col-lg-3">{l s='Использовать самовывоз Boxberry'}</label>
+                                            <div class="col-lg-1">
+                                                <span class="switch prestashop-switch fixed-width-lg">
+                                                    <input type="radio" name="use-mscw-boxberry-carry" id="use-mscw-boxberry-carry-on" value="1" {if $use_mscw_boxberry_carry} checked="checked"{/if}>
+                                                    <label for="use-mscw-boxberry-carry-on">{l s='Да'}</label>
+                                                    <input type="radio" name="use-mscw-boxberry-carry" id="use-mscw-boxberry-carry-off" value="0" {if !$use_mscw_boxberry_carry} checked="checked"{/if} />
+                                                    <label for="use-mscw-boxberry-carry-off">{l s='Нет'}</label>
+                                                    <a class="slide-button btn"></a>
+                                                </span>
+                                            </div>
+                                        </div>
+                                        <div class="form-group">
+                                            <label class="control-label col-lg-3">{l s='Использовать самовывоз RussianPost'}</label>
+                                            <div class="col-lg-1">
+                                                <span class="switch prestashop-switch fixed-width-lg">
+                                                    <input type="radio" name="use-mscw-russianpost-carry" id="use-mscw-russianpost-carry-on" value="1" {if $use_mscw_russianpost_carry} checked="checked"{/if}>
+                                                    <label for="use-mscw-russianpost-carry-on">{l s='Да'}</label>
+                                                    <input type="radio" name="use-mscw-russianpost-carry" id="use-mscw-russianpost-carry-off" value="0" {if !$use_mscw_russianpost_carry} checked="checked"{/if}" />
+                                                    <label for="use-mscw-russianpost-carry-off">{l s='Нет'}</label>
+                                                    <a class="slide-button btn"></a>
+                                                </span>
+                                            </div>
+                                        </div>
+                                        <br>
+                                        <div class="row">
+                                            <div class="col-lg-5">
+                                                <button type="submit" id="submitUseDelivery" class="btn btn-primary pull-right" name="submitUseDelivery">
+                                                    {l s='Сохранить'}
                                                 </button>
-                                            </td>
-                                        </tr>
-
-                                        </form>
-                                        </tfoot>
-                                        <tbody>
-                                        {foreach from=$AxiomusPost->getAllWeightType() item=line}
-                                            <tr>
-                                                <form action="{$smarty.server.REQUEST_URI|escape:'html':'UTF-8'}&amp;" method="post"">
-                                                <input type="hidden" name="mscw-axiomus-price-id" value="{$line.id}">
-                                                <td>{$line.id}</td>
-                                                <td>{$line.name}</td>
-                                                <td>{$line.weightfrom}</td>
-                                                <td>{$line.weightto}</td>
-                                                <td>
-                                                    <button type="submit" id="deleteMscwAxiomusWeightType" class="btn btn-danger pull-right" name="deleteMscwAxiomusConditionPrice">
-                                                        {l s='Удалить'}
-                                                    </button>
-                                                </td>
-                                                </form>
-                                            </tr>
-                                        {/foreach}
-
-                                        </tbody>
-                                    </table>
-                                </div>
-
+                                            </div>
+                                        </div>
+                                    </div>
+                                </form>
                             </div>
                         </div>
                         <div class="col-lg-6">
                             <div class="panel">
                                 <div class="panel-heading">
                                     <i class="icon-money"></i>
-                                    Виды веса
+                                    Кэш записей о самовывозе
                                 </div>
-                                <div class="table-responsive">
-                                    <table class="table">
-                                        <thead>
-                                        <tr>
-                                            <th><span class="title_box ">id</span></th>
-                                            <th><span class="title_box ">Имя</span></th>
-                                            <th></th>
-                                        </tr>
-                                        </thead>
-                                        <tfoot>
-                                        <form action="{$smarty.server.REQUEST_URI|escape:'html':'UTF-8'}&amp;" method="post"">
-
-                                        <tr class="current-edit">
-                                            <td></td>
-                                            <td>
-                                                <input type=text name="mscw-axiomus-weighttype-name" class="form-control">
-                                            </td>
-                                            <td>
-                                                <button type="submit" id="submitMscwAxiomusTimeType" class="btn btn-primary pull-right" name="submitMscwAxiomusWeightType">
-                                                    {l s='Добавить'}
-                                                </button>
-                                            </td>
-                                        </tr>
-
-                                        </form>
-                                        </tfoot>
-                                        <tbody>
-                                        {foreach from=$AxiomusPost->getAllTimeType() item=line}
-                                            <tr>
-                                                <form action="{$smarty.server.REQUEST_URI|escape:'html':'UTF-8'}&amp;" method="post"">
-                                                <input type="hidden" name="mscw-axiomus-price-id" value="{$line.id}">
-                                                <td>{$line.id}</td>
-                                                <td>{$line.name}</td>
-                                                <td>
-                                                    <button type="submit" id="deleteMscwAxiomusTimeType" class="btn btn-danger pull-right" name="deleteMscwAxiomusConditionPrice">
-                                                        {l s='Удалить'}
-                                                    </button>
-                                                </td>
-                                                </form>
-                                            </tr>
-                                        {/foreach}
-
-                                        </tbody>
-                                    </table>
+                                <form action="{$smarty.server.REQUEST_URI|escape:'html':'UTF-8'}&amp;" method="post"">
+                                    <div id="mscw-setting-form" class="form-horizontal">
+                                        <div class="row">
+                                            Дата последнего обновления: <b>{$AxiomusPost->getLastUpdateCacheCarry('axiomus')}</b>
+                                            <button type="submit" id="submitRefreshCacheCarryAddressesAxiomus" class="btn btn-success pull-right" name="submitRefreshCacheCarryAddressesAxiomus">
+                                                {l s='Обновить кэш Axiomus'}
+                                            </button>
+                                        </div>
+                                    </div>
+                                </form>
+                                <br>
+                                <form action="{$smarty.server.REQUEST_URI|escape:'html':'UTF-8'}&amp;" method="post"">
+                                <div id="mscw-setting-form" class="form-horizontal">
+                                    <div class="row">
+                                        Дата последнего обновления: <b>{$AxiomusPost->getLastUpdateCacheCarry('dpd')}</b>
+                                        <button type="submit" id="submitRefreshCacheCarryAddressesDPD" class="btn btn-success pull-right" name="submitRefreshCacheCarryAddressesDPD">
+                                            {l s='Обновить кэш DPD'}
+                                        </button>
+                                    </div>
                                 </div>
-
+                                </form>
+                                <br>
+                                <form action="{$smarty.server.REQUEST_URI|escape:'html':'UTF-8'}&amp;" method="post"">
+                                <div id="mscw-setting-form" class="form-horizontal">
+                                    <div class="row">
+                                        Дата последнего обновления: <b>{$AxiomusPost->getLastUpdateCacheCarry('boxberry')}</b>
+                                        <button type="submit" id="submitRefreshCacheCarryAddressesBoxBerry" class="btn btn-success pull-right" name="submitRefreshCacheCarryAddressesBoxBerry">
+                                            {l s='Обновить кэш BoxBerry'}
+                                        </button>
+                                    </div>
+                                </div>
+                                </form>
                             </div>
                         </div>
                     </div>
                 </div>
-                <!-- Tab mscw-axiomus -->
-                <div class="tab-pane {if $subtab == 1}active{/if}" id="mscw-axiomus">
+                <!-- Tab mscw-weighttype -->
+                <div class="tab-pane {if $subtab == 1}active{/if}" id="mscw-weighttype">
+                    <div class="row">
+                        <!-- WeightType -->
+                        <div class="panel">
+                            <div class="panel-heading">
+                                <i class="icon-money"></i>
+                                Виды веса
+                            </div>
+                            <div class="table-responsive">
+                                <table class="table">
+                                    <thead>
+                                    <tr>
+                                        <th><span class="title_box ">id</span></th>
+                                        <th><span class="title_box ">Имя</span></th>
+                                        <th><span class="title_box ">Вес от(кг.)</span></th>
+                                        <th><span class="title_box ">Вес до(кг.)</span></th>
+                                        <th></th>
+
+                                    </tr>
+                                    </thead>
+                                    <tfoot>
+                                    <form action="{$smarty.server.REQUEST_URI|escape:'html':'UTF-8'}&amp;" method="post"">
+
+                                    <tr class="current-edit">
+                                        <td></td>
+                                        <td>
+                                            <input type=text name="mscw-axiomus-weighttype-name" class="form-control">
+                                        </td>
+                                        <td>
+                                            <input type=text name="mscw-axiomus-weighttype-weightfrom" class="form-control">
+                                        </td>
+                                        <td>
+                                            <input type=text name="mscw-axiomus-weighttype-weightto" class="form-control">
+                                        </td>
+                                        <td>
+                                            <button type="submit" id="submitMscwAxiomusWeightType" class="btn btn-primary pull-right" name="submitMscwAxiomusWeightType">
+                                                {l s='Добавить'}
+                                            </button>
+                                        </td>
+                                    </tr>
+
+                                    </form>
+                                    </tfoot>
+                                    <tbody>
+                                    {foreach from=$AxiomusPost->getAllWeightType('Москва') item=line}
+                                        <tr>
+                                            <form action="{$smarty.server.REQUEST_URI|escape:'html':'UTF-8'}&amp;" method="post"">
+                                            <td><input type="hidden" name="mscw-axiomus-weighttype-id" value="{$line.id}">{$line.id}</td>
+                                            <td><input type="text" name="mscw-axiomus-weighttype-name" value="{$line.name}"></td>
+                                            <td><input type="text" name="mscw-axiomus-weighttype-weightfrom" value="{$line.weightfrom}"></td>
+                                            <td><input type="text" name="mscw-axiomus-weighttype-weightto" value="{$line.weightto}"></td>
+                                            <td class="fixed-width-sm">
+                                                <div class="row">
+                                                    <button type="submit" id="deleteMscwAxiomusWeightType" class="btn btn-danger pull-right" name="deleteMscwAxiomusWeightType">
+                                                        <i class="icon-remove"></i>
+                                                    </button>
+                                                    <button type="submit" id="updateMscwAxiomusWeightType" class="btn btn-success pull-right" name="updateMscwAxiomusWeightType">
+                                                        <i class="icon-pencil" ></i>
+                                                    </button>
+                                                </div>
+                                            </td>
+                                            </form>
+                                        </tr>
+                                    {/foreach}
+
+                                    </tbody>
+                                </table>
+                            </div>
+
+                        </div>
+                    </div>
+                </div>
+                <!-- Tab mscw-timetype -->
+                <div class="tab-pane {if $subtab == 2}active{/if}" id="mscw-timetype">
                     <div class="row">
                         <div class="panel">
                             <div class="panel-heading">
-                                <i class="icon-AdminTools"></i>
-                                Основные настройки
+                                <i class="icon-money"></i>
+                                Временные интервалы
                             </div>
-                            <form action="{$smarty.server.REQUEST_URI|escape:'html':'UTF-8'}&amp;" method="post"">
-                                <div id="mscw-axiomus-form" class="form-horizontal">
-                                    <div class="row">
-                                        <div class="col-lg-4">
-                                            <div class="form-group">
-                                                <label class="control-label col-lg-8">{l s='Установить цену доставки вручную'}</label>
-                                                <div class="col-lg-1">
-                                                    <span class="switch prestashop-switch fixed-width-lg">
-                                                        <input type="radio" name="mscw-axiomus-manual" id="mscw-axiomus-manual-on" value="1" {if $mscw_axiomus_manual} checked="checked"{/if}>
-                                                        <label for="mscw-axiomus-manual-on">{l s='Да'}</label>
-                                                        <input type="radio" name="mscw-axiomus-manual" id="mscw-axiomus-manual-off" value="0" {if !$mscw_axiomus_manual} checked="checked"{/if} />
-                                                        <label for="mscw-axiomus-manual-off">{l s='Нет'}</label>
-                                                        <a class="slide-button btn"></a>
-                                                    </span>
-                                                </div>
-                                            </div>
-                                        </div>
-                                        <div class="col-lg-2">
-                                            <button type="submit" id="submitMscwAxiomusSettings" class="btn btn-primary pull-right" name="submitMscwAxiomusSettings">
-                                                {l s='Сохранить'}
+                            <div class="table-responsive">
+                                <table class="table">
+                                    <thead>
+                                    <tr>
+                                        <th><span class="title_box ">id</span></th>
+                                        <th><span class="title_box ">Имя</span></th>
+                                        <th></th>
+                                        <th></th>
+                                        <th></th>
+                                    </tr>
+                                    </thead>
+                                    <tfoot>
+                                    <form action="{$smarty.server.REQUEST_URI|escape:'html':'UTF-8'}&amp;" method="post"">
+
+                                    <tr class="current-edit">
+                                        <td></td>
+                                        <td>
+                                            <input type=text name="mscw-axiomus-timetype-name" class="form-control">
+                                            {*customTimePicker*}
+                                        </td>
+                                        <td>
+                                            <input type=text name="mscw-axiomus-timetype-timefrom" class="form-control customTimePicker">
+                                        </td>
+                                        <td>
+                                            <input type=text name="mscw-axiomus-timetype-timeto" class="form-control customTimePicker">
+                                        </td>
+                                        <td>
+                                            <button type="submit" id="submitMscwAxiomusTimeType" class="btn btn-primary pull-right" name="submitMscwAxiomusTimeType">
+                                                {l s='Добавить'}
                                             </button>
-                                        </div>
-                                    </div>
-                                </div>
-                            </form>
+                                        </td>
+                                    </tr>
+
+                                    </form>
+                                    </tfoot>
+                                    <tbody>
+                                    {foreach from=$AxiomusPost->getAllTimeType('Москва') item=line}
+                                        <tr>
+                                            <form action="{$smarty.server.REQUEST_URI|escape:'html':'UTF-8'}&amp;" method="post"">
+                                            <input type="hidden" name="mscw-axiomus-timetype-id" value="{$line.id}">
+                                            <td>{$line.id}</td>
+                                            <td><input type="text" name="mscw-axiomus-timetype-name" class="form-control" value="{$line.name}"></td>
+                                            <td><input type="text" name="mscw-axiomus-timetype-timefrom" class="form-control customTimePicker" value="{$line.timefrom}"></td>
+                                            <td><input type="text" name="mscw-axiomus-timetype-timeto" class="form-control customTimePicker" value="{$line.timeto}"></td>
+                                            <td class="fixed-width-sm">
+                                                <div class="row">
+                                                    <button type="submit" id="deleteMscwAxiomusTimeType" class="btn btn-danger pull-right" name="deleteMscwAxiomusTimeType">
+                                                        <i class="icon-remove"></i>
+                                                    </button>
+                                                    <button type="submit" id="updateMscwAxiomusTimeType" class="btn btn-success pull-right" name="updateMscwAxiomusTimeType">
+                                                        <i class="icon-pencil" ></i>
+                                                    </button>
+                                                </div>
+                                            </td>
+                                            </form>
+                                        </tr>
+                                    {/foreach}
+
+                                    </tbody>
+                                </table>
+                            </div>
+
                         </div>
                     </div>
+                </div>
+                <!-- Tab mscw-kadtype -->
+                <div class="tab-pane {if $subtab == 3}active{/if}" id="mscw-kadtype">
                     <div class="row">
-                        <div id="mscw-axiomus-block-no" {if $mscw_axiomus_manual}style="display: none"{/if}>
-                            <form action="{$smarty.server.REQUEST_URI|escape:'html':'UTF-8'}&amp;" method="post"">
-                                <div id="mscw-axiomus-form" class="form-horizontal">
-                                    <div class="form-group">
-                                        <label class="control-label col-lg-2">{l s='Надбавка(%)'}</label>
-                                        <div class="col-lg-4">
-                                            <input type="text" id="mscw-axiomus-increment" class="" name="mscw-axiomus-increment" value="{if (isset($mscw_axiomus_increment))}{$mscw_axiomus_increment}{/if}">
-                                        </div>
-                                    </div>
-                                    <div class="row">
-                                        <div class="col-lg-12">
-                                            <button type="submit" id="submitMscwAxiomusIncrement" class="btn btn-primary pull-right" name="submitMscwAxiomusIncrement">
-                                                {l s='Сохранить'}
+                        <div class="panel">
+                            <div class="panel-heading">
+                                <i class="icon-money"></i>
+                                промежутки расстояния от МКАД
+                            </div>
+                            <div class="table-responsive">
+                                <table class="table">
+                                    <thead>
+                                    <tr>
+                                        <th><span class="title_box ">id</span></th>
+                                        <th><span class="title_box ">Имя</span></th>
+                                        <th><span class="title_box ">От(км.)</span></th>
+                                        <th><span class="title_box ">До(км.)</span></th>
+                                        <th></th>
+                                    </tr>
+                                    </thead>
+                                    <tfoot>
+                                    <form action="{$smarty.server.REQUEST_URI|escape:'html':'UTF-8'}&amp;" method="post"">
+
+                                    <tr class="current-edit">
+                                        <td></td>
+                                        <td>
+                                            <input type=text name="mscw-axiomus-kadtype-name" class="form-control">
+                                            {*customTimePicker*}
+                                        </td>
+                                        <td>
+                                            <input type=text name="mscw-axiomus-kadtype-rangefrom" class="form-control">
+                                        </td>
+                                        <td>
+                                            <input type=text name="mscw-axiomus-kadtype-rangeto" class="form-control">
+                                        </td>
+                                        <td>
+                                            <button type="submit" id="submitMscwAxiomusKadType" class="btn btn-primary pull-right" name="submitMscwAxiomusKadType">
+                                                {l s='Добавить'}
                                             </button>
-                                        </div>
-                                    </div>
-                                </div>
-                            </form>
+                                        </td>
+                                    </tr>
+
+                                    </form>
+                                    </tfoot>
+                                    <tbody>
+                                    {foreach from=$AxiomusPost->getAllKadType('Москва') item=line}
+                                        <tr>
+                                            <form action="{$smarty.server.REQUEST_URI|escape:'html':'UTF-8'}&amp;" method="post"">
+                                            <td><input type="hidden" name="mscw-axiomus-kadtype-id" value="{$line.id}">{$line.id}</td>
+                                            <td><input type="text" name="mscw-axiomus-kadtype-name" class="form-control" value="{$line.name}"></td>
+                                            <td><input type="text" name="mscw-axiomus-kadtype-timefrom" class="form-control" value="{$line.rangefrom}"></td>
+                                            <td><input type="text" name="mscw-axiomus-kadtype-timeto" class="form-control" value="{$line.rangeto}"></td>
+                                            <td class="fixed-width-sm">
+                                                <div class="row">
+                                                    <button type="submit" id="deleteMscwAxiomusKadType" class="btn btn-danger pull-right" name="deleteMscwAxiomusKadType">
+                                                        <i class="icon-remove"></i>
+                                                    </button>
+                                                    <button type="submit" id="updateMscwAxiomusKadType" class="btn btn-success pull-right" name="updateMscwAxiomusKadType">
+                                                        <i class="icon-pencil" ></i>
+                                                    </button>
+                                                </div>
+                                            </td>
+                                            </form>
+                                        </tr>
+                                    {/foreach}
+
+                                    </tbody>
+                                </table>
+                            </div>
                         </div>
-                        <div id="mscw-axiomus-block-yes" {if !$mscw_axiomus_manual}style="display: none"{/if}>
-                            <div class="row">
-                                <div class="col-lg-6"><!-- WeightPrice -->
-                                    <div class="panel">
-                                        <div class="panel-heading">
-                                            <i class="icon-money"></i>
-                                            Сумма в зависимости от веса
-                                        </div>
-                                        <div class="table-responsive">
-                                            <table class="table">
-                                                <thead>
-                                                <tr>
-                                                    <th><span class="title_box ">id</span></th>
-                                                    <th><span class="title_box ">Город</span></th>
-                                                    <th><span class="title_box ">Доставка</span></th>
-                                                    <th><span class="title_box ">Самовывоз</span></th>
-                                                    <th><span class="title_box ">Тип веса</span></th>
-                                                    <th><span class="title_box ">Сумма</span></th>
-                                                    <th></th>
-                                                </tr>
-                                                </thead>
-                                                <tfoot>
-                                                <form action="{$smarty.server.REQUEST_URI|escape:'html':'UTF-8'}&amp;" method="post"">
+                    </div>
+                </div>
+                <!-- Tab mscw-weightprice -->
+                <div class="tab-pane {if $subtab == 4}active{/if}" id="mscw-weightprice">
+                    <div class="row">
+                       <!-- WeightPrice -->
+                        <div class="panel">
+                            <div class="panel-heading">
+                                <i class="icon-money"></i>
+                                Сумма в зависимости от веса
+                            </div>
+                            <div class="table-responsive">
+                                <table class="table">
+                                    <thead>
+                                    <tr>
+                                        <th><span class="title_box ">id</span></th>
+
+                                        <th><span class="title_box ">Доставка</span></th>
+                                        <th><span class="title_box ">Самовывоз</span></th>
+                                        <th><span class="title_box ">Тип веса</span></th>
+                                        <th><span class="title_box ">Сумма</span></th>
+                                        <th></th>
+                                    </tr>
+                                    </thead>
+                                    <tfoot>
+                                    <form action="{$smarty.server.REQUEST_URI|escape:'html':'UTF-8'}&amp;" method="post"">
+
+                                    <tr class="current-edit">
+                                        <td></td>
+
+                                        <td></td>
+                                        <td class="row-selector text-center"><input type="checkbox" name="mscw-axiomus-weightprice-carry" class="noborder"></td>
+                                        <td>
+                                            <select class="form-control " id="mscw-axiomus-weightprice-type" name="mscw-axiomus-weightprice-type">
+                                                {foreach from=$AxiomusPost->getAllWeightType('Москва') key=k item=line}
+                                                    <option value="{$k+1}">{$line.name}</option>
+                                                {/foreach}
+                                            </select>
+                                        </td>
+                                        <td>
+                                            <input type=text name="mscw-axiomus-weightprice-sum" class="form-control">
+                                        </td>
+                                        <td>
+                                            <button type="submit" id="submitMscwAxiomusWeightPrice" class="btn btn-primary pull-right" name="submitMscwAxiomusWeightType">
+                                                {l s='Добавить'}
+                                            </button>
+                                        </td>
+                                    </tr>
+
+                                    </form>
+                                    </tfoot>
+                                    <tbody>
+                                    {foreach from=$AxiomusPost->getAllWeightPrice('Москва') item=line}
+                                        <tr>
+                                            <form action="{$smarty.server.REQUEST_URI|escape:'html':'UTF-8'}&amp;" method="post"">
+                                            <td><input type="hidden" name="mscw-axiomus-weightprice-id" class="form-control" value="{$line.id}">{$line.id}</td>
+
+                                            <td>{$line.delivery}</td>
+                                            <td class="row-selector text-center"><input type="checkbox" name="mscw-axiomus-weightprice-carry" class="noborder" {if ($line.carry == 1)}checked{/if}"></td>
+                                            <td>
+                                                <select class="form-control " id="mscw-axiomus-weightprice-type" name="mscw-axiomus-weightprice-type">
+                                                    {foreach from=$AxiomusPost->getAllWeightType('Москва') key=k item=linetype}
+                                                        <option value="{$k}">{$linetype.name}</option>
+                                                    {/foreach}
+                                                </select>
+                                            </td>
+                                            <td><input type=text name="mscw-axiomus-weightprice-sum" class="form-control" value="{$line.sum}"></td>
+                                            <td class="fixed-width-sm">
+                                                <div class="row">
+                                                    <button type="submit" id="deleteMscwAxiomusWeightPrice" class="btn btn-danger pull-right" name="deleteMscwAxiomusWeightPrice">
+                                                        <i class="icon-remove"></i>
+                                                    </button>
+                                                    <button type="submit" id="updateMscwAxiomusWeightPrice" class="btn btn-success pull-right" name="updateMscwAxiomusWeightPrice">
+                                                        <i class="icon-pencil" ></i>
+                                                    </button>
+                                                </div>
+                                            </td>
+                                            </form>
+                                        </tr>
+                                    {/foreach}
+
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <!-- Tab mscw-conditionprice -->
+                <div class="tab-pane {if $subtab == 5}active{/if}" id="mscw-conditionprice">
+                    <div class="row">
+                        <div class="panel">
+                            <div class="panel-heading">
+                                <i class="icon-money"></i>
+                                Добавка к сумме по условию
+                            </div>
+                            <!-- KAD price -->
+                            <div class="table-responsive">
+                                <table class="table">
+                                    <thead>
+                                    <tr>
+                                        <th><span class="title_box ">id</span></th>
+
+                                        <th><span class="title_box ">Самовывоз</span></th>
+                                        <th><span class="title_box ">Сумма от</span></th>
+                                        <th><span class="title_box ">Сумма до</span></th>
+                                        <th><span class="title_box ">Время</span></th>
+                                        <th><span class="title_box ">МКАД</span></th>
+                                        <th><span class="title_box ">Сумма</span></th>
+                                        <th></th>
+                                    </tr>
+                                    </thead>
+                                    <tfoot>
+                                        <form action="{$smarty.server.REQUEST_URI|escape:'html':'UTF-8'}&amp;" method="post"">
 
                                                 <tr class="current-edit">
                                                     <td></td>
-                                                    <td></td>
-                                                    <td></td>
+
+                                                    <td class="row-selector text-center"><input type="checkbox" name="mscw-axiomus-conditionprice-carry" class="noborder"></td>
                                                     <td>
-                                                        <input type=text name="mscw-axiomus-weightprice-carry" class="form-control">
+                                                        <input type=text name="mscw-axiomus-conditionprice-sumfrom" class="form-control">
                                                     </td>
                                                     <td>
-                                                        <select class="form-control " id="mscw-axiomus-weightprice-type" name="mscw-axiomus-weightprice-type">
-                                                            {foreach from=$AxiomusPost->getAllWeightType() key=k item=line}
-                                                                <option value="{$k}">{$line.name}</option>
+                                                        <input type=text name="mscw-axiomus-conditionprice-sumto" class="form-control">
+                                                    </td>
+                                                    <td>
+                                                        <select class="form-control " id="mscw-axiomus-conditionprice-timetype" name="mscw-axiomus-conditionprice-timetype">
+                                                            {foreach from=$AxiomusPost->getAllTimeType('Москва') key=k item=line}
+                                                                <option value="{$k+1}">{$line.name}</option>
                                                             {/foreach}
                                                         </select>
                                                     </td>
                                                     <td>
-                                                        <input type=text name="mscw-axiomus-weightprice-sum" class="form-control">
+                                                        <select class="form-control " id="mscw-axiomus-conditionprice-kadtype" name="mscw-axiomus-conditionprice-kadtype">
+                                                            {foreach from=$AxiomusPost->getAllKadType('Москва') key=k item=line}
+                                                                <option value="{$k+1}">{$line.name}</option>
+                                                            {/foreach}
+                                                        </select>
                                                     </td>
                                                     <td>
-                                                        <button type="submit" id="submitMscwAxiomusWeightPrice" class="btn btn-primary pull-right" name="submitMscwAxiomusWeightType">
+                                                        <input type=text name="mscw-axiomus-conditionprice-sum" class="form-control">
+                                                    </td>
+                                                    <td>
+                                                        <button type="submit" id="submitMscwAxiomusConditionPrice" class="btn btn-primary pull-right" name="submitMscwAxiomusConditionPrice">
                                                             {l s='Добавить'}
                                                         </button>
                                                     </td>
                                                 </tr>
 
-                                                </form>
-                                                </tfoot>
-                                                <tbody>
-                                                {foreach from=$AxiomusPost->getAllWeightPrice() item=line}
-                                                    <tr>
-                                                        <form action="{$smarty.server.REQUEST_URI|escape:'html':'UTF-8'}&amp;" method="post"">
-                                                        <input type="hidden" name="mscw-axiomus-price-id" value="{$line.id}">
-                                                        <td>{$line.id}</td>
-                                                        <td>{$line.city}</td>
-                                                        <td>{$line.delivery}</td>
-                                                        <td>{$line.carry}</td>
-                                                        <td>{$AxiomusPost->getWeightNameById($line.type)}</td>
-                                                        <td>{$line.sum}</td>
-                                                        <td>
-                                                            <button type="submit" id="deleteMscwAxiomusWeightPrice" class="btn btn-danger pull-right" name="deleteMscwAxiomusConditionPrice">
-                                                                {l s='Удалить'}
-                                                            </button>
-                                                        </td>
-                                                        </form>
-                                                    </tr>
-                                                {/foreach}
+                                        </form>
+                                    </tfoot>
+                                    <tbody>
+                                    {foreach from=$AxiomusPost->getAllConditionPrice('Москва') item=line}
+                                        <tr>
+                                            <form action="{$smarty.server.REQUEST_URI|escape:'html':'UTF-8'}&amp;" method="post"">
+                                                <td><input type="hidden" name="mscw-axiomus-conditionprice-id" value="{$line.id}">{$line.id}</td>
 
-                                                </tbody>
-                                            </table>
-                                        </div>
+                                                <td class="row-selector text-center"><input type="checkbox" name="mscw-axiomus-conditionprice-carry" class="noborder" {if ($line.carry == 1)}checked{/if}></td>
+                                                <td><input type="text" name="mscw-axiomus-conditionprice-sumfrom" class="form-control" value="{$line.sumfrom}"></td>
+                                                <td><input type="text" name="mscw-axiomus-conditionprice-sumto" class="form-control" value="{$line.sumto}"></td>
+                                                <td>
+                                                    <select class="form-control " id="mscw-axiomus-conditionprice-timetype" name="mscw-axiomus-conditionprice-timetype">
+                                                        {foreach from=$AxiomusPost->getAllTimeType('Москва') key=k item=linetime}
+                                                            <option value="{$k}" {if ($line.timetype == $linetime.id)}selected{/if}>{$linetime.name}</option>
+                                                        {/foreach}
+                                                    </select>
+                                                </td>
+                                                <td>
+                                                    <select class="form-control " id="mscw-axiomus-conditionprice-kadtype" name="mscw-axiomus-conditionprice-kadtype">
+                                                        {foreach from=$AxiomusPost->getAllKadType('Москва') key=k item=linekad}
+                                                            <option value="{$k}" {if ($line.kadtype == $linekad.id)}selected{/if}>{$linekad.name}</option>
+                                                        {/foreach}
+                                                    </select>
+                                                </td>
+                                                <td><input type="text" name="mscw-axiomus-conditionprice-sum" value="{$line.sum}"></td>
+                                                <td class="fixed-width-sm">
+                                                    <div class="row">
+                                                        <button type="submit" id="deleteMscwAxiomusConditionPrice" class="btn btn-danger pull-right" name="deleteMscwAxiomusConditionPrice">
+                                                            <i class="icon-remove"></i>
+                                                        </button>
+                                                        <button type="submit" id="updateMscwAxiomusConditionPrice" class="btn btn-success pull-right" name="updateMscwAxiomusConditionPrice">
+                                                            <i class="icon-pencil" ></i>
+                                                        </button>
+                                                    </div>
+                                                </td>
+                                            </form>
+                                        </tr>
+                                    {/foreach}
 
-                                    </div>
-                                </div>
-
-                                <div class="col-lg-6"><!-- TimeType -->
-
-                                </div>
+                                    </tbody>
+                                </table>
                             </div>
-                            <div class="row">
-                                <div class="panel">
-                                    <div class="panel-heading">
-                                        <i class="icon-money"></i>
-                                        Добавка к сумме по условию
-                                    </div>
-                                    <!-- KAD price -->
-                                    <div class="table-responsive">
-                                        <table class="table">
-                                            <thead>
-                                            <tr>
-                                                <th><span class="title_box ">id</span></th>
-                                                <th><span class="title_box ">Город</span></th>
-                                                <th><span class="title_box ">Самовывоз</span></th>
-                                                <th><span class="title_box ">Сумма от</span></th>
-                                                <th><span class="title_box ">Сумма до</span></th>
-                                                <th><span class="title_box ">Время</span></th>
-                                                <th><span class="title_box ">МКАД</span></th>
-                                                <th><span class="title_box ">Сумма</span></th>
-                                                <th></th>
-                                            </tr>
-                                            </thead>
-                                            <tfoot>
-                                                <form action="{$smarty.server.REQUEST_URI|escape:'html':'UTF-8'}&amp;" method="post"">
 
-                                                        <tr class="current-edit">
-                                                            <td></td>
-                                                            <td></td>
-                                                            <td></td>
-                                                            <td>
-                                                                <input type=text name="mscw-axiomus-price-sumfrom" class="form-control">
-                                                            </td>
-                                                            <td>
-                                                                <input type=text name="mscw-axiomus-price-sumto" class="form-control">
-                                                            </td>
-                                                            <td>
-                                                                <select class="form-control " id="mscw-axiomus-price-timetype" name="mscw-axiomus-price-timetype">
-                                                                    {foreach from=$AxiomusPost->getAllTimeType() key=k item=line}
-                                                                        <option value="{$k}">{$line.name}</option>
-                                                                    {/foreach}
-                                                                </select>
-                                                            </td>
-                                                            <td>
-                                                                <select class="form-control " id="mscw-axiomus-price-kadtype" name="mscw-axiomus-price-kadtype">
-                                                                    {foreach from=$AxiomusPost->getAllWeightType() key=k item=line}
-                                                                        <option value="{$k}">{$line.name}</option>
-                                                                    {/foreach}
-                                                                </select>
-                                                            </td>
-                                                            <td>
-                                                                <input type=text name="mscw-axiomus-price-sum" class="form-control">
-                                                            </td>
-                                                            <td>
-                                                                <button type="submit" id="submitMscwAxiomusConditionPrice" class="btn btn-primary pull-right" name="submitMscwAxiomusConditionPrice">
-                                                                    {l s='Добавить'}
-                                                                </button>
-                                                            </td>
-                                                        </tr>
-
-                                                </form>
-                                            </tfoot>
-                                            <tbody>
-                                            {foreach from=$AxiomusPost->getAllConditionPrice() item=line}
-                                                <tr>
-                                                    <form action="{$smarty.server.REQUEST_URI|escape:'html':'UTF-8'}&amp;" method="post"">
-                                                        <input type="hidden" name="mscw-axiomus-price-id" value="{$line.id}">
-                                                        <td>{$line.id}</td>
-                                                        <td>{$line.city}</td>
-                                                        <td>{$line.carry}</td>
-                                                        <td>{$line.sumfrom}</td>
-                                                        <td>{$line.sumto}</td>
-                                                        <td>{$AxiomusPost->getTimeNameById($line.timetype)}</td>
-                                                        <td>{$AxiomusPost->getWeightNameById($line.kadtype)}</td>
-                                                        <td>{$line.sum}</td>
-                                                        <td>
-                                                            <button type="submit" id="deleteMscwAxiomusConditionPrice" class="btn btn-danger pull-right" name="deleteMscwAxiomusConditionPrice">
-                                                                {l s='Удалить'}
-                                                            </button>
-                                                        </td>
-                                                    </form>
-                                                </tr>
-                                            {/foreach}
-
-                                            </tbody>
-                                        </table>
-                                    </div>
-                                    <!-- end KAD price -->
-                                </div>
-                            </div>
                         </div>
                     </div>
                 </div>
-                <!-- Tab mscw-topdelivery -->
-                <div class="tab-pane {if $subtab == 2}active{/if}" id="mscw-topdelivery">
-                    <h4>{l s='TopDelivery'} </h4>
+                <!-- end condition price -->
+                <div class="tab-pane {if $subtab == 6}active{/if}" id="mscw-carry-axiomus">
+                    <div class="row">
+                        <!-- carryAxiomus -->
+                        <div class="panel">
+                            <div class="panel-heading">
+                                <i class="icon-money"></i>
+                                Самовывоз Axiomus
+                            </div>
+                            <form action="{$smarty.server.REQUEST_URI|escape:'html':'UTF-8'}&amp;" method="post"">
+                                <div id="setting-form" class="form-horizontal">
+                                    <div class="form-group">
+                                        <label class="control-label col-lg-2">{l s='Стоимость для самовывоза'}</label>
+                                        <div class="col-lg-4">
+                                            <input type="text" id="mscw-carry-axiomus-price" class="" name="mscw-carry-axiomus-price" value="{$AxiomusPost->getCarryPriceByName('Москва', 'axiomus')}">
+                                        </div>
+                                    </div>
+                                </div>
+                                <br>
+                                <div class="row">
+                                    <div class="col-lg-6">
+                                        <button type="submit" id="submitMscwAxiomusCarryPrice" class="btn btn-primary pull-right" name="submitMscwAxiomusCarryPrice">
+                                            {l s='Сохранить'}
+                                        </button>
+                                    </div>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
                 </div>
-                <!-- Tab mscw-dpd -->
-                <div class="tab-pane {if $subtab == 3}active{/if}" id="mscw-dpd">
-                    <h4>{l s='DPD'} </h4>
+                <!-- end condition price -->
+                <div class="tab-pane {if $subtab == 7}active{/if}" id="mscw-carry-dpd">
+                    <div class="row">
+                        <!-- carryAxiomus -->
+                        <div class="panel">
+                            <div class="panel-heading">
+                                <i class="icon-money"></i>
+                                Самовывоз DPD
+                            </div>
+                            <form action="{$smarty.server.REQUEST_URI|escape:'html':'UTF-8'}&amp;" method="post"">
+                                <div id="setting-form" class="form-horizontal">
+                                    <div class="form-group">
+                                        <label class="control-label col-lg-2">{l s='Стоимость для самовывоза'}</label>
+                                        <div class="col-lg-4">
+                                            <input type="text" id="mscw-carry-dpd-price" class="" name="mscw-carry-dpd-price" value="{$AxiomusPost->getCarryPriceByName('Москва', 'dpd')}">
+                                        </div>
+                                    </div>
+                                </div>
+                                <br>
+                                <div class="row">
+                                    <div class="col-lg-6">
+                                        <button type="submit" id="submitMscwDPDPrice" class="btn btn-primary pull-right" name="submitMscwDPDPrice">
+                                            {l s='Сохранить'}
+                                        </button>
+                                    </div>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
                 </div>
-                <!-- Tab mscw-boxberry -->
-                <div class="tab-pane {if $subtab == 4}active{/if}" id="mscw-boxberry">
-                    <h4>{l s='Boxberry'} </h4>
-                </div>
-                <!-- Tab mscw-axiomus-carry -->
-                <div class="tab-pane {if $subtab == 5}active{/if}" id="mscw-axiomus-carry">
-                    <h4>{l s='Axiomus carry'} </h4>
-                </div>
-                <!-- Tab mscw-topdelivery-carry -->
-                <div class="tab-pane {if $subtab == 6}active{/if}" id="mscw-topdelivery-carry">
-                    <h4>{l s='TopDelivery carry'} </h4>
-                </div>
-                <!-- Tab mscw-dpd-carry -->
-                <div class="tab-pane {if $subtab == 7}active{/if}" id="mscw-dpd-carry">
-                    <h4>{l s='DPD carry'} </h4>
-                </div>
-                <!-- Tab mscw-boxberry-carry -->
-                <div class="tab-pane {if $subtab == 8}active{/if}" id="mscw-boxberry-carry">
-                    <h4>{l s='boxberry carry'} </h4>
-                </div>
-                <!-- Tab mscw-russianpost-carry -->
-                <div class="tab-pane {if $subtab == 9}active{/if}" id="mscw-russianpost-carry">
-                    <h4>{l s='russian post'} </h4>
+                <!-- end condition price -->
+                <div class="tab-pane {if $subtab == 8}active{/if}" id="mscw-carry-boxberry">
+                    <div class="row">
+                        <!-- carryAxiomus -->
+                        <div class="panel">
+                            <div class="panel-heading">
+                                <i class="icon-money"></i>
+                                Самовывоз BoxBerry
+                            </div>
+                            <form action="{$smarty.server.REQUEST_URI|escape:'html':'UTF-8'}&amp;" method="post"">
+                                <div id="setting-form" class="form-horizontal">
+                                    <div class="form-group">
+                                        <label class="control-label col-lg-2">{l s='Стоимость для самовывоза'}</label>
+                                        <div class="col-lg-4">
+                                            <input type="text" id="mscw-carry-boxberry-price" class="" name="mscw-carry-boxberry-price" value="{$AxiomusPost->getCarryPriceByName('Москва', 'boxberry')}">
+                                        </div>
+                                    </div>
+                                </div>
+                                <br>
+                                <div class="row">
+                                    <div class="col-lg-6">
+                                        <button type="submit" id="submitMscwBoxBerryPrice" class="btn btn-primary pull-right" name="submitMscwBoxBerryPrice">
+                                            {l s='Сохранить'}
+                                        </button>
+                                    </div>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
                 </div>
             </div>
-
-
-
-            <!-- Shipping block -->
-            {*{if !$order->isVirtual()}*}
-                {*<div class="form-horizontal">*}
-                    {*{if $order->gift_message}*}
-                        {*<div class="form-group">*}
-                            {*<label class="control-label col-lg-3">{l s='Message'}</label>*}
-                            {*<div class="col-lg-9">*}
-                                {*<p class="form-control-static">{$order->gift_message|nl2br}</p>*}
-                            {*</div>*}
-                        {*</div>*}
-                    {*{/if}*}
-                    {*{include file='controllers/orders/_shipping.tpl'}*}
-                    {*{if $carrierModuleCall}*}
-                        {*{$carrierModuleCall}*}
-                    {*{/if}*}
-                    {*<hr />*}
-                    {*{if $order->recyclable}*}
-                        {*<span class="label label-success"><i class="icon-check"></i> {l s='Recycled packaging'}</span>*}
-                    {*{else}*}
-                        {*<span class="label label-inactive"><i class="icon-remove"></i> {l s='Recycled packaging'}</span>*}
-                    {*{/if}*}
-
-                    {*{if $order->gift}*}
-                        {*<span class="label label-success"><i class="icon-check"></i> {l s='Gift wrapping'}</span>*}
-                    {*{else}*}
-                        {*<span class="label label-inactive"><i class="icon-remove"></i> {l s='Gift wrapping'}</span>*}
-                    {*{/if}*}
-                {*</div>*}
-            {*{/if}*}
         </div>
         <!-- Tab returns -->
         <div class="tab-pane {if $maintab == 1}active{/if}" id="piter">
@@ -671,51 +811,6 @@
                         {l s='Настройки'} <span class="badge"></span>
                     </a>
                 </li>
-                <li>
-                    <a href="#ptr-axiomus">
-                        {l s='Axiomus'} <span class="badge"></span>
-                    </a>
-                </li>
-                <li>
-                    <a href="#ptr-topdelivery">
-                        {l s='TopDelivery'}
-                    </a>
-                </li>
-                <li>
-                    <a href="#ptr-dpd">
-                        {l s='DPD'}
-                    </a>
-                </li>
-                <li>
-                    <a href="#ptr-boxberry">
-                        {l s='BoxBerry'}
-                    </a>
-                </li>
-                <li>
-                    <a href="#ptr-axiomus-carry">
-                        {l s='axiomus(самовывоз)'}
-                    </a>
-                </li>
-                <li>
-                    <a href="#ptr-topdelivery-carry">
-                        {l s='TopDelivery(самовывоз)'}
-                    </a>
-                </li>
-                <li>
-                    <a href="#ptr-dpd-carry">
-                        {l s='DPD(самовывоз)'}
-                    </a>
-                </li>
-                <li>
-                    <a href="#ptr-boxberry-carry">
-                        {l s='BoxBerry(самовывоз)'}
-                    </a>
-                </li>
-                <li>
-                    <a href="#ptr-russianpost-carry">
-                        {l s='RussianPost(самовывоp)'}
-                    </a>
-                </li>
             </ul>
             <!-- Tab Moscow content -->
             <div class="tab-content panel">
@@ -724,104 +819,7 @@
                 <div class="tab-pane active" id="ptr-setting">
                     <h4>{l s='Settings'} </h4>
                 </div>
-                <!-- Tab mscw-axiomus -->
-                <div class="tab-pane" id="ptr-axiomus">
-                    <h4>{l s='Axiomus'} </h4>
-                </div>
-                <!-- Tab mscw-topdelivery -->
-                <div class="tab-pane" id="ptr-topdelivery">
-                    <h4>{l s='TopDelivery'} </h4>
-                </div>
-                <!-- Tab mscw-dpd -->
-                <div class="tab-pane" id="ptr-dpd">
-                    <h4>{l s='DPD'} </h4>
-                </div>
-                <!-- Tab mscw-boxberry -->
-                <div class="tab-pane" id="ptr-boxberry">
-                    <h4>{l s='Boxberry'} </h4>
-                </div>
-                <!-- Tab mscw-axiomus-carry -->
-                <div class="tab-pane" id="ptr-axiomus-carry">
-                    <h4>{l s='Axiomus carry'} </h4>
-                </div>
-                <!-- Tab mscw-topdelivery-carry -->
-                <div class="tab-pane" id="ptr-topdelivery-carry">
-                    <h4>{l s='TopDelivery carry'} </h4>
-                </div>
-                <!-- Tab mscw-dpd-carry -->
-                <div class="tab-pane" id="ptr-dpd-carry">
-                    <h4>{l s='DPD carry'} </h4>
-                </div>
-                <!-- Tab mscw-boxberry-carry -->
-                <div class="tab-pane" id="ptr-boxberry-carry">
-                    <h4>{l s='boxberry carry'} </h4>
-                </div>
-                <!-- Tab mscw-russianpost-carry -->
-                <div class="tab-pane" id="ptr-russianpost-carry">
-                    <h4>{l s='russian post'} </h4>
-                </div>
             </div>
-
-
-            {*{if !$order->isVirtual()}*}
-                <!-- Return block -->
-                {*{if $order->getReturn()|count > 0}*}
-                    {*<div class="table-responsive">*}
-                        {*<table class="table">*}
-                            {*<thead>*}
-                            {*<tr>*}
-                                {*<th><span class="title_box ">Date</span></th>*}
-                                {*<th><span class="title_box ">Type</span></th>*}
-                                {*<th><span class="title_box ">Carrier</span></th>*}
-                                {*<th><span class="title_box ">Tracking number</span></th>*}
-                            {*</tr>*}
-                            {*</thead>*}
-                            {*<tbody>*}
-                            {*{foreach from=$order->getReturn() item=line}*}
-                                {*<tr>*}
-                                    {*<td>{$line.date_add}</td>*}
-                                    {*<td>{$line.type}</td>*}
-                                    {*<td>{$line.state_name}</td>*}
-                                    {*<td class="actions">*}
-                                        {*<span class="shipping_number_show">{if isset($line.url) && isset($line.tracking_number)}<a href="{$line.url|replace:'@':$line.tracking_number|escape:'html':'UTF-8'}">{$line.tracking_number}</a>{elseif isset($line.tracking_number)}{$line.tracking_number}{/if}</span>*}
-                                        {*{if $line.can_edit}*}
-                                            {*<form method="post" action="{$link->getAdminLink('AdminOrders')|escape:'html':'UTF-8'}&amp;vieworder&amp;id_order={$order->id|intval}&amp;id_order_invoice={if $line.id_order_invoice}{$line.id_order_invoice|intval}{else}0{/if}&amp;id_carrier={if $line.id_carrier}{$line.id_carrier|escape:'html':'UTF-8'}{else}0{/if}">*}
-													{*<span class="shipping_number_edit" style="display:none;">*}
-														{*<button type="button" name="tracking_number">*}
-															{*{$line.tracking_number|htmlentities}*}
-														{*</button>*}
-														{*<button type="submit" class="btn btn-default" name="submitShippingNumber">*}
-															{*{l s='Update'}*}
-														{*</button>*}
-													{*</span>*}
-                                                {*<button href="#" class="edit_shipping_number_link">*}
-                                                    {*<i class="icon-pencil"></i>*}
-                                                    {*{l s='Edit'}*}
-                                                {*</button>*}
-                                                {*<button href="#" class="cancel_shipping_number_link" style="display: none;">*}
-                                                    {*<i class="icon-remove"></i>*}
-                                                    {*{l s='Cancel'}*}
-                                                {*</button>*}
-                                            {*</form>*}
-                                        {*{/if}*}
-                                    {*</td>*}
-                                {*</tr>*}
-                            {*{/foreach}*}
-                            {*</tbody>*}
-                        {*</table>*}
-                    {*</div>*}
-                {*{else}*}
-                    {*<div class="list-empty hidden-print">*}
-                        {*<div class="list-empty-msg">*}
-                            {*<i class="icon-warning-sign list-empty-icon"></i>*}
-                            {*{l s='No merchandise returned yet'}*}
-                        {*</div>*}
-                    {*</div>*}
-                {*{/if}*}
-                {*{if $carrierModuleCall}*}
-                    {*{$carrierModuleCall}*}
-                {*{/if}*}
-            {*{/if}*}
         </div>
         <div class="tab-pane {if $maintab == 2}active{/if}" id="settings">
             <h4>{l s='Настройки'}</h4>
@@ -855,6 +853,16 @@
     </div>
     <script>
         $(document).ready(function () {
+            $('.customTimePicker').timepicker({
+                'step': 60,
+                'timeFormat': 'H:i',
+                'useSelect': 'true',
+                'showDuration': false
+            });
+//
+//            $('#time_from').timepicker('setTime', new Date(0, 0, 0, 10, 0, 0, 0));
+
+
         //ToDo добавить валидацию полей
             $('#tabDelivery a').click(function (e) {
                 e.preventDefault()

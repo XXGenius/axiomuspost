@@ -4,7 +4,7 @@
  */
 require_once(_PS_MODULE_DIR_ . 'axiomuspostcarrier/models/AxiomusPost.php');
 
-class axiomuspostcarrierGetPriceModuleFrontController extends ModuleFrontController
+class axiomuspostcarrierGetCarryModuleFrontController extends ModuleFrontController
 {
     public function init()
     {
@@ -17,13 +17,18 @@ class axiomuspostcarrierGetPriceModuleFrontController extends ModuleFrontControl
         //ToDo добавить проверку что запрос идет с домена axiomus
         //ToDo статус меняется, но не меняется на страницы просмотра заказа
 //        parent::init();
-        if(isset($_POST['carry'])){
-            $AxiomusPost = new AxiomusPost();
-            $price = $AxiomusPost->getPrice($_POST['city'], (boolean)$_POST['carry'], $_POST['weight'], $_POST['price'],(isset($_POST['carrytype'])?(int)$_POST['carrytype']:null), (isset($_POST['kad'])?(int)$_POST['kad']:null), (isset($_POST['time'])?(int)$_POST['time']:null));
-            echo $price;
-            exit;
+        if(isset($_POST['carry'])) {
+            if (isset($_POST['city'])) {
+                $AxiomusPost = new AxiomusPost();
+                $AddressesArray = $AxiomusPost->getCarryAddressesArray($_POST['carry'], $_POST['city']);
+
+                echo json_encode($AddressesArray);
+                exit;
+            } else {
+                return 'not city';
+            }
         }else{
-            return 'not carry';
+            echo 'not carry';
         }
     }
 }
