@@ -146,37 +146,25 @@
                                             </div>
                                         </div>
                                         <div class="form-group">
-                                            <label class="control-label col-lg-3">{l s='Использовать доставку TopDelivery'}</label>
+                                            <label class="control-label col-lg-3">{l s='Использовать доставку Стриж'}</label>
                                             <div class="col-lg-1">
                                                 <span class="switch prestashop-switch fixed-width-lg">
-                                                    <input type="radio" name="use-mscw-topdelivery" id="use-mscw-topdelivery-on" value="1" {if $use_mscw_topdelivery} checked="checked"{/if}>
-                                                    <label for="use-mscw-topdelivery-on">{l s='Да'}</label>
-                                                    <input type="radio" name="use-mscw-topdelivery" id="use-mscw-topdelivery-off" value="0" {if !$use_mscw_topdelivery} checked="checked"{/if}/>
-                                                    <label for="use-mscw-topdelivery-off">{l s='Нет'}</label>
+                                                    <input type="radio" name="use-mscw-strizh" id="use-mscw-strizh-on" value="1" {if $use_mscw_strizh} checked="checked"{/if}>
+                                                    <label for="use-mscw-strizh-on">{l s='Да'}</label>
+                                                    <input type="radio" name="use-mscw-strizh" id="use-mscw-strizh-off" value="0" {if !$use_mscw_strizh} checked="checked"{/if}/>
+                                                    <label for="use-mscw-strizh-off">{l s='Нет'}</label>
                                                     <a class="slide-button btn"></a>
                                                 </span>
                                             </div>
                                         </div>
                                         <div class="form-group">
-                                            <label class="control-label col-lg-3">{l s='Использовать доставку DPD'}</label>
+                                            <label class="control-label col-lg-3">{l s='Использовать доставку ПЭК'}</label>
                                             <div class="col-lg-1">
                                                 <span class="switch prestashop-switch fixed-width-lg">
-                                                    <input type="radio" name="use-mscw-dpd" id="use-mscw-dpd-on" value="1" {if $use_mscw_dpd} checked="checked"{/if}>
-                                                    <label for="use-mscw-dpd-on">{l s='Да'}</label>
-                                                    <input type="radio" name="use-mscw-dpd" id="use-mscw-dpd-off" value="0" {if !$use_mscw_dpd} checked="checked"{/if}/>
-                                                    <label for="use-mscw-dpd-off">{l s='Нет'}</label>
-                                                    <a class="slide-button btn"></a>
-                                                </span>
-                                            </div>
-                                        </div>
-                                        <div class="form-group">
-                                            <label class="control-label col-lg-3">{l s='Использовать доставку Boxberry'}</label>
-                                            <div class="col-lg-1">
-                                                <span class="switch prestashop-switch fixed-width-lg">
-                                                    <input type="radio" name="use-mscw-boxberry" id="use-mscw-boxberry-on" value="1" {if $use_mscw_boxberry} checked="checked"{/if}>
-                                                    <label for="use-mscw-boxberry-on">{l s='Да'}</label>
-                                                    <input type="radio" name="use-mscw-boxberry" id="use-mscw-boxberry-off" value="0" {if !$use_mscw_boxberry} checked="checked"{/if} />
-                                                    <label for="use-mscw-boxberry-off">{l s='Нет'}</label>
+                                                    <input type="radio" name="use-mscw-pek" id="use-mscw-pek-on" value="1" {if $use_mscw_pek} checked="checked"{/if}>
+                                                    <label for="use-mscw-pek-on">{l s='Да'}</label>
+                                                    <input type="radio" name="use-mscw-pek" id="use-mscw-pek-off" value="0" {if !$use_mscw_pek} checked="checked"{/if}/>
+                                                    <label for="use-mscw-pek-off">{l s='Нет'}</label>
                                                     <a class="slide-button btn"></a>
                                                 </span>
                                             </div>
@@ -191,18 +179,6 @@
                                                     <label for="use-mscw-axiomus-carry-on">{l s='Да'}</label>
                                                     <input type="radio" name="use-mscw-axiomus-carry" id="use-mscw-axiomus-carry-off" value="0" {if !$use_mscw_axiomus_carry} checked="checked"{/if} />
                                                     <label for="use-mscw-axiomus-carry-off">{l s='Нет'}</label>
-                                                    <a class="slide-button btn"></a>
-                                                </span>
-                                            </div>
-                                        </div>
-                                        <div class="form-group">
-                                            <label class="control-label col-lg-3">{l s='Использовать самовывоз TopDelivery'}</label>
-                                            <div class="col-lg-1">
-                                                <span class="switch prestashop-switch fixed-width-lg">
-                                                    <input type="radio" name="use-mscw-topdelivery-carry" id="use-mscw-topdelivery-carry-on" value="1" {if $use_mscw_topdelivery_carry} checked="checked"{/if}>
-                                                    <label for="use-mscw-topdelivery-carry-on">{l s='Да'}</label>
-                                                    <input type="radio" name="use-mscw-topdelivery-carry" id="use-mscw-topdelivery-carry-off" value="0" {if !$use_mscw_topdelivery_carry} checked="checked"{/if} />
-                                                    <label for="use-mscw-topdelivery-carry-off">{l s='Нет'}</label>
                                                     <a class="slide-button btn"></a>
                                                 </span>
                                             </div>

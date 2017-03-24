@@ -31,7 +31,7 @@ class AxiomusPost extends ObjectModel {
 
     public $AxiomusXML;
     public static $definition = array(
-        'table' => 'axiomus',
+        'table' => 'axiomus_order',
         'tableOrder' => 'axiomus_order',
         'tableConditionPrice' => 'axiomus_condition_price',
         'tableWeightPrice' => 'axiomus_weight_price',
@@ -44,18 +44,18 @@ class AxiomusPost extends ObjectModel {
         'tableCacheCarryBoxBerry' => 'axiomus_cache_carry_boxberry',
         'tableCarryPrice' => 'axiomus_carry_price',
 
-        'primary' => 'id',//Это нужно для работы формы добавления
+//        'primary' => 'id',//Это нужно для работы формы добавления
         'multilang' => false,
-        'fields' => array( //ToDo нужно ли это все
-            'id' => array(
-                'type' => ObjectModel::TYPE_INT,
-                'required' => false
-            ),
-            'track_number' => array(
-                'type' => ObjectModel::TYPE_STRING,
-                'required' => false
-            ),
-        ),
+//        'fields' => array( //ToDo нужно ли это все
+//            'id' => array(
+//                'type' => ObjectModel::TYPE_INT,
+//                'required' => false
+//            ),
+//            'track_number' => array(
+//                'type' => ObjectModel::TYPE_STRING,
+//                'required' => false
+//            ),
+//        ),
     );
 
     public function __construct($id = null, $id_lang = null, $id_shop = NULL) {
@@ -66,7 +66,7 @@ class AxiomusPost extends ObjectModel {
 
         $this->tableCacheWithPrefix = _DB_PREFIX_. AxiomusPost::$definition['tableCache'];
         $this->tableOrderWithPrefix = _DB_PREFIX_. AxiomusPost::$definition['tableOrder'];
-        $this->tableWeightPriceWithPrefix = _DB_PREFIX_. AxiomusPost::$definition['tableWeightPrice']; //ToDo может както попроще, зачем столько параметров
+        $this->tableWeightPriceWithPrefix = _DB_PREFIX_. AxiomusPost::$definition['tableWeightPrice'];
         $this->tableConditionPriceWithPrefix = _DB_PREFIX_. AxiomusPost::$definition['tableConditionPrice'];
         $this->tableWeightTypeWithPrefix = _DB_PREFIX_. AxiomusPost::$definition['tableWeightType'];
         $this->tableTimeTypeWithPrefix = _DB_PREFIX_. AxiomusPost::$definition['tableTimeType'];
@@ -77,7 +77,7 @@ class AxiomusPost extends ObjectModel {
         $this->tableCarryPriceWithPrefix = _DB_PREFIX_. AxiomusPost::$definition['tableCarryPrice'];
     }
 
-    public function createTables() {
+    public function createTabless() {
 
         $sql = "CREATE TABLE IF NOT EXISTS `{$this->tableConditionPriceWithPrefix}` (" .
             '`id` INT(11) NOT NULL AUTO_INCREMENT,' .
@@ -304,6 +304,7 @@ class AxiomusPost extends ObjectModel {
         $this->_insertStartWeightPrice();
         $this->_insertStartConditionPrice();
         $this->_insertStartCarryPrice();
+        return true;
     }
 
     private function _insertStartKadType(){
@@ -501,7 +502,6 @@ class AxiomusPost extends ObjectModel {
         return true;
     }
 
-
     //Price ajax
     public function getPriceByCartId($cart_id){
         $sql = "SELECT * FROM {$this->tableOrderWithPrefix} WHERE `id_cart` = '{$cart_id}'";
@@ -526,7 +526,6 @@ class AxiomusPost extends ObjectModel {
             return $sumWeight + $sumCondition;
         }
     }
-
 
     //WeightType
     public function getAllWeightType($city){
@@ -615,7 +614,6 @@ class AxiomusPost extends ObjectModel {
     }
 
     //KadType
-
     public function getKadTypeById($id){
         $sql = "SELECT * FROM {$this->tableKadTypeWithPrefix} WHERE `id` = '{$id}'";
         $res = Db::getInstance()->getRow($sql);

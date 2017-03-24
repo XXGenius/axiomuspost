@@ -14,13 +14,12 @@ class AdminAxiomusConfigController extends ModuleAdminController
 
         $this->settingsArray = $this->getSettingsArray(); //ToDo может в приват?
 
-//        $this->table = 'axiomus_config';
-        $this->AxiomusPost = new AxiomusPost();
-//        $this->identifier = 'id';
 
         //$this->context = Context::getContext();
         $this->bootstrap = true;
         parent::__construct();
+
+        $this->AxiomusPost = $this->module->AxiomusPost;
 
         $this->addRowAction('edit');
         $this->addRowAction('delete');
@@ -152,12 +151,6 @@ class AdminAxiomusConfigController extends ModuleAdminController
         $this->context->smarty->assign($this->AxiomusPost->getWeightPriceArray());
         $this->context->smarty->assign('AxiomusPost', $this->AxiomusPost);
         $this->setTemplate('view.tpl');
-
-        /* DO STUFF HERE */
-//        $posts = array();
-
-//        $this->context->smarty->assign('posts', $posts);
-
     }
 
     public function getSettingsArray(){
@@ -167,21 +160,17 @@ class AdminAxiomusConfigController extends ModuleAdminController
             'subtab' => $this->subtab,
             //Moscow
             'use_mscw_axiomus'              => Configuration::get('RS_AXIOMUS_MSCW_USE_AXIOMUS'),
-            'use_mscw_topdelivery'          => Configuration::get('RS_AXIOMUS_MSCW_USE_TOPDELIVERY'),
-            'use_mscw_dpd'                  => Configuration::get('RS_AXIOMUS_MSCW_USE_DPD'),
-            'use_mscw_boxberry'             => Configuration::get('RS_AXIOMUS_MSCW_USE_BOXBERRY'),
+            'use_mscw_strizh'               => Configuration::get('RS_AXIOMUS_MSCW_USE_STRIZH'),
+            'use_mscw_pek'                  => Configuration::get('RS_AXIOMUS_MSCW_USE_PEK'),
             'use_mscw_axiomus_carry'        => Configuration::get('RS_AXIOMUS_MSCW_USE_AXIOMUS_CARRY'),
-            'use_mscw_topdelivery_carry'    => Configuration::get('RS_AXIOMUS_MSCW_USE_TOPDELIVERY_CARRY'),
             'use_mscw_dpd_carry'            => Configuration::get('RS_AXIOMUS_MSCW_USE_DPD_CARRY'),
             'use_mscw_boxberry_carry'       => Configuration::get('RS_AXIOMUS_MSCW_USE_BOXBERRY_CARRY'),
             'use_mscw_russianpost_carry'    => Configuration::get('RS_AXIOMUS_MSCW_USE_RUSSIANPOST_CARRY'),
             //Piter
             'use_ptr_axiomus'              => Configuration::get('RS_AXIOMUS_PTR_USE_AXIOMUS'),
-            'use_ptr_topdelivery'          => Configuration::get('RS_AXIOMUS_PTR_USE_TOPDELIVERY'),
-            'use_ptr_dpd'                  => Configuration::get('RS_AXIOMUS_PTR_USE_DPD'),
-            'use_ptr_boxberry_delivery'    => Configuration::get('RS_AXIOMUS_PTR_USE_BOXBERRY'),
+            'use_ptr_strizh'               => Configuration::get('RS_AXIOMUS_PTR_USE_STRIZH'),
+            'use_ptr_pek'                  => Configuration::get('RS_AXIOMUS_PTR_USE_PEK'),
             'use_ptr_axiomus_carry'        => Configuration::get('RS_AXIOMUS_PTR_USE_AXIOMUS_CARRY'),
-            'use_ptr_topdelivery_carry'    => Configuration::get('RS_AXIOMUS_PTR_USE_TOPDELIVERY_CARRY'),
             'use_ptr_dpd_carry'            => Configuration::get('RS_AXIOMUS_PTR_USE_DPD_CARRY'),
             'use_ptr_boxberry_carry'       => Configuration::get('RS_AXIOMUS_PTR_USE_BOXBERRY_CARRY'),
             'use_ptr_russianpost_carry'    => Configuration::get('RS_AXIOMUS_PTR_USE_RUSSIANPOST_CARRY'),
@@ -212,97 +201,26 @@ class AdminAxiomusConfigController extends ModuleAdminController
             $this->subtab = 0;
             //Delivery
             if ((boolean)$_POST['use-mscw-axiomus'] != $this->settingsArray['use_mscw_axiomus']) {
-                if ((boolean)$_POST['use-mscw-axiomus']) {
-                    $res = $this->module->installCarrier('Axiomus', 'DELIVERY');
-
-                } else {
-                    $res = $this->module->uninstallCarrier('Axiomus', 'DELIVERY');
-                }
-                if ($res){
-                    Configuration::updateValue('RS_AXIOMUS_MSCW_USE_AXIOMUS', $_POST['use-mscw-axiomus']);
-                }
+                Configuration::updateValue('RS_AXIOMUS_MSCW_USE_AXIOMUS', $_POST['use-mscw-axiomus']);
             }
-
-            if ((boolean)$_POST['use-mscw-topdelivery'] != $this->settingsArray['use_mscw_topdelivery']) {
-                if ((boolean)$_POST['use-mscw-topdelivery']) {
-                    $res = $this->module->installCarrier('TopDelivery', 'DELIVERY');
-                } else {
-                    $res = $this->module->uninstallCarrier('TopDelivery', 'DELIVERY');
-                }
-                if ($res){
-                    Configuration::updateValue('RS_AXIOMUS_MSCW_USE_TOPDELIVERY', $_POST['use-mscw-topdelivery']);
-                }
+            if ((boolean)$_POST['use-mscw-strizh'] != $this->settingsArray['use_mscw_strizh']) {
+                Configuration::updateValue('RS_AXIOMUS_MSCW_USE_STRIZH', $_POST['use-mscw-strizh']);
             }
-            if ((boolean)$_POST['use-mscw-dpd'] != $this->settingsArray['use_mscw_dpd']) {
-                if ((boolean)$_POST['use-mscw-dpd']) {
-                    $res = $this->module->installCarrier('DPD', 'DELIVERY');
-                } else {
-                    $res = $this->module->uninstallCarrier('DPD', 'DELIVERY');
-                }
-                if ($res){
-                    Configuration::updateValue('RS_AXIOMUS_MSCW_USE_DPD', $_POST['use-mscw-dpd']);
-                }
-            }
-            if ((boolean)$_POST['use-mscw-boxberry'] != $this->settingsArray['use_mscw_boxberry']) {
-                if ((boolean)$_POST['use-mscw-boxberry']) {
-                    $res = $this->module->installCarrier('BoxBerry', 'DELIVERY');
-                } else {
-                    $res = $this->module->uninstallCarrier('BoxBerry', 'DELIVERY');
-                }
-                if ($res){
-                    Configuration::updateValue('RS_AXIOMUS_MSCW_USE_BOXBERRY', $_POST['use-mscw-boxberry']);
-                }
+            if ((boolean)$_POST['use-mscw-pek'] != $this->settingsArray['use_mscw_pek']) {
+                Configuration::updateValue('RS_AXIOMUS_MSCW_USE_PEK', $_POST['use-mscw-pek']);
             }
             //Carry
             if ((boolean)$_POST['use-mscw-axiomus-carry'] != $this->settingsArray['use_mscw_axiomus_carry']) {
-                if ((boolean)$_POST['use-mscw-axiomus-carry']) {
-                    $res = $this->module->installCarrier('Axiomus', 'CARRY');
-                } else {
-                    $res = $this->module->uninstallCarrier('Axiomus', 'CARRY');
-                }
-                if ($res){
-                    Configuration::updateValue('RS_AXIOMUS_MSCW_USE_AXIOMUS_CARRY', $_POST['use-mscw-axiomus-carry']);
-                }
-            }
-            if ((boolean)$_POST['use-mscw-topdelivery-carry'] != $this->settingsArray['use_mscw_topdelivery_carry']) {
-                if ((boolean)$_POST['use-mscw-topdelivery-carry']) {
-                    $res = $this->module->installCarrier('TopDelivery', 'CARRY');
-                } else {
-                    $res = $this->module->uninstallCarrier('TopDelivery', 'CARRY');
-                }
-                if ($res){
-                    Configuration::updateValue('RS_AXIOMUS_MSCW_USE_TOPDELIVERY_CARRY', $_POST['use-mscw-topdelivery-carry']);
-                }
+                Configuration::updateValue('RS_AXIOMUS_MSCW_USE_AXIOMUS_CARRY', $_POST['use-mscw-axiomus-carry']);
             }
             if ((boolean)$_POST['use-mscw-dpd-carry'] != $this->settingsArray['use_mscw_dpd_carry']) {
-                if ((boolean)$_POST['use-mscw-dpd-carry']) {
-                    $res = $this->module->installCarrier('DPD', 'CARRY');
-                } else {
-                    $res = $this->module->uninstallCarrier('DPD', 'CARRY');
-                }
-                if ($res){
-                    Configuration::updateValue('RS_AXIOMUS_MSCW_USE_DPD_CARRY', $_POST['use-mscw-dpd-carry']);
-                }
+                Configuration::updateValue('RS_AXIOMUS_MSCW_USE_DPD_CARRY', $_POST['use-mscw-dpd-carry']);
             }
             if ((boolean)$_POST['use-mscw-boxberry-carry'] != $this->settingsArray['use_mscw_boxberry_carry']) {
-                if ((boolean)$_POST['use-mscw-boxberry-carry']) {
-                    $res = $this->module->installCarrier('BoxBerry', 'CARRY');
-                } else {
-                    $res = $this->module->uninstallCarrier('BoxBerry', 'CARRY');
-                }
-                if ($res){
-                    Configuration::updateValue('RS_AXIOMUS_MSCW_USE_BOXBERRY_CARRY', $_POST['use-mscw-boxberry-carry']);
-                }
+                Configuration::updateValue('RS_AXIOMUS_MSCW_USE_BOXBERRY_CARRY', $_POST['use-mscw-boxberry-carry']);
             }
             if ((boolean)$_POST['use-mscw-russianpost-carry'] != $this->settingsArray['use_mscw_russianpost_carry']) {
-                if ((boolean)$_POST['use-mscw-russianpost-carry']) {
-                    $res = $this->module->installCarrier('RussianPost', 'CARRY');
-                } else {
-                    $res = $this->module->uninstallCarrier('RussianPost', 'CARRY');
-                }
-                if ($res){
-                    Configuration::updateValue('RS_AXIOMUS_MSCW_USE_RUSSIANPOST_CARRY', $_POST['use-mscw-russianpost-carry']);
-                }
+                Configuration::updateValue('RS_AXIOMUS_MSCW_USE_RUSSIANPOST_CARRY', $_POST['use-mscw-russianpost-carry']);
             }
         }
         if (Tools::isSubmit('submitSettings')) {
