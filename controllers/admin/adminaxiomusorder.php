@@ -177,7 +177,7 @@ class AdminAxiomusOrderController extends ModuleAdminController
                 $wherestring = 'AND (carrier.id_carrier = '.$item;
                 $count++;
             }else{
-                $wherestring .= 'OR carrier.id_carrier = '.$item;
+                $wherestring .= ' OR carrier.id_carrier = '.$item;
             }
         }
         if (!empty($wherestring)){

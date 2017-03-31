@@ -1,6 +1,6 @@
 <?php
 
-class AdminAxiomusConfigController extends ModuleAdminController
+class AdminAxiomusConfigoldController extends ModuleAdminController
 {
 
     public function __construct()

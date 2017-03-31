@@ -1,222 +1,89 @@
 <?php
 
+include_once (_PS_MODULE_DIR_ . 'axiomuspostcarrier/models/AxiomusPost.php');
+
 class AdminAxiomusConfigController extends ModuleAdminController
 {
 
+    public $settingsArray = [];
+    public $maintab = 0;
+    public $subtab = 0;
+
     public function __construct()
     {
-
-//        $this->table = 'axiomus_config';
-//        $this->className = 'AxiomusPost';
-//        $this->identifier = 'id';
+        $this->settingsArray = $this->getSettingsArray(); //ToDo может в приват?
 
         //$this->context = Context::getContext();
         $this->bootstrap = true;
         parent::__construct();
-
-        $this->addRowAction('edit');
-        $this->addRowAction('delete');
-
-        $this->bulk_actions = array(
-            'delete' => array(
-                'text' => $this->l('Delete selected'),
-                'confirm' => $this->l('Delete selected items?')
-            )
-        );
-
-        $this->fields_options = array(
-            'general' => array(
-                'title' => $this->l('Основная конфигурация'),
-                'fields' => array(
-                    'RS_AXIOMUS_TOKEN' => array(
-                        'title' => $this->l('Токен к Axiomus API'),
-                        'cast' => 'strval',
-                        'type' => 'text',
-                        'size' => '16'
-                    ),
-                    'RS_AXIOMUS_CACHE_HOURLIFE' => array(
-                        'title' => $this->l('Время жизни записи в кеше (часов)'),
-                        'cast' => 'intval',
-                        'type' => 'text',
-                        'suffix' => 'час',
-                        'size' => '2' //ToDo не забыть валидацию
-                    )
-                ),
-                'submit' => array(
-                    'title' => $this->l('Сохранить'),
-                ),
-            ),
-            'use_delivery' => array(
-                'title' => $this->l('Использование доставки'),
-                'fields' => array(
-                    'RS_AXIOMUS_USE_AXIOMUS_DELIVERY' => array(
-                        'title' => $this->l('Использовать доставку Axiomus'),
-                        'desc' => $this->l('Если включено будет создана доставка Axiomus'),
-                        'cast' => 'boolval',
-                        'type' => 'bool'
-                    ),
-                    'RS_AXIOMUS_USE_TOPDELIVERY_DELIVERY' => array(
-                        'title' => $this->l('Использовать доставку TopDelivery'),
-                        'desc' => $this->l('Если включено будет создана доставка TopDelivery через Axiomus API'),
-                        'cast' => 'boolval',
-                        'type' => 'bool'
-                    ),
-                    'RS_AXIOMUS_USE_DPD_DELIVERY' => array(
-                        'title' => $this->l('Использовать доставку DPD'),
-                        'desc' => $this->l('Если включено будет создана доставка DPD через Axiomus API'),
-                        'cast' => 'boolval',
-                        'type' => 'bool'
-                    ),
-                    'RS_AXIOMUS_USE_BOXBERRY_DELIVERY' => array(
-                        'title' => $this->l('Использовать доставку BoxBerry'),
-                        'desc' => $this->l('Если включено будет создана доставка BoxBerry через Axiomus API'),
-                        'cast' => 'boolval',
-                        'type' => 'bool'
-                    ),
-                ),
-                'submit' => array(
-                    'title' => $this->l('Сохранить'),
-                ),
-            ),
-            'use_carry' => array(
-                'title' => $this->l('Использование самовывоза'),
-                'fields' => array(
-                    'RS_AXIOMUS_USE_AXIOMUS_CARRY' => array(
-                        'title' => $this->l('Использовать пункты самовывоза Axiomus'),
-                        'desc' => $this->l('Если включено будет создана доставка Axiomus с пунктами самовывоза'),
-                        'cast' => 'boolval',
-                        'type' => 'bool'
-                    ),
-                    'RS_AXIOMUS_USE_TOPDELIVERY_CARRY' => array(
-                        'title' => $this->l('Использовать пункты самовывоза TopDelivery'),
-                        'desc' => $this->l('Если включено будет создана доставка TopDelivery через Axiomus API с пунктами самовывоза'),
-                        'cast' => 'boolval',
-                        'type' => 'bool'
-                    ),
-                    'RS_AXIOMUS_USE_DPD_CARRY' => array(
-                        'title' => $this->l('Использовать пункты самовывоза DPD'),
-                        'desc' => $this->l('Если включено будет создана доставка DPD через Axiomus API с пунктами самовывоза'),
-                        'cast' => 'boolval',
-                        'type' => 'bool'
-                    ),
-                    'RS_AXIOMUS_USE_BOXBERRY_CARRY' => array(
-                        'title' => $this->l('Использовать пункты самовывоза BoxBerry'),
-                        'desc' => $this->l('Если включено будет создана доставка BoxBerry через Axiomus API с пунктами самовывоза'),
-                        'cast' => 'boolval',
-                        'type' => 'bool'
-                    ),
-                    'RS_AXIOMUS_USE_RUSSIANPOST_CARRY' => array(
-                        'title' => $this->l('Использовать пункты самовывоза Почты России'),
-                        'desc' => $this->l('Если включено будет создана доставка Почта России через Axiomus API с пунктами самовывоза'),
-                        'cast' => 'boolval',
-                        'type' => 'bool'
-                    ),
-                ),
-                'submit' => array(
-                    'title' => $this->l('Сохранить'),
-                ),
-            )
-        );
     }
 
     /*******************************************
      * Form to add new
      * */
-
-    public function renderForm()
+    public function getTemplatePath()
     {
-
-        $this->fields_form = array(
-            'legend' => array(
-                'title' => 'Legend',
-            ),
-            'input' => array(
-                array(
-                    'type' => 'select',
-                    'label' => $this->l('Country'),
-                    'name' => 'id_country',
-                    'options' => array(
-                        'query' => Country::getCountries($this->context->language->id, true, true),
-                        'id' => 'id_country',
-                        'name' => 'name',
-                        //'default' => array('value'=>$this->context->country->id, 'label'=>$this->l($this->context->country->name)),//array() or value???
-                    ),
-                    'required' => true,
-                ),
-                array(
-                    'type' => 'select',
-                    'label' => $this->l('State'),
-                    'name' => 'id_state',
-                    'required' => true,
-                    'options' => array(
-                        'query' => State::getStates(),
-                        'id' => 'id_state',
-                        'name' => 'name'
-                    ),
-                ),
-                array(
-                    'type' => 'select',
-                    'label' => 'Tariff Zone',
-                    'name' => 'id_post_zone',
-                    'options' => array(
-                        'query' => array(
-                            array(
-                                'id' => 1,
-                                'value' => 'Zone 1'
-                            ),
-                            array(
-                                'id' => 2,
-                                'value' => 'Zone 2'
-                            ),
-                            array(
-                                'id' => 3,
-                                'value' => 'Zone 3'
-                            ),
-                            array(
-                                'id' => 4,
-                                'value' => 'Zone 4'
-                            ),
-                            array(
-                                'id' => 5,
-                                'value' => 'Zone 5'
-                            ),
-                        ),
-                        'id' => 'id',
-                        'name' => 'value'
-                    ),
-                    'required' => true
-                ),
-                array(
-                    'type' => 'radio',
-                    'label' => $this->l('Status'),
-                    'name' => 'active',
-                    'required' => false,
-                    'is_bool' => true,
-                    'class' => 't',
-                    'values' => array(
-                        array(
-                            'id' => 'active_on',
-                            'value' => 1,
-                            'label' => $this->l('Enabled')
-                        ),
-                        array(
-                            'id' => 'active_off',
-                            'value' => 0,
-                            'label' => $this->l('Disabled')
-                        ),
-                    ),
-                    'desc' => $this->l('Enable delivery to this Country/State'),
-                ),
-            ),
-            'submit' => array(
-                'title' => $this->l('Save'),
-                'class' => 'button',
-            ),
-        );
-
-        return parent::renderForm();
+        return _PS_MODULE_DIR_.$this->module->name.'/views/templates/admin/';
     }
 
+    public function createTemplate($tpl_name) {
+        if (file_exists($this->getTemplatePath() . $tpl_name) && $this->viewAccess())
+            return $this->context->smarty->createTemplate($this->getTemplatePath() . $tpl_name, $this->context->smarty);
+        return parent::createTemplate($tpl_name);
+    }
+
+    public function initContent(){
+        $this->_path = _PS_ROOT_DIR_.$this->module->getPathUri();
+        $this->context->controller->addJS($this->_path.'/views/js/jquery.timepicker.min.js');
+        $this->context->controller->addCSS($this->_path.'/views/css/jquery.timepicker.css', 'all');
+
+        parent::initContent();
+
+        $this->context->smarty->assign($this->getSettingsArray());
+        $this->context->smarty->assign($this->module->AxiomusPost->getWeightPriceArray());
+        $this->context->smarty->assign('AxiomusPost', $this->module->AxiomusPost);
+        $this->setTemplate('view.tpl');
+    }
+
+    public function getSettingsArray(){
+        return [
+            //CPU
+            'maintab' => $this->maintab,
+            'subtab' => $this->subtab,
+            //Moscow
+            'use_mscw_axiomus'              => Configuration::get('RS_AXIOMUS_MSCW_USE_AXIOMUS'),
+            'use_mscw_strizh'               => Configuration::get('RS_AXIOMUS_MSCW_USE_STRIZH'),
+            'use_mscw_pek'                  => Configuration::get('RS_AXIOMUS_MSCW_USE_PEK'),
+            'use_mscw_axiomus_carry'        => Configuration::get('RS_AXIOMUS_MSCW_USE_AXIOMUS_CARRY'),
+            'use_mscw_dpd_carry'            => Configuration::get('RS_AXIOMUS_MSCW_USE_DPD_CARRY'),
+            'use_mscw_boxberry_carry'       => Configuration::get('RS_AXIOMUS_MSCW_USE_BOXBERRY_CARRY'),
+            'use_mscw_russianpost_carry'    => Configuration::get('RS_AXIOMUS_MSCW_USE_RUSSIANPOST_CARRY'),
+            //Piter
+            'use_ptr_axiomus'              => Configuration::get('RS_AXIOMUS_PTR_USE_AXIOMUS'),
+            'use_ptr_strizh'               => Configuration::get('RS_AXIOMUS_PTR_USE_STRIZH'),
+            'use_ptr_pek'                  => Configuration::get('RS_AXIOMUS_PTR_USE_PEK'),
+            'use_ptr_axiomus_carry'        => Configuration::get('RS_AXIOMUS_PTR_USE_AXIOMUS_CARRY'),
+            'use_ptr_dpd_carry'            => Configuration::get('RS_AXIOMUS_PTR_USE_DPD_CARRY'),
+            'use_ptr_boxberry_carry'       => Configuration::get('RS_AXIOMUS_PTR_USE_BOXBERRY_CARRY'),
+            'use_ptr_russianpost_carry'    => Configuration::get('RS_AXIOMUS_PTR_USE_RUSSIANPOST_CARRY'),
+            //region
+            'use_region_axiomus_carry'        => Configuration::get('RS_AXIOMUS_REGION_USE_AXIOMUS_CARRY'),
+            'use_region_dpd_carry'            => Configuration::get('RS_AXIOMUS_REGION_USE_DPD_CARRY'),
+            'use_region_boxberry_carry'       => Configuration::get('RS_AXIOMUS_REGION_USE_BOXBERRY_CARRY'),
+            'use_region_russianpost_carry'    => Configuration::get('RS_AXIOMUS_REGION_USE_RUSSIANPOST_CARRY'),
+            //Settings
+            'axiomus_token'                => Configuration::get('RS_AXIOMUS_TOKEN'),
+            'axiomus_cache_hourlife'       => Configuration::get('RS_AXIOMUS_CACHE_HOURLIFE'),
+            //Moscow
+            'mscw_axiomus_manual'          => Configuration::get('RS_AXIOMUS_MSCW_AXIOMUS_MANUAL'),
+            'mscw_axiomus_increment'       => Configuration::get('RS_AXIOMUS_MSCW_AXIOMUS_INCREMENT'),
+//            'mscw_axiomus_weight'          => Configuration::getMultiple('RS_AXIOMUS_MSCW_AXIOMUS_PRICE'),
+        ];
+    }
+
+    /**
+     *
+     */
     public function postProcess()
     {
         //ToDo добавить проверку токена
@@ -224,87 +91,202 @@ class AdminAxiomusConfigController extends ModuleAdminController
             return;
         }
 
-        if (Tools::isSubmit('submitOptionsaxiomus_post')) {
-            //Delivery
+        $this->settingsArray = $this->getSettingsArray();
 
-            if ((boolean)$_POST['RS_AXIOMUS_USE_AXIOMUS_DELIVERY'] != (boolean)Configuration::get('RS_AXIOMUS_USE_AXIOMUS_DELIVERY')) {
-                if ((boolean)$_POST['RS_AXIOMUS_USE_AXIOMUS_DELIVERY']) {
-                    $this->module->installCarrier('Axiomus', 'DELIVERY');
-                } else {
-                    $this->module->uninstallCarrier('Axiomus', 'DELIVERY');
-                }
+        if (Tools::isSubmit('submitUseDelivery')) {
+            $this->maintab = 0;
+            $this->subtab = 0;
+            //Delivery
+            if ((boolean)$_POST['use-mscw-axiomus'] != $this->settingsArray['use_mscw_axiomus']) {
+                Configuration::updateValue('RS_AXIOMUS_MSCW_USE_AXIOMUS', $_POST['use-mscw-axiomus']);
             }
-            if ((boolean)$_POST['RS_AXIOMUS_USE_TOPDELIVERY_DELIVERY'] != (boolean)Configuration::get('RS_AXIOMUS_USE_TOPDELIVERY_DELIVERY')) { 
-                if ((boolean)$_POST['RS_AXIOMUS_USE_TOPDELIVERY_DELIVERY']) {
-                    $this->module->installCarrier('TopDelivery', 'DELIVERY');
-                } else {
-                    $this->module->uninstallCarrier('TopDelivery', 'DELIVERY');
-                }
+            if ((boolean)$_POST['use-mscw-strizh'] != $this->settingsArray['use_mscw_strizh']) {
+                Configuration::updateValue('RS_AXIOMUS_MSCW_USE_STRIZH', $_POST['use-mscw-strizh']);
             }
-            if ((boolean)$_POST['RS_AXIOMUS_USE_DPD_DELIVERY'] != (boolean)Configuration::get('RS_AXIOMUS_USE_DPD_DELIVERY')) { 
-                if ((boolean)$_POST['RS_AXIOMUS_USE_DPD_DELIVERY']) {
-                    $this->module->installCarrier('DPD', 'DELIVERY');
-                } else {
-                    $this->module->uninstallCarrier('DPD', 'DELIVERY');
-                }
-            }
-            if ((boolean)$_POST['RS_AXIOMUS_USE_BOXBERRY_DELIVERY'] != (boolean)Configuration::get('RS_AXIOMUS_USE_BOXBERRY_DELIVERY')) { 
-                if ((boolean)$_POST['RS_AXIOMUS_USE_BOXBERRY_DELIVERY']) {
-                    $this->module->installCarrier('BoxBerry', 'DELIVERY');
-                } else {
-                    $this->module->uninstallCarrier('BoxBerry', 'DELIVERY');
-                }
+            if ((boolean)$_POST['use-mscw-pek'] != $this->settingsArray['use_mscw_pek']) {
+                Configuration::updateValue('RS_AXIOMUS_MSCW_USE_PEK', $_POST['use-mscw-pek']);
             }
             //Carry
-            if ((boolean)$_POST['RS_AXIOMUS_USE_AXIOMUS_CARRY'] != (boolean)Configuration::get('RS_AXIOMUS_USE_AXIOMUS_CARRY')) { 
-                if ((boolean)$_POST['RS_AXIOMUS_USE_AXIOMUS_CARRY']) {
-                    $this->module->installCarrier('Axiomus', 'CARRY');
-                } else {
-                    $this->module->uninstallCarrier('Axiomus', 'CARRY');
-                }
+            if ((boolean)$_POST['use-mscw-axiomus-carry'] != $this->settingsArray['use_mscw_axiomus_carry']) {
+                Configuration::updateValue('RS_AXIOMUS_MSCW_USE_AXIOMUS_CARRY', $_POST['use-mscw-axiomus-carry']);
             }
-            if ((boolean)$_POST['RS_AXIOMUS_USE_TOPDELIVERY_CARRY'] != (boolean)Configuration::get('RS_AXIOMUS_USE_TOPDELIVERY_CARRY')) { 
-                if ((boolean)$_POST['RS_AXIOMUS_USE_TOPDELIVERY_CARRY']) {
-                    $this->module->installCarrier('TopDelivery', 'CARRY');
-                } else {
-                    $this->module->uninstallCarrier('TopDelivery', 'CARRY');
-                }
+            if ((boolean)$_POST['use-mscw-dpd-carry'] != $this->settingsArray['use_mscw_dpd_carry']) {
+                Configuration::updateValue('RS_AXIOMUS_MSCW_USE_DPD_CARRY', $_POST['use-mscw-dpd-carry']);
             }
-            if ((boolean)$_POST['RS_AXIOMUS_USE_DPD_CARRY'] != (boolean)Configuration::get('RS_AXIOMUS_USE_DPD_CARRY')) { 
-                if ((boolean)$_POST['RS_AXIOMUS_USE_DPD_CARRY']) {
-                    $this->module->installCarrier('DPD', 'CARRY');
-                } else {
-                    $this->module->uninstallCarrier('DPD', 'CARRY');
-                }
+            if ((boolean)$_POST['use-mscw-boxberry-carry'] != $this->settingsArray['use_mscw_boxberry_carry']) {
+                Configuration::updateValue('RS_AXIOMUS_MSCW_USE_BOXBERRY_CARRY', $_POST['use-mscw-boxberry-carry']);
             }
-            if ((boolean)$_POST['RS_AXIOMUS_USE_BOXBERRY_CARRY'] != (boolean)Configuration::get('RS_AXIOMUS_USE_BOXBERRY_CARRY')) { 
-                if ((boolean)$_POST['RS_AXIOMUS_USE_BOXBERRY_CARRY']) {
-                    $this->module->installCarrier('BoxBerry', 'CARRY');
-                } else {
-                    $this->module->uninstallCarrier('BoxBerry', 'CARRY');
-                }
-            }
-            if ((boolean)$_POST['RS_AXIOMUS_USE_RUSSIANPOST_CARRY'] != (boolean)Configuration::get('RS_AXIOMUS_USE_RUSSIANPOST_CARRY')) { 
-                if ((boolean)$_POST['RS_AXIOMUS_USE_RUSSIANPOST_CARRY']) {
-                    $this->module->installCarrier('RussianPost', 'CARRY');
-                } else {
-                    $this->module->uninstallCarrier('RussianPost', 'CARRY');
-                }
+            if ((boolean)$_POST['use-mscw-russianpost-carry'] != $this->settingsArray['use_mscw_russianpost_carry']) {
+                Configuration::updateValue('RS_AXIOMUS_MSCW_USE_RUSSIANPOST_CARRY', $_POST['use-mscw-russianpost-carry']);
             }
         }
+        if (Tools::isSubmit('submitSettings')) {
+            $this->maintab = 2;
+            $this->subtab = 0;
+            if ($_POST['axiomus-token'] != $this->settingsArray['axiomus_token']) {
+                Configuration::updateValue('RS_AXIOMUS_TOKEN', $_POST['axiomus-token']);
+            }
+            if ($_POST['axiomus-cache-hourlife'] != $this->settingsArray['axiomus_cache_hourlife']) {
+                Configuration::updateValue('RS_AXIOMUS_CACHE_HOURLIFE', $_POST['axiomus-cache-hourlife']);
+            }
+        }
+        if (Tools::isSubmit('submitMscwAxiomusSettings')){
+            $this->maintab = 0;
+            $this->subtab = 1;
+            if ((boolean)$_POST['mscw-axiomus-manual'] != $this->settingsArray['mscw_axiomus_manual']) {
+                Configuration::updateValue('RS_AXIOMUS_MSCW_AXIOMUS_MANUAL', $_POST['mscw-axiomus-manual']);
+            }
+        }
+        if (Tools::isSubmit('submitMscwAxiomusIncrement')) {
+            $this->maintab = 0;
+            $this->subtab = 1;
+            if ($_POST['mscw-axiomus-increment'] != $this->settingsArray['mscw_axiomus_increment']) {
+                Configuration::updateValue('RS_AXIOMUS_MSCW_AXIOMUS_INCREMENT', $_POST['mscw-axiomus-increment']);
+            }
+        }
+
+
+        //weightype
+        if (Tools::isSubmit('submitMscwAxiomusWeightType')) {
+            $this->maintab = 0;
+            $this->subtab = 0;
+            $this->module->AxiomusPost->insertWeightType($_POST['mscw-axiomus-weighttype-name'], $_POST['mscw-axiomus-weighttype-weightfrom'], $_POST['mscw-axiomus-weighttype-weightto']);
+        }
+        if (Tools::isSubmit('updateMscwAxiomusWeightType')) {
+            $this->maintab = 0;
+            $this->subtab = 0;
+            $this->module->AxiomusPost->updateWeightType($_POST['mscw-axiomus-weighttype-id'], $_POST['mscw-axiomus-weighttype-name'], $_POST['mscw-axiomus-weighttype-weightfrom'], $_POST['mscw-axiomus-weighttype-weightto']);
+        }
+        if (Tools::isSubmit('deleteMscwAxiomusWeightType')) {
+            $this->maintab = 0;
+            $this->subtab = 0;
+            $this->module->AxiomusPost->deleteWeightType((int)$_POST['mscw-axiomus-weighttype-id']);
+        }
+        //timetype
+        if (Tools::isSubmit('submitMscwAxiomusTimeType')) {
+            $this->maintab = 0;
+            $this->subtab = 0;
+            $this->module->AxiomusPost->insertTimeType($_POST['mscw-axiomus-timetype-name'], $_POST['mscw-axiomus-timetype-timefrom'], $_POST['mscw-axiomus-timetype-timeto']);
+        }
+        if (Tools::isSubmit('updateMscwAxiomusTimeType')) {
+            $this->maintab = 0;
+            $this->subtab = 0;
+            $this->module->AxiomusPost->updateTimeType($_POST['mscw-axiomus-timetype-id'], $_POST['mscw-axiomus-timetype-name'], $_POST['mscw-axiomus-timetype-timefrom'], $_POST['mscw-axiomus-timetype-timeto']);
+        }
+        if (Tools::isSubmit('deleteMscwAxiomusTimeType')) {
+            $this->maintab = 0;
+            $this->subtab = 0;
+            $this->module->AxiomusPost->deleteTimeType((int)$_POST['mscw-axiomus-timetype-id']);
+        }
+        //kadtype
+        if (Tools::isSubmit('submitMscwAxiomusKadType')) {
+            $this->maintab = 0;
+            $this->subtab = 1;
+            $this->module->AxiomusPost->insertKadType('Москва', $_POST['mscw-axiomus-kadtype-name'], $_POST['mscw-axiomus-kadtype-rangefrom'], $_POST['mscw-axiomus-kadtype-rangeto']);
+        }
+        if (Tools::isSubmit('updateMscwAxiomusKadType')) {
+            $this->maintab = 0;
+            $this->subtab = 1;
+            $this->module->AxiomusPost->updateKadType($_POST['mscw-axiomus-kadtype-id'], 'Москва', $_POST['mscw-axiomus-kadtype-name'], $_POST['mscw-axiomus-kadtype-rangefrom'], $_POST['mscw-axiomus-kadtype-rangeto']);
+        }
+        if (Tools::isSubmit('deleteMscwAxiomusKadType')) {
+            $this->maintab = 0;
+            $this->subtab = 1;
+            $this->module->AxiomusPost->deleteKadType((int)$_POST['mscw-axiomus-kadtype-id']);
+        }
+        //weightprice
+        if (Tools::isSubmit('submitMscwAxiomusWeightPrice')) {
+            $this->maintab = 0;
+            $this->subtab = 1;
+            $this->module->AxiomusPost->insertWeightPrice('Москва', 'axiomus',$_POST['mscw-axiomus-weightprice-carry'], $_POST['mscw-axiomus-weightprice-type'], $_POST['mscw-axiomus-weightprice-sum']);
+        }
+        if (Tools::isSubmit('updateMscwAxiomusWeightPrice')) {
+            $this->maintab = 0;
+            $this->subtab = 1;
+            $this->module->AxiomusPost->updateWeightPrice($_POST['mscw-axiomus-weightprice-id'], 'Москва', 'axiomus',$_POST['mscw-axiomus-weightprice-carry'], $_POST['mscw-axiomus-weightprice-type'], $_POST['mscw-axiomus-weightprice-sum']);
+        }
+        if (Tools::isSubmit('deleteMscwAxiomusWeightPrice')) {
+            $this->maintab = 0;
+            $this->subtab = 1;
+            $this->module->AxiomusPost->deleteConditionPrice((int)$_POST['mscw-axiomus-weightprice-id']);
+        }
+        //conditionprice
+        if (Tools::isSubmit('submitMscwAxiomusConditionPrice')) {
+            $this->maintab = 0;
+            $this->subtab = 1;
+            if(isset($_POST['mscw-axiomus-conditionprice-carry'])){
+                $carry = ($_POST['mscw-axiomus-conditionprice-carry']=='on')?true:false;
+            }else{
+                $carry = false;
+            }
+            $this->module->AxiomusPost->insertConditionPrice('Москва', 'axiomus', $carry, $_POST['mscw-axiomus-conditionprice-sumfrom'], $_POST['mscw-axiomus-conditionprice-sumto'], $_POST['mscw-axiomus-conditionprice-timetype'], $_POST['mscw-axiomus-conditionprice-kadtype'], $_POST['mscw-axiomus-conditionprice-sum']);
+        }
+        if (Tools::isSubmit('updateMscwAxiomusConditionPrice')) {
+            $this->maintab = 0;
+            $this->subtab = 1;
+            $this->module->AxiomusPost->updateConditionPrice($_POST['mscw-axiomus-conditionprice-id'], 'Москва', 'axiomus', ($_POST['mscw-axiomus-conditionprice-carry']=='on')?true:false, $_POST['mscw-axiomus-conditionprice-sumfrom'], $_POST['mscw-axiomus-conditionprice-sumto'], $_POST['mscw-axiomus-conditionprice-timetype'], $_POST['mscw-axiomus-conditionprice-kadtype'], $_POST['mscw-axiomus-conditionprice-sum']);
+        }
+        if (Tools::isSubmit('deleteMscwAxiomusConditionPrice')) {
+            $this->maintab = 0;
+            $this->subtab = 1;
+            $this->module->AxiomusPost->deleteConditionPrice((int)$_POST['mscw-axiomus-conditionprice-id']);
+        }
+        //cachecarry
+        if (Tools::isSubmit('submitRefreshCacheCarryAddressesAxiomus')){
+            $this->maintab = 0;
+            $this->subtab = 1;
+            $this->module->AxiomusPost->refreshCarryAddressCacheAxiomus();
+        }
+        if (Tools::isSubmit('submitRefreshCacheCarryAddressesDPD')){
+            $this->maintab = 0;
+            $this->subtab = 1;
+            $this->module->AxiomusPost->refreshCarryAddressCacheDPD();
+        }
+        if (Tools::isSubmit('submitRefreshCacheCarryAddressesBoxBerry')){
+            $this->maintab = 0;
+            $this->subtab = 1;
+            $this->module->AxiomusPost->refreshCarryAddressCacheBoxBerry();
+        }
+        //carry
+        if (Tools::isSubmit('submitMscwAxiomusCarryPrice')){
+            $this->maintab = 0;
+            $this->subtab = 6;
+            $this->module->AxiomusPost->setCarryPrice('Москва', 'axiomus', (int)$_POST['mscw-carry-axiomus-price']);
+        }
+        if (Tools::isSubmit('submitMscwDPDPrice')){
+            $this->maintab = 0;
+            $this->subtab = 7;
+            $this->module->AxiomusPost->setCarryPrice('Москва', 'dpd', (int)$_POST['mscw-carry-dpd-price']);
+        }
+        if (Tools::isSubmit('submitMscwBoxBerryPrice')){
+            $this->maintab = 0;
+            $this->subtab = 8;
+            $this->module->AxiomusPost->setCarryPrice('Москва', 'boxberry', (int)$_POST['mscw-carry-boxberry-price']);
+        }
+
+
+
         parent::postProcess();
     }
-
-
 
     public function processSave()
     {
         parent::processSave();
     }
 
+    public function renderView(){
+        parent::renderView();
+    }
+
     public function initProcess()
     {
+
         parent::initProcess();
+//        global $smarty;
+//        $smarty->display(_PS_MODULE_DIR_ .'axiomuspostcarrier/views/templates/admin/view.tpl');
+
+
+
     }
 
     protected function processUpdateOptions()
