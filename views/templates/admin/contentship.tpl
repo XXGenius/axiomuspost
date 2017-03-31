@@ -10,7 +10,7 @@
     {if (!$axiomus_succes)}
         <button type="submit" class="btn btn-success" id="submitSendToAxiomus">Отправить через Axiomus</button>
         <button type="submit" class="btn btn-success" id="submitSendToStrizh">Отправить через Стриж</button>
-        <button type="submit" class="btn btn-success" id="submitSendToPek">Отправить через ПЭК</button>
+        <button type="submit" class="btn btn-success" id="submitSendTopecom">Отправить через ПЭК</button>
     {/if}
 </div>
 
@@ -20,13 +20,13 @@
             updatePrice('axiomus', 'new');
         });
         $('#submitSendToAxiomusReturn').click(function () {
-            updatePrice('', 'delete');
+            updatePrice('{$delivery_name}', 'delete');
         });
         $('#submitSendToStrizh').click(function () {
             updatePrice('strizh', 'new');
         });
-        $('#submitSendToAxiomusReturn').click(function () {
-            updatePrice('', 'delete');
+        $('#submitSendTopecom').click(function () {
+            updatePrice('pecom', 'new');
         });
         function updatePrice(delivery = '', action) {
             data = 'delivery='+delivery+'&action='+action+'&order_id={$order_id}&cart_id={$cart_id}';

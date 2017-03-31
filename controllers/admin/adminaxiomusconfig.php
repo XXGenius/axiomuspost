@@ -53,24 +53,27 @@ class AdminAxiomusConfigController extends ModuleAdminController
             //Moscow
             'use_mscw_axiomus'              => Configuration::get('RS_AXIOMUS_MSCW_USE_AXIOMUS'),
             'use_mscw_strizh'               => Configuration::get('RS_AXIOMUS_MSCW_USE_STRIZH'),
-            'use_mscw_pek'                  => Configuration::get('RS_AXIOMUS_MSCW_USE_PEK'),
+            'use_mscw_pecom'                  => Configuration::get('RS_AXIOMUS_MSCW_USE_pecom'),
             'use_mscw_axiomus_carry'        => Configuration::get('RS_AXIOMUS_MSCW_USE_AXIOMUS_CARRY'),
             'use_mscw_dpd_carry'            => Configuration::get('RS_AXIOMUS_MSCW_USE_DPD_CARRY'),
             'use_mscw_boxberry_carry'       => Configuration::get('RS_AXIOMUS_MSCW_USE_BOXBERRY_CARRY'),
             'use_mscw_russianpost_carry'    => Configuration::get('RS_AXIOMUS_MSCW_USE_RUSSIANPOST_CARRY'),
+            'use_mscw_pecom_carry'          => Configuration::get('RS_AXIOMUS_MSCW_USE_PECOM_CARRY'),
             //Piter
             'use_ptr_axiomus'              => Configuration::get('RS_AXIOMUS_PTR_USE_AXIOMUS'),
             'use_ptr_strizh'               => Configuration::get('RS_AXIOMUS_PTR_USE_STRIZH'),
-            'use_ptr_pek'                  => Configuration::get('RS_AXIOMUS_PTR_USE_PEK'),
+            'use_ptr_pecom'                  => Configuration::get('RS_AXIOMUS_PTR_USE_pecom'),
             'use_ptr_axiomus_carry'        => Configuration::get('RS_AXIOMUS_PTR_USE_AXIOMUS_CARRY'),
             'use_ptr_dpd_carry'            => Configuration::get('RS_AXIOMUS_PTR_USE_DPD_CARRY'),
             'use_ptr_boxberry_carry'       => Configuration::get('RS_AXIOMUS_PTR_USE_BOXBERRY_CARRY'),
             'use_ptr_russianpost_carry'    => Configuration::get('RS_AXIOMUS_PTR_USE_RUSSIANPOST_CARRY'),
+            'use_ptr_pecom_carry'          => Configuration::get('RS_AXIOMUS_PTR_USE_PECOM_CARRY'),
             //region
             'use_region_axiomus_carry'        => Configuration::get('RS_AXIOMUS_REGION_USE_AXIOMUS_CARRY'),
             'use_region_dpd_carry'            => Configuration::get('RS_AXIOMUS_REGION_USE_DPD_CARRY'),
             'use_region_boxberry_carry'       => Configuration::get('RS_AXIOMUS_REGION_USE_BOXBERRY_CARRY'),
             'use_region_russianpost_carry'    => Configuration::get('RS_AXIOMUS_REGION_USE_RUSSIANPOST_CARRY'),
+            'use_region_pecom_carry'          => Configuration::get('RS_AXIOMUS_REGION_USE_PECOM_CARRY'),
             //Settings
             'axiomus_token'                => Configuration::get('RS_AXIOMUS_TOKEN'),
             'axiomus_cache_hourlife'       => Configuration::get('RS_AXIOMUS_CACHE_HOURLIFE'),
@@ -103,8 +106,8 @@ class AdminAxiomusConfigController extends ModuleAdminController
             if ((boolean)$_POST['use-mscw-strizh'] != $this->settingsArray['use_mscw_strizh']) {
                 Configuration::updateValue('RS_AXIOMUS_MSCW_USE_STRIZH', $_POST['use-mscw-strizh']);
             }
-            if ((boolean)$_POST['use-mscw-pek'] != $this->settingsArray['use_mscw_pek']) {
-                Configuration::updateValue('RS_AXIOMUS_MSCW_USE_PEK', $_POST['use-mscw-pek']);
+            if ((boolean)$_POST['use-mscw-pecom'] != $this->settingsArray['use_mscw_pecom']) {
+                Configuration::updateValue('RS_AXIOMUS_MSCW_USE_pecom', $_POST['use-mscw-pecom']);
             }
             //Carry
             if ((boolean)$_POST['use-mscw-axiomus-carry'] != $this->settingsArray['use_mscw_axiomus_carry']) {
@@ -118,6 +121,9 @@ class AdminAxiomusConfigController extends ModuleAdminController
             }
             if ((boolean)$_POST['use-mscw-russianpost-carry'] != $this->settingsArray['use_mscw_russianpost_carry']) {
                 Configuration::updateValue('RS_AXIOMUS_MSCW_USE_RUSSIANPOST_CARRY', $_POST['use-mscw-russianpost-carry']);
+            }
+            if ((boolean)$_POST['use-mscw-pecom-carry'] != $this->settingsArray['use_mscw_pecom_carry']) {
+                Configuration::updateValue('RS_AXIOMUS_MSCW_USE_PECOM_CARRY', $_POST['use-mscw-pecom-carry']);
             }
         }
         if (Tools::isSubmit('submitSettings')) {
@@ -247,6 +253,11 @@ class AdminAxiomusConfigController extends ModuleAdminController
             $this->subtab = 1;
             $this->module->AxiomusPost->refreshCarryAddressCacheBoxBerry();
         }
+        if (Tools::isSubmit('submitRefreshCacheCarryAddressesPecom')){
+            $this->maintab = 0;
+            $this->subtab = 1;
+            $this->module->AxiomusPost->refreshCarryAddressCachePecom();
+        }
         //carry
         if (Tools::isSubmit('submitMscwAxiomusCarryPrice')){
             $this->maintab = 0;
@@ -264,7 +275,7 @@ class AdminAxiomusConfigController extends ModuleAdminController
             $this->module->AxiomusPost->setCarryPrice('Москва', 'boxberry', (int)$_POST['mscw-carry-boxberry-price']);
         }
 
-
+        $ls = AxiomusXml::getCarryAddressesPecom();
 
         parent::postProcess();
     }

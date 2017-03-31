@@ -105,7 +105,7 @@
                                         <td id="address"></td>
                                     </tr>
                                     <tr>
-                                        <td>Время работы:</td>
+                                        <td id="work-schedule-title">Время работы:</td>
                                         <td id="work-schedule"></td>
                                     </tr>
                                     <tr>
@@ -199,7 +199,13 @@
                 for (var i in jsonArray) {
                     if(jsonArray[i].id == selectedcarryaddress){
                         $('#address').text(jsonArray[i].address);
-                        $('#work-schedule').text(jsonArray[i].work_schedule);
+                        if (jsonArray[i].work_schedule != null) {
+                            $('#work-schedule').text(jsonArray[i].work_schedule);
+                            $('#work-schedule-title').show();
+                        }else{
+                            $('#work-schedule').text('');
+                            $('#work-schedule-title').hide();
+                        }
                         if (jsonArray[i].path != null) {
                             $('#path').text(jsonArray[i].path);
                         }else{
@@ -243,7 +249,14 @@
                             $('#carry_address_block').show();
 
                             $('#address').text(jsonArray[0].address);
-                            $('#work-schedule').text(jsonArray[0].work_schedule);
+                            console.log(jsonArray[0].work_schedule);
+                            if (jsonArray[0].work_schedule != null) {
+                                $('#work-schedule').text(jsonArray[0].work_schedule);
+                                $('#work-schedule-title').show();
+                            }else{
+                                $('#work-schedule').text('');
+                                $('#work-schedule-title').hide();
+                            }
                             if (jsonArray[0].path != null) {
                                 $('#path').text(jsonArray[0].path);
                             }else{

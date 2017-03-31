@@ -23,6 +23,7 @@ class AxiomusPost extends ObjectModel {
     public $tableCacheCarryBoxBerryWithPrefix;
 
     public $tableCarryPriceWithPrefix;
+    public $tableCacheCarryPecomWithPrefix;
 
     protected $dbconn;
     public $priceTypes = [1, 2, 3, 4, 5, 6, 7];
@@ -42,6 +43,7 @@ class AxiomusPost extends ObjectModel {
         'tableCacheCarryAxiomus' => 'axiomus_cache_carry_axiomus',
         'tableCacheCarryDPD' => 'axiomus_cache_carry_dpd',
         'tableCacheCarryBoxBerry' => 'axiomus_cache_carry_boxberry',
+        'tableCacheCarrypecom' => 'axiomus_cache_carry_pecom',
         'tableCarryPrice' => 'axiomus_carry_price',
 
         'primary' => 'id',//Это нужно для работы формы добавления
@@ -52,7 +54,6 @@ class AxiomusPost extends ObjectModel {
 
         parent::__construct($id, $id_lang, $id_shop);
 
-        $this->AxiomusXML = new AxiomusXml();
 
         $this->tableCacheWithPrefix = _DB_PREFIX_. AxiomusPost::$definition['tableCache'];
         $this->tableOrderWithPrefix = _DB_PREFIX_. AxiomusPost::$definition['tableOrder'];
@@ -64,6 +65,7 @@ class AxiomusPost extends ObjectModel {
         $this->tableCacheCarryAxiomusWithPrefix = _DB_PREFIX_. AxiomusPost::$definition['tableCacheCarryAxiomus'];
         $this->tableCacheCarryDPDWithPrefix = _DB_PREFIX_. AxiomusPost::$definition['tableCacheCarryDPD'];
         $this->tableCacheCarryBoxBerryWithPrefix = _DB_PREFIX_. AxiomusPost::$definition['tableCacheCarryBoxBerry'];
+        $this->tableCacheCarryPecomWithPrefix = _DB_PREFIX_. AxiomusPost::$definition['tableCacheCarrypecom'];
         $this->tableCarryPriceWithPrefix = _DB_PREFIX_. AxiomusPost::$definition['tableCarryPrice'];
     }
 
@@ -285,6 +287,36 @@ class AxiomusPost extends ObjectModel {
             return false;
         }
 
+
+        $sql = "CREATE TABLE IF NOT EXISTS `{$this->tableCacheCarryPecomWithPrefix}` (" .
+            '`id` INT(11) NOT NULL AUTO_INCREMENT,' .
+            '`datetime` DATETIME DEFAULT NOW() NOT NULL,' .
+            '`warehouseId` VARCHAR(255) NOT NULL,' .
+            '`divisionId` VARCHAR(255) NOT NULL,' .
+            '`name` VARCHAR(255),' .
+            '`divisionName` VARCHAR(255),' .
+            '`city_name` VARCHAR(255),'.
+            '`address` VARCHAR(255),' .
+            '`addressDivision` VARCHAR(255),' .
+            '`isAcceptanceOnly` BOOLEAN,' .
+            '`isFreightSurcharge` BOOLEAN,' .
+            '`coordinates` VARCHAR(255),' .
+            '`email` VARCHAR(255),' .
+            '`phone` VARCHAR(255),' .
+            '`isRestrictions` BOOLEAN,' .
+            '`maxWeight` INT(11),' .
+            '`maxVolume` INT(11),' .
+            '`maxWeightPerPlace` INT(11),' .
+            '`maxDimention` INT(11),' .
+            '`work_schedule` VARCHAR(255),' .
+
+            'PRIMARY KEY (`id`)' .
+            ') DEFAULT CHARSET=utf8;';
+
+        if (!Db::getInstance()->execute($sql, false)) {
+            return false;
+        }
+
         return true;
     }
 
@@ -488,6 +520,11 @@ class AxiomusPost extends ObjectModel {
         }
 
         $sql = "DROP TABLE IF EXISTS `".$this->tableCarryPriceWithPrefix."`;";
+        if (!Db::getInstance()->execute($sql)) {
+            return false;
+        }
+
+        $sql = "DROP TABLE IF EXISTS `".$this->tableCacheCarryPecomWithPrefix."`;";
         if (!Db::getInstance()->execute($sql)) {
             return false;
         }
@@ -799,9 +836,9 @@ class AxiomusPost extends ObjectModel {
         }
     }
 
-    public function setOrderResponse($id_cart, $oid, $okey){
+    public function setOrderResponse($id_cart, $oid, $okay = null){
         if ($this->issetOrder($id_cart)){
-            $res = Db::getInstance()->update(AxiomusPost::$definition['tableOrder'], ['oid' => $oid, 'okay' => $okey],"`id_cart` = {$id_cart}");
+            $res = Db::getInstance()->update(AxiomusPost::$definition['tableOrder'], ['oid' => $oid, 'okay' => $okay],"`id_cart` = {$id_cart}");
             if (!$res){
                 return false;
             }else{
@@ -835,7 +872,7 @@ class AxiomusPost extends ObjectModel {
         $arr = [];
         if ($city=='Москва') {
             if (Configuration::get('RS_AXIOMUS_MSCW_USE_AXIOMUS_CARRY')) {
-                $arr[Configuration::get('RS_AXIOMUS_oid_CARRY')] = 'axiomus';
+                $arr[Configuration::get('RS_AXIOMUS_ID_AXIOMUS_CARRY')] = 'axiomus';
             }
             if (Configuration::get('RS_AXIOMUS_MSCW_USE_DPD_CARRY')) {
                 $arr[Configuration::get('RS_AXIOMUS_ID_DPD_CARRY')] = 'dpd';
@@ -845,6 +882,9 @@ class AxiomusPost extends ObjectModel {
             }
             if (Configuration::get('RS_AXIOMUS_MSCW_USE_RUSSIANPOST_CARRY')) {
                 $arr[Configuration::get('RS_AXIOMUS_ID_RUSSIANPOST_CARRY')] = 'russianpost';
+            }
+            if (Configuration::get('RS_AXIOMUS_MSCW_USE_PECOM_CARRY')) {
+                $arr[Configuration::get('RS_AXIOMUS_ID_PECOM_CARRY')] = 'pecom';
             }
         }elseif ($city='Санкт-Петербург'){
             if (Configuration::get('RS_AXIOMUS_PTR_USE_AXIOMUS_CARRY')) {
@@ -859,6 +899,9 @@ class AxiomusPost extends ObjectModel {
             if (Configuration::get('RS_AXIOMUS_PTR_USE_RUSSIANPOST_CARRY')) {
                 $arr[Configuration::get('RS_AXIOMUS_ID_RUSSIANPOST_CARRY')] = 'russianpost';
             }
+            if (Configuration::get('RS_AXIOMUS_PTR_USE_PECOM_CARRY')) {
+                $arr[Configuration::get('RS_AXIOMUS_ID_PECOM_CARRY')] = 'pecom';
+            }
         }else{
             if (Configuration::get('RS_AXIOMUS_REGION_USE_AXIOMUS_CARRY')) {
                 $arr[Configuration::get('RS_AXIOMUS_oid_CARRY')] = 'axiomus';
@@ -872,12 +915,15 @@ class AxiomusPost extends ObjectModel {
             if (Configuration::get('RS_AXIOMUS_REGION_USE_RUSSIANPOST_CARRY')) {
                 $arr[Configuration::get('RS_AXIOMUS_ID_RUSSIANPOST_CARRY')] = 'russianpost';
             }
+            if (Configuration::get('RS_AXIOMUS_REGION_USE_PECOM_CARRY')) {
+                $arr[Configuration::get('RS_AXIOMUS_ID_PECOM_CARRY')] = 'pecom';
+            }
         }
         return $arr;
     }
 
     public function getCarryAddressesArray($carry_id, $city){
-        if ($carry_id == (int)Configuration::get('RS_AXIOMUS_oid_CARRY')) { //axiomus
+        if ($carry_id == (int)Configuration::get('RS_AXIOMUS_ID_AXIOMUS_CARRY')) { //axiomus
             $activeTable = $this->tableCacheCarryAxiomusWithPrefix;
             $data = Db::getInstance()->ExecuteS("SELECT * FROM `{$activeTable}` WHERE `city_name` = '{$city}'");
             return $data;
@@ -887,6 +933,14 @@ class AxiomusPost extends ObjectModel {
             return $data;
         }elseif ($carry_id == (int)Configuration::get('RS_AXIOMUS_ID_BOXBERRY_CARRY')){ //boxberry
             $activeTable = $this->tableCacheCarryBoxBerryWithPrefix;
+            $data = Db::getInstance()->ExecuteS("SELECT * FROM `{$activeTable}` WHERE `city_name` = '{$city}'");
+            return $data;
+        }elseif ($carry_id == (int)Configuration::get('RS_AXIOMUS_ID_RUSSIANPOST_CARRY')){ //boxberry
+//            $activeTable = $this->tableCacheCarryBoxBerryWithPrefix;
+//            $data = Db::getInstance()->ExecuteS("SELECT * FROM `{$activeTable}` WHERE `city_name` = '{$city}'");
+//            return $data;
+        }elseif ($carry_id == (int)Configuration::get('RS_AXIOMUS_ID_PECOM_CARRY')){ //boxberry
+            $activeTable = $this->tableCacheCarryPecomWithPrefix;
             $data = Db::getInstance()->ExecuteS("SELECT * FROM `{$activeTable}` WHERE `city_name` = '{$city}'");
             return $data;
         }else{
@@ -899,7 +953,7 @@ class AxiomusPost extends ObjectModel {
 
     public function refreshCarryAddressCacheAxiomus(){
         $error = [];
-        $results = $this->AxiomusXML->getCarryAddresses('get_carry')->carry_list;
+        $results = AxiomusXml::getCarryAddressesAxiomus('get_carry')->carry_list;
         if(!empty($results)){
             $data = Db::getInstance()->execute("TRUNCATE TABLE `{$this->tableCacheCarryAxiomusWithPrefix}`");
             if ($data) {
@@ -942,7 +996,7 @@ class AxiomusPost extends ObjectModel {
 
     public function refreshCarryAddressCacheDPD(){
         $error = [];
-        $results = $this->AxiomusXML->getCarryAddresses('get_dpd_pickup')->pickup_list;
+        $results = AxiomusXml::getCarryAddressesAxiomus('get_dpd_pickup')->pickup_list;
         if(!empty($results)){
             $data = Db::getInstance()->execute("TRUNCATE TABLE `{$this->tableCacheCarryDPDWithPrefix}`");
             if ($data) {
@@ -977,7 +1031,7 @@ class AxiomusPost extends ObjectModel {
 
     public function refreshCarryAddressCacheBoxBerry(){
         $error = [];
-        $results = $this->AxiomusXML->getCarryAddresses('get_boxberry_pickup')->pickup_list;
+        $results = AxiomusXml::getCarryAddressesAxiomus('get_boxberry_pickup')->pickup_list;
         if(!empty($results)){
             $data = Db::getInstance()->execute("TRUNCATE TABLE `{$this->tableCacheCarryBoxBerryWithPrefix}`");
             if ($data) {
@@ -1012,6 +1066,77 @@ class AxiomusPost extends ObjectModel {
         }
     }
 
+    public function refreshCarryAddressCachePecom(){
+        $daysNames = array("Пн","Вт","Ср","Чт","Пт","Сб","Вс");
+        $error = [];
+        $results = AxiomusXml::getCarryAddressesPecom()->branches;
+        if(!empty($results)){
+            $data = Db::getInstance()->execute("TRUNCATE TABLE `{$this->tableCacheCarryPecomWithPrefix}`");
+            if ($data) {
+                foreach ($results as $key => $filial) { //ToDo тут все не верно
+                    foreach ($filial->divisions as $keyDivision => $division) {
+                        foreach ($division->warehouses as $keyWarehouse => $warehouse) {
+                            if (!$this->issetCarryAddressCachepecomByWarehouseId($warehouse->id)) {
+                                $timeOfWork = '';
+                                if (!empty($warehouse->timeOfWork)) {
+                                    foreach ($warehouse->timeOfWork as $day) {
+                                        if (!empty($day->dayOfWeek)) {
+                                            $timeStr = ((string)$day->workFrom == '') ? 'вых.;' : ($day->workFrom . ', ' . $day->workTo . '; ');
+                                            $timeOfWork .= $daysNames[$day->dayOfWeek - 1] . ': ' . $timeStr;
+                                        }
+                                    }
+                                }
+
+                                $cityname = '';
+                                $cityname = explode(" ", $warehouse->divisionName);
+                                $cityname = $cityname[0];
+
+                                $res = Db::getInstance()->autoExecuteWithNullValues($this->tableCacheCarryPecomWithPrefix, [
+                                    'warehouseId' => (string)$warehouse->id,
+                                    'divisionId' => (string)$warehouse->divisionId,
+                                    'name' => (string)$warehouse->name,
+                                    'divisionName' => (string)$warehouse->divisionName,
+                                    'city_name' => (string)$cityname,
+                                    'address' => (string)(empty($warehouse->address))?$warehouse->addressDivision:$warehouse->address ,
+                                    'addressDivision' => (string)(empty($warehouse->addressDivision))?$warehouse->address:$warehouse->addressDivision,
+                                    'isAcceptanceOnly' => (boolean)$warehouse->isAcceptanceOnly,
+                                    'isFreightSurcharge' => (boolean)$warehouse->isFreightSurcharge,
+                                    'coordinates' => (string)$warehouse->coordinates,
+                                    'email' => (string)$warehouse->email,
+                                    'phone' => (string)$warehouse->telephone,
+                                    'isRestrictions' => (boolean)$warehouse->isRestrictions,
+                                    'maxWeight' => (int)$warehouse->maxWeight,
+                                    'maxVolume' => (int)$warehouse->maxVolume,
+                                    'maxWeightPerPlace' => (int)$warehouse->maxWeightPerPlace,
+                                    'maxDimention' => (int)$warehouse->maxDimention,
+                                    'work_schedule' => (string)$timeOfWork,
+
+                                ], 'INSERT');
+                                if ($res) {
+                                    continue;
+                                } else {
+                                    $error[] = $key;
+                                }
+
+                            }
+                        }
+                    }
+                }
+            }
+            return $error;
+        }
+    }
+
+    public function issetCarryAddressCachepecomByWarehouseId($warehouseId){
+        $sql = "Select * FROM {$this->tableCacheCarryPecomWithPrefix} WHERE `warehouseId` = '{$warehouseId}'";
+        $res = Db::getInstance()->getRow($sql);
+        if ($res) {
+            return true;
+        }else{
+            return false;
+        }
+    }
+
     public function getLastUpdateCacheCarry($type){
         if ($type=='axiomus'){
             $table = $this->tableCacheCarryAxiomusWithPrefix;
@@ -1019,6 +1144,8 @@ class AxiomusPost extends ObjectModel {
             $table = $this->tableCacheCarryDPDWithPrefix;
         }elseif ($type == 'boxberry'){
             $table = $this->tableCacheCarryBoxBerryWithPrefix;
+        }elseif ($type == 'pecom'){
+            $table = $this->tableCacheCarryPecomWithPrefix;
         }else{
             return false;
         }

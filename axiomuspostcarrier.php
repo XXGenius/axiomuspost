@@ -18,8 +18,8 @@ class axiomuspostcarrier extends CarrierModule
     // Хоть и неочевидно, но здесь это должно быть. Кем-то присваивается.
     public $id_carrier;
     public $value_prefix = 'RS_AXIOMUS';
-    public $deliveryNames = ['undefined', 'axiomus', 'strizh', 'pek'];
-    public $carryNames = ['axiomus', 'dpd', 'boxberry', 'russianpost'];
+    public $deliveryNames = ['undefined', 'axiomus', 'strizh', 'pecom'];
+    public $carryNames = ['axiomus', 'dpd', 'boxberry', 'russianpost', 'pecom'];
     private $_postErrors = array();
 
     public function __construct()
@@ -252,6 +252,7 @@ class axiomuspostcarrier extends CarrierModule
         $this->AxiomusPost->refreshCarryAddressCacheAxiomus();
         $this->AxiomusPost->refreshCarryAddressCacheDPD();
         $this->AxiomusPost->refreshCarryAddressCacheBoxBerry();
+        $this->AxiomusPost->refreshCarryAddressCachePecom();
 
         $this->_createMenuTab();
 
@@ -782,24 +783,27 @@ class axiomuspostcarrier extends CarrierModule
 
         Configuration::updateValue('RS_AXIOMUS_MSCW_USE_AXIOMUS', 1);
         Configuration::updateValue('RS_AXIOMUS_MSCW_USE_STRIZH', 1);
-        Configuration::updateValue('RS_AXIOMUS_MSCW_USE_PEK', 1);
+        Configuration::updateValue('RS_AXIOMUS_MSCW_USE_PECOM', 1);
         Configuration::updateValue('RS_AXIOMUS_MSCW_USE_AXIOMUS_CARRY', 1);
         Configuration::updateValue('RS_AXIOMUS_MSCW_USE_DPD_CARRY', 1);
         Configuration::updateValue('RS_AXIOMUS_MSCW_USE_BOXBERRY_CARRY', 1);
         Configuration::updateValue('RS_AXIOMUS_MSCW_USE_RUSSIANPOST_CARRY', 1);
+        Configuration::updateValue('RS_AXIOMUS_MSCW_USE_PECOM_CARRY', 1);
             //Piter
         Configuration::updateValue('RS_AXIOMUS_PTR_USE_AXIOMUS', 1);
         Configuration::updateValue('RS_AXIOMUS_PTR_USE_STRIZH', 1);
-        Configuration::updateValue('RS_AXIOMUS_PTR_USE_PEK', 1);
+        Configuration::updateValue('RS_AXIOMUS_PTR_USE_PECOM', 1);
         Configuration::updateValue('RS_AXIOMUS_PTR_USE_AXIOMUS_CARRY', 1);
         Configuration::updateValue('RS_AXIOMUS_PTR_USE_DPD_CARRY', 1);
         Configuration::updateValue('RS_AXIOMUS_PTR_USE_BOXBERRY_CARRY', 1);
         Configuration::updateValue('RS_AXIOMUS_PTR_USE_RUSSIANPOST_CARRY', 1);
+        Configuration::updateValue('RS_AXIOMUS_PTR_USE_PECOM_CARRY', 1);
             //region
         Configuration::updateValue('RS_AXIOMUS_REGION_USE_AXIOMUS_CARRY', 1);
         Configuration::updateValue('RS_AXIOMUS_REGION_USE_DPD_CARRY', 1);
         Configuration::updateValue('RS_AXIOMUS_REGION_USE_BOXBERRY_CARRY', 1);
         Configuration::updateValue('RS_AXIOMUS_REGION_USE_RUSSIANPOST_CARRY', 1);
+        Configuration::updateValue('RS_AXIOMUS_REGION_USE_PECOM_CARRY', 1);
             //Settings
         Configuration::updateValue('RS_AXIOMUS_TOKEN', 1);
         Configuration::updateValue('RS_AXIOMUS_CACHE_HOURLIFE', 1);
@@ -810,16 +814,16 @@ class axiomuspostcarrier extends CarrierModule
         Configuration::updateValue('RS_AXIOMUS_TOKEN', '76793d5test0cf77');
         Configuration::updateValue('RS_AXIOMUS_CACHE_HOURLIFE', 24);
 
-        Configuration::updateValue('RS_AXIOMUS_USE_AXIOMUS_DELIVERY', 1);
-        Configuration::updateValue('RS_AXIOMUS_USE_TOPDELIVERY_DELIVERY', null);
-        Configuration::updateValue('RS_AXIOMUS_USE_DPD_DELIVERY', null);
-        Configuration::updateValue('RS_AXIOMUS_USE_BOXBERRY_DELIVERY', null);
-
-        Configuration::updateValue('RS_AXIOMUS_USE_AXIOMUS_CARRY', null);
-        Configuration::updateValue('RS_AXIOMUS_USE_TOPDELIVERY_CARRY', null);
-        Configuration::updateValue('RS_AXIOMUS_USE_DPD_CARRY', null);
-        Configuration::updateValue('RS_AXIOMUS_USE_BOXBERRY_CARRY', null);
-        Configuration::updateValue('RS_AXIOMUS_USE_RUSSIANPOST_CARRY', null);
+//        Configuration::updateValue('RS_AXIOMUS_USE_AXIOMUS_DELIVERY', 1);
+//        Configuration::updateValue('RS_AXIOMUS_USE_TOPDELIVERY_DELIVERY', null);
+//        Configuration::updateValue('RS_AXIOMUS_USE_DPD_DELIVERY', null);
+//        Configuration::updateValue('RS_AXIOMUS_USE_BOXBERRY_DELIVERY', null);
+//
+//        Configuration::updateValue('RS_AXIOMUS_USE_AXIOMUS_CARRY', null);
+//        Configuration::updateValue('RS_AXIOMUS_USE_TOPDELIVERY_CARRY', null);
+//        Configuration::updateValue('RS_AXIOMUS_USE_DPD_CARRY', null);
+//        Configuration::updateValue('RS_AXIOMUS_USE_BOXBERRY_CARRY', null);
+//        Configuration::updateValue('RS_AXIOMUS_USE_RUSSIANPOST_CARRY', null);
     }
 
     public function uninstall()

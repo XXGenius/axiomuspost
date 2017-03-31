@@ -174,10 +174,10 @@
                                             <label class="control-label col-lg-3">{l s='Использовать доставку ПЭК'}</label>
                                             <div class="col-lg-1">
                                                 <span class="switch prestashop-switch fixed-width-lg">
-                                                    <input type="radio" name="use-mscw-pek" id="use-mscw-pek-on" value="1" {if $use_mscw_pek} checked="checked"{/if}>
-                                                    <label for="use-mscw-pek-on">{l s='Да'}</label>
-                                                    <input type="radio" name="use-mscw-pek" id="use-mscw-pek-off" value="0" {if !$use_mscw_pek} checked="checked"{/if}/>
-                                                    <label for="use-mscw-pek-off">{l s='Нет'}</label>
+                                                    <input type="radio" name="use-mscw-pecom" id="use-mscw-pecom-on" value="1" {if $use_mscw_pecom} checked="checked"{/if}>
+                                                    <label for="use-mscw-pecom-on">{l s='Да'}</label>
+                                                    <input type="radio" name="use-mscw-pecom" id="use-mscw-pecom-off" value="0" {if !$use_mscw_pecom} checked="checked"{/if}/>
+                                                    <label for="use-mscw-pecom-off">{l s='Нет'}</label>
                                                     <a class="slide-button btn"></a>
                                                 </span>
                                             </div>
@@ -232,6 +232,18 @@
                                                 </span>
                                             </div>
                                         </div>
+                                        <div class="form-group">
+                                            <label class="control-label col-lg-3">{l s='Использовать самовывоз ПЭК'}</label>
+                                            <div class="col-lg-1">
+                                                <span class="switch prestashop-switch fixed-width-lg">
+                                                    <input type="radio" name="use-mscw-pecom-carry" id="use-mscw-pecom-carry-on" value="1" {if $use_mscw_pecom_carry} checked="checked"{/if}>
+                                                    <label for="use-mscw-pecom-carry-on">{l s='Да'}</label>
+                                                    <input type="radio" name="use-mscw-pecom-carry" id="use-mscw-pecom-carry-off" value="0" {if !$use_mscw_pecom_carry} checked="checked"{/if}" />
+                                                    <label for="use-mscw-pecom-carry-off">{l s='Нет'}</label>
+                                                    <a class="slide-button btn"></a>
+                                                </span>
+                                            </div>
+                                        </div>
                                         <br>
                                         <div class="row">
                                             <div class="col-lg-5">
@@ -278,6 +290,17 @@
                                         Дата последнего обновления: <b>{$AxiomusPost->getLastUpdateCacheCarry('boxberry')}</b>
                                         <button type="submit" id="submitRefreshCacheCarryAddressesBoxBerry" class="btn btn-success pull-right" name="submitRefreshCacheCarryAddressesBoxBerry">
                                             {l s='Обновить кэш BoxBerry'}
+                                        </button>
+                                    </div>
+                                </div>
+                                </form>
+                                <br>
+                                <form action="{$smarty.server.REQUEST_URI|escape:'html':'UTF-8'}&amp;" method="post"">
+                                <div id="mscw-setting-form" class="form-horizontal">
+                                    <div class="row">
+                                        Дата последнего обновления: <b>{$AxiomusPost->getLastUpdateCacheCarry('pecom')}</b>
+                                        <button type="submit" id="submitRefreshCacheCarryAddressesPecom" class="btn btn-success pull-right" name="submitRefreshCacheCarryAddressesPecom">
+                                            {l s='Обновить кэш ПЭК'}
                                         </button>
                                     </div>
                                 </div>
@@ -559,7 +582,7 @@
                                             <td>
                                                 <select class="form-control " id="mscw-axiomus-weightprice-type" name="mscw-axiomus-weightprice-type">
                                                     {foreach from=$AxiomusPost->getAllWeightType('Москва') key=k item=linetype}
-                                                        <option value="{$k}">{$linetype.name}</option>
+                                                        <option value="{$k}" {if ($line.type == $linetype.id)}selected{/if}>{$linetype.name}</option>
                                                     {/foreach}
                                                 </select>
                                             </td>
