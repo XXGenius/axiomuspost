@@ -19,6 +19,12 @@
             </a>
         </li>
         <li {if $maintab == 2}class="active"{/if}>
+            <a href="#region">
+                <i class="icon-plane"></i>
+                {l s='Регионы'}
+            </a>
+        </li>
+        <li {if $maintab == 3}class="active"{/if}>
             <a href="#settings">
                 <i class="icon-AdminAdmin"></i>
                 {l s='Настройки'}
@@ -48,6 +54,7 @@
 
                 <li {if $subtab == 2}class="active"{/if}>
                     <a href="#mscw-timetype">
+                        <i class="icon-clock-o"></i>
                         {l s='Временные интервалы'}
                     </a>
                 </li>
@@ -55,6 +62,7 @@
 
                 <li {if $subtab == 3}class="active"{/if}>
                     <a href="#mscw-kadtype">
+                        <i class="icon-road"></i>
                         {l s='МКАД'}
                     </a>
                 </li>
@@ -62,12 +70,14 @@
 
                 <li {if $subtab == 4}class="active"{/if}>
                     <a href="#mscw-weightprice">
+                        <i class="icon-ruble"></i>
                         {l s='Прайс по весу'}
                     </a>
                 </li>
 
                 <li {if $subtab == 5}class="active"{/if}>
                     <a href="#mscw-conditionprice">
+                        <i class="icon-plus"></i>
                         {l s='Надбавка по условию'}
                     </a>
                 </li>
@@ -125,14 +135,14 @@
                         <div class="col-lg-6">
                             <div class="panel">
                                 <div class="panel-heading">
-                                    <i class="icon-money"></i>
-                                    Создание доставки
+                                    <i class="icon-AdminAdmin"></i>
+                                    Использование доставки
                                 </div>
                                 <form action="{$smarty.server.REQUEST_URI|escape:'html':'UTF-8'}&amp;" method="post"">
                                     <div id="mscw-setting-form" class="form-horizontal">
                                         <div class="form-group">
                                             <div class="col-lg-12 alert alert-info">
-                                                <strong>Внимание!</strong> При изменении параметров идущих ниже будет <strong>создан/удален</strong> соответствующий перевозчик
+                                                <strong>Внимание!</strong> После изменении параметров идущих ниже будет <strong>создан/удален</strong> соответствующий пункт при выборе способа доставки в фронтальной части магазина
                                             </div>
                                         </div>
                                         <!-- Доставки -->
@@ -282,7 +292,7 @@
                         <!-- WeightType -->
                         <div class="panel">
                             <div class="panel-heading">
-                                <i class="icon-money"></i>
+                                <i class=""></i>
                                 Виды веса
                             </div>
                             <div class="table-responsive">
@@ -354,7 +364,7 @@
                     <div class="row">
                         <div class="panel">
                             <div class="panel-heading">
-                                <i class="icon-money"></i>
+                                <i class="icon-clock-o"></i>
                                 Временные интервалы
                             </div>
                             <div class="table-responsive">
@@ -427,7 +437,7 @@
                     <div class="row">
                         <div class="panel">
                             <div class="panel-heading">
-                                <i class="icon-money"></i>
+                                <i class="icon-road"></i>
                                 промежутки расстояния от МКАД
                             </div>
                             <div class="table-responsive">
@@ -499,7 +509,7 @@
                        <!-- WeightPrice -->
                         <div class="panel">
                             <div class="panel-heading">
-                                <i class="icon-money"></i>
+                                <i class="icon-ruble"></i>
                                 Сумма в зависимости от веса
                             </div>
                             <div class="table-responsive">
@@ -507,8 +517,6 @@
                                     <thead>
                                     <tr>
                                         <th><span class="title_box ">id</span></th>
-
-                                        <th><span class="title_box ">Доставка</span></th>
                                         <th><span class="title_box ">Самовывоз</span></th>
                                         <th><span class="title_box ">Тип веса</span></th>
                                         <th><span class="title_box ">Сумма</span></th>
@@ -521,7 +529,6 @@
                                     <tr class="current-edit">
                                         <td></td>
 
-                                        <td></td>
                                         <td class="row-selector text-center"><input type="checkbox" name="mscw-axiomus-weightprice-carry" class="noborder"></td>
                                         <td>
                                             <select class="form-control " id="mscw-axiomus-weightprice-type" name="mscw-axiomus-weightprice-type">
@@ -548,7 +555,6 @@
                                             <form action="{$smarty.server.REQUEST_URI|escape:'html':'UTF-8'}&amp;" method="post"">
                                             <td><input type="hidden" name="mscw-axiomus-weightprice-id" class="form-control" value="{$line.id}">{$line.id}</td>
 
-                                            <td>{$line.delivery}</td>
                                             <td class="row-selector text-center"><input type="checkbox" name="mscw-axiomus-weightprice-carry" class="noborder" {if ($line.carry == 1)}checked{/if}"></td>
                                             <td>
                                                 <select class="form-control " id="mscw-axiomus-weightprice-type" name="mscw-axiomus-weightprice-type">
@@ -583,7 +589,7 @@
                     <div class="row">
                         <div class="panel">
                             <div class="panel-heading">
-                                <i class="icon-money"></i>
+                                <i class="icon-plus"></i>
                                 Добавка к сумме по условию
                             </div>
                             <!-- KAD price -->
@@ -800,7 +806,10 @@
                 </div>
             </div>
         </div>
-        <div class="tab-pane {if $maintab == 2}active{/if}" id="settings">
+        <div class="tab-pane {if $maintab == 2}active{/if}" id="region">
+            <h4>{l s='Регионы'}</h4>
+        </div>
+        <div class="tab-pane {if $maintab == 3}active{/if}" id="settings">
             <h4>{l s='Настройки'}</h4>
             <form action="{$smarty.server.REQUEST_URI|escape:'html':'UTF-8'}&amp;" method="post"">
                 <div id="setting-form" class="form-horizontal">

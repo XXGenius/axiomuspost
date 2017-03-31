@@ -18,7 +18,7 @@ class axiomuspostcarrier extends CarrierModule
     // Хоть и неочевидно, но здесь это должно быть. Кем-то присваивается.
     public $id_carrier;
     public $value_prefix = 'RS_AXIOMUS';
-    public $deliveryNames = ['axiomus', 'strizh', 'pek'];
+    public $deliveryNames = ['undefined', 'axiomus', 'strizh', 'pek'];
     public $carryNames = ['axiomus', 'dpd', 'boxberry', 'russianpost'];
     private $_postErrors = array();
 
@@ -807,8 +807,6 @@ class axiomuspostcarrier extends CarrierModule
         Configuration::updateValue('RS_AXIOMUS_MSCW_AXIOMUS_MANUAL', 1);
         Configuration::updateValue('RS_AXIOMUS_MSCW_AXIOMUS_INCREMENT', 0);
 
-        Configuration::updateValue('RS_AXIOMUS_ID_AXIOMUS_DELIVERY', null); //ToDo пересмотреть
-
         Configuration::updateValue('RS_AXIOMUS_TOKEN', '76793d5test0cf77');
         Configuration::updateValue('RS_AXIOMUS_CACHE_HOURLIFE', 24);
 
@@ -880,6 +878,7 @@ class axiomuspostcarrier extends CarrierModule
         foreach ($this->carryNames as $carryName){
             $this->_uninstallCarrier($carryName, 'CARRY');
         }
+        return true;
     }
 
     private function _uninstallCarrier($name = '', $type = '')
@@ -1031,7 +1030,7 @@ class axiomuspostcarrier extends CarrierModule
             $orderState->delete();
             Configuration::updateValue('RS_AXIOMUS_120_FULLFAILURE_ORDER_STATUS_ID', '');
         }
-
+        return true;
     }
 
     private function _unsetSettingsValues(){
@@ -1051,6 +1050,7 @@ class axiomuspostcarrier extends CarrierModule
         Configuration::updateValue('RS_AXIOMUS_USE_DPD_CARRY', null);
         Configuration::updateValue('RS_AXIOMUS_USE_BOXBERRY_CARRY', null);
         Configuration::updateValue('RS_AXIOMUS_USE_RUSSIANPOST_CARRY', null);
+        return true;
     }
 
     public function hookDisplayAdminOrderTabShip($params = null){
@@ -1067,6 +1067,11 @@ class axiomuspostcarrier extends CarrierModule
         }
 
         $link = $this->context->link->getAdminLink('AdminAxiomusSend');
+
+        $carrier = new Carrier($this->context->cart->id_carrier);
+        $deliveryName = $carrier->name;
+
+        $this->context->smarty->assign('delivery_name', $deliveryName);
         $this->context->smarty->assign('axiomus_succes', $axiomusSucces);
         $this->context->smarty->assign('axiomus_succes_code', $axiomusSuccesCode);
         $this->context->smarty->assign('order_id', $params['order']->id);

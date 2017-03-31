@@ -14,7 +14,7 @@ public $ukey = 'XXcd208495d565ef66e7dff9f98764XX';
 public $uid = 92;
 public $url = "http://axiomus.ru/test/api_xml_test.php";
 
-    public function sendTo($id)
+    public function sendTo($id, $method)
     {
 //ToDo валидация входных данных
 //        	elseif (isset($_POST['delivery']) AND $_POST['delivery'] == 'axiomus_deliver')
@@ -62,6 +62,13 @@ public $url = "http://axiomus.ru/test/api_xml_test.php";
             $customer = new Customer($order->id_customer);
             $address = new Address($order->id_address_delivery);
 
+            if ($address->city == 'Москва'){
+                $city = 0;
+            }elseif($address->city == 'Санкт-Петербург'){
+                $city = 1;
+            }else{
+                return false;
+            }
             $products = $cart->getProducts();
 
             $AxiomusPost = new AxiomusPost();
@@ -76,12 +83,12 @@ public $url = "http://axiomus.ru/test/api_xml_test.php";
             $from_mkad = ($kadtype['rangefrom']+$kadtype['rangeto'])/2; //ToDo может все таки не среднее значение
 
             $xml_single_order = new SimpleXMLElement('<singleorder/>');
-            $xml_single_order->addChild('mode', 'new');
+            $xml_single_order->addChild('mode', $method);
             $xml_auth = $xml_single_order->addChild('auth');
             $xml_auth->addAttribute('ukey', $this->ukey);
             $xml_order = $xml_single_order->addChild('order');
             $xml_order->addAttribute('inner_id', "Заказ #" . $id);
-            $xml_order->addAttribute('name', $address->firstname . ' ' . $address->lastname); //ToDo добавить отчество?
+            $xml_order->addAttribute('name', $customer->firstname . ' ' . $customer->lastname); //ToDo добавить отчество?
             $xml_order->addAttribute('address', $address->city . ', ул. ' . $address->address1); //ToDo что делать с address2?
             $xml_order->addAttribute('from_mkad', $from_mkad);
             $xml_order->addAttribute('d_date', $d_date->format('Y-m-d'));
@@ -89,8 +96,8 @@ public $url = "http://axiomus.ru/test/api_xml_test.php";
             $xml_order->addAttribute('e_time', $e_time->format('H:i'));
             $xml_order->addAttribute('incl_deliv_sum', $order->total_shipping); //ToDo переработать этот вопрос
             $xml_order->addAttribute('places', 1); //ToDo количество занимаемых мест.. переработать
-            $xml_order->addAttribute('city', $address->city);
-            $xml_order->addChild('contacts', 'тел. ' . ($address->phone != '') ? $address->phone : $address->phone_mobile); //ToDo переработать телефоны
+            $xml_order->addAttribute('city', $city);
+            $xml_order->addChild('contacts', ($address->phone_mobile == '') ? $address->phone : $address->phone_mobile); //ToDo переработать телефоны
 //            $xml_order->addChild('sms', 'тел. ');
 //            $xml_order->addChild('sms_sender', 'тел. ');
 //            $xml_order->addChild('description', $additionalInfo);

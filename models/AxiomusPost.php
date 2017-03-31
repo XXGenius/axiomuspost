@@ -143,14 +143,15 @@ class AxiomusPost extends ObjectModel {
         $sql = "CREATE TABLE IF NOT EXISTS `{$this->tableOrderWithPrefix}` (" .
             '`id` INT(11) NOT NULL AUTO_INCREMENT,' .
             '`id_cart` INT(11) NOT NULL,' .
-            '`delivery` VARCHAR(50) NOT NULL,' .
-            '`date` DATETIME NOT NULL,' .
+            '`delivery_id` INT(11) NULL,' .
+            '`date` DATETIME NULL,' .
             '`carry` BOOLEAN NOT NULL,' .
-            '`kadtype` INT(11) NOT NULL,'.
-            '`timetype` INT(11) NOT NULL,'.
+            '`kadtype` INT(11) NULL,'.
+            '`timetype` INT(11) NULL,'.
             '`price_weight` INT(11),' .
             '`price_condition` INT(11),' .
-            '`id_axiomus` INT(11),' .
+            '`carry_address_id` INT(11),' .
+            '`oid` INT(11),' .
             '`okay` VARCHAR(255),' .
             'PRIMARY KEY (`id`)' .
             ") DEFAULT CHARSET=utf8;".
@@ -362,11 +363,13 @@ class AxiomusPost extends ObjectModel {
     private function _insertStartWeightPrice(){
 
         $id = 0;
+        $sum = 10;
         foreach ($this->cities as $city){
             foreach ($this->deliveries as $delivery){
                 foreach ($this->getAllWeightType($city) as $type) {
                     $id++;
-                    $res = Db::getInstance()->autoExecuteWithNullValues($this->tableWeightPriceWithPrefix, ['id' => 0, 'city' => $city, 'delivery' => $delivery, 'carry' => false, 'type' => (int)$type['id'],'sum' => 0],'INSERT');
+                    $res = Db::getInstance()->autoExecuteWithNullValues($this->tableWeightPriceWithPrefix, ['id' => 0, 'city' => $city, 'delivery' => $delivery, 'carry' => false, 'type' => (int)$type['id'],'sum' => $sum],'INSERT');
+                    $sum += 10;
                     if (!$res){
                         return false;
                     }
@@ -503,7 +506,7 @@ class AxiomusPost extends ObjectModel {
 
         //определение типа веса
         if ($carry){
-            $delivery = $this->getActiveCarry()[$carrytype];
+            $delivery = $this->getActiveCarry($city)[$carrytype];
             return $this->getCarryPriceByName($city, $delivery);
         }else {
             $weighttype = $this->getWeightTypeId($weight);
@@ -750,13 +753,21 @@ class AxiomusPost extends ObjectModel {
     }
 
     //Order
-    public function setOrder($id_cart, $delivery, $date, $carry, $kad, $time){
-        $date = new DateTime($date);
+    public function setOrder($id_cart, $delivery_id, $date = null, $kad = null, $time = null, $carry, $carry_address_id = null){
+
+
+        if ($carry == 0) {
+            $date = new DateTime($date);
+            $date = $date->format('Y-m-d');
+        }elseif($carry == 1){
+
+        }else{
+            return false;
+        }
 
         $cart = new Cart($id_cart);
         $totalWeight = $cart->getTotalWeight();
         $weighttype = $this->getWeightTypeId($totalWeight);
-
         $addr = new Address($cart->id_address_delivery);
         if (!Validate::isLoadedObject($addr))
             return false;
@@ -772,14 +783,14 @@ class AxiomusPost extends ObjectModel {
         $price_condition = $this->getConditionPrice($city, $carry, $price, $kad, $time);
 
         if ($this->issetOrder($cart->id)){
-            $res = Db::getInstance()->update(AxiomusPost::$definition['tableOrder'], ['delivery' => $delivery,'date' => $date->format('Y-m-d'), 'carry' => (boolean)$carry, 'kadtype' => $kad, 'timetype' => $time, 'price_weight' => (int)$price_weight, 'price_condition' => (int)$price_condition],"`id_cart` = {$id_cart}");
+            $res = Db::getInstance()->update(AxiomusPost::$definition['tableOrder'], ['delivery_id' => $delivery_id,'date' => $date, 'carry' => (boolean)$carry, 'kadtype' => $kad, 'timetype' => $time, 'price_weight' => (int)$price_weight, 'price_condition' => (int)$price_condition, 'carry_address_id' => (int)$carry_address_id],"`id_cart` = {$id_cart}");
             if (!$res){
                 return false;
             }else{
                 return true;
             }
         }else {
-            $res = Db::getInstance()->autoExecuteWithNullValues($this->tableOrderWithPrefix, ['id_cart' => $id_cart, 'delivery' => $delivery,'date' => $date->format('Y-m-d'), 'carry' => $carry, 'kadtype' => $kad, 'timetype' => $time, 'price_weight' => $price_weight, 'price_condition' => $price_condition], 'INSERT');
+            $res = Db::getInstance()->autoExecuteWithNullValues($this->tableOrderWithPrefix, ['id_cart' => $id_cart, 'delivery_id' => $delivery_id,'date' => $date, 'carry' => $carry, 'kadtype' => $kad, 'timetype' => $time, 'price_weight' => $price_weight, 'price_condition' => $price_condition, 'carry_address_id' => (int)$carry_address_id], 'INSERT');
             if ($res) {
                 return true;
             } else {
@@ -790,7 +801,7 @@ class AxiomusPost extends ObjectModel {
 
     public function setOrderResponse($id_cart, $oid, $okey){
         if ($this->issetOrder($id_cart)){
-            $res = Db::getInstance()->update(AxiomusPost::$definition['tableOrder'], ['id_axiomus' => $oid, 'okay' => $okey],"`id_cart` = {$id_cart}");
+            $res = Db::getInstance()->update(AxiomusPost::$definition['tableOrder'], ['oid' => $oid, 'okay' => $okey],"`id_cart` = {$id_cart}");
             if (!$res){
                 return false;
             }else{
@@ -824,7 +835,7 @@ class AxiomusPost extends ObjectModel {
         $arr = [];
         if ($city=='Москва') {
             if (Configuration::get('RS_AXIOMUS_MSCW_USE_AXIOMUS_CARRY')) {
-                $arr[Configuration::get('RS_AXIOMUS_ID_AXIOMUS_CARRY')] = 'axiomus';
+                $arr[Configuration::get('RS_AXIOMUS_oid_CARRY')] = 'axiomus';
             }
             if (Configuration::get('RS_AXIOMUS_MSCW_USE_DPD_CARRY')) {
                 $arr[Configuration::get('RS_AXIOMUS_ID_DPD_CARRY')] = 'dpd';
@@ -837,7 +848,7 @@ class AxiomusPost extends ObjectModel {
             }
         }elseif ($city='Санкт-Петербург'){
             if (Configuration::get('RS_AXIOMUS_PTR_USE_AXIOMUS_CARRY')) {
-                $arr[Configuration::get('RS_AXIOMUS_ID_AXIOMUS_CARRY')] = 'axiomus';
+                $arr[Configuration::get('RS_AXIOMUS_oid_CARRY')] = 'axiomus';
             }
             if (Configuration::get('RS_AXIOMUS_PTR_USE_DPD_CARRY')) {
                 $arr[Configuration::get('RS_AXIOMUS_ID_DPD_CARRY')] = 'dpd';
@@ -850,7 +861,7 @@ class AxiomusPost extends ObjectModel {
             }
         }else{
             if (Configuration::get('RS_AXIOMUS_REGION_USE_AXIOMUS_CARRY')) {
-                $arr[Configuration::get('RS_AXIOMUS_ID_AXIOMUS_CARRY')] = 'axiomus';
+                $arr[Configuration::get('RS_AXIOMUS_oid_CARRY')] = 'axiomus';
             }
             if (Configuration::get('RS_AXIOMUS_REGION_USE_DPD_CARRY')) {
                 $arr[Configuration::get('RS_AXIOMUS_ID_DPD_CARRY')] = 'dpd';
@@ -866,7 +877,7 @@ class AxiomusPost extends ObjectModel {
     }
 
     public function getCarryAddressesArray($carry_id, $city){
-        if ($carry_id == (int)Configuration::get('RS_AXIOMUS_ID_AXIOMUS_CARRY')) { //axiomus
+        if ($carry_id == (int)Configuration::get('RS_AXIOMUS_oid_CARRY')) { //axiomus
             $activeTable = $this->tableCacheCarryAxiomusWithPrefix;
             $data = Db::getInstance()->ExecuteS("SELECT * FROM `{$activeTable}` WHERE `city_name` = '{$city}'");
             return $data;

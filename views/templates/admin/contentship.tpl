@@ -3,12 +3,14 @@
     <!-- Shipping block -->
     {if ($axiomus_succes)}
         <div class="row">
-            <div>Отправлено в систему Axiomus, код: <b>{$axiomus_succes_code}</b></div>
+            <div>Отправлено в систему Axiomus, через <b>{$delivery_name}</b> код: <b>{$axiomus_succes_code}</b></div>
             <button type="submit" class="btn btn-danger pull-right" id="submitSendToAxiomusReturn">Анулировать заявку</button>
         </div>
     {/if}
     {if (!$axiomus_succes)}
         <button type="submit" class="btn btn-success" id="submitSendToAxiomus">Отправить через Axiomus</button>
+        <button type="submit" class="btn btn-success" id="submitSendToStrizh">Отправить через Стриж</button>
+        <button type="submit" class="btn btn-success" id="submitSendToPek">Отправить через ПЭК</button>
     {/if}
 </div>
 
@@ -18,10 +20,16 @@
             updatePrice('axiomus', 'new');
         });
         $('#submitSendToAxiomusReturn').click(function () {
-            updatePrice('axiomus', 'delete');
+            updatePrice('', 'delete');
         });
-        function updatePrice(delivery, action) {
-            data = 'dellivery='+delivery+'&action='+action+'&order_id={$order_id}&cart_id={$cart_id}';
+        $('#submitSendToStrizh').click(function () {
+            updatePrice('strizh', 'new');
+        });
+        $('#submitSendToAxiomusReturn').click(function () {
+            updatePrice('', 'delete');
+        });
+        function updatePrice(delivery = '', action) {
+            data = 'delivery='+delivery+'&action='+action+'&order_id={$order_id}&cart_id={$cart_id}';
             $.ajax({
                 type: 'POST',
                 url: '{$_axiomus_sendto_link}',
