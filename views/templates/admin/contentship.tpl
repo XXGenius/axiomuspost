@@ -7,29 +7,47 @@
             <button type="submit" class="btn btn-danger pull-right" id="submitSendToAxiomusReturn">Анулировать заявку</button>
         </div>
     {/if}
+    <div class="col-lg-12 alert alert-warning" style="display: none" id="axiomusErrorBlock">
+
+    </div>
     {if (!$axiomus_succes)}
-        <button type="submit" class="btn btn-success" id="submitSendToAxiomus">Отправить через Axiomus</button>
-        <button type="submit" class="btn btn-success" id="submitSendToStrizh">Отправить через Стриж</button>
-        <button type="submit" class="btn btn-success" id="submitSendTopecom">Отправить через ПЭК</button>
+        {if $deliveries_used.axiomus}
+            <button type="submit" class="btn btn-primary" data-toggle="modal" data-target="#axiomusModal">Отправить через Axiomus</button>
+        {/if}
+        {if $deliveries_used.strizh}
+            <button type="submit" class="btn btn-primary" data-toggle="modal" data-target="#axiomusModal">Отправить через Стриж</button>
+        {/if}
+        {if $deliveries_used.pecom}
+            <button type="submit" class="btn btn-primary"   data-toggle="modal" data-target="#pecomModal">Отправить через ПЭК</button>
+        {/if}
     {/if}
+
+    {include file="$_axiomus_module_path/views/templates/admin/axiomus_modal.tpl"}
+    {include file="$_axiomus_module_path/views/templates/admin/pecom_modal.tpl"}
+
+//ToDo работа остановилась на том что нужно проделать страницу дефолтных настроке и для Axiomus
+
 </div>
 
 <script>
     $(document).ready(function () {
         $('#submitSendToAxiomus').click(function () {
-            updatePrice('axiomus', 'new');
-        });
-        $('#submitSendToAxiomusReturn').click(function () {
-            updatePrice('{$delivery_name}', 'delete');
+            sendTo('axiomus', 'new');
         });
         $('#submitSendToStrizh').click(function () {
-            updatePrice('strizh', 'new');
+            sendTo('strizh', 'new');
         });
-        $('#submitSendTopecom').click(function () {
-            updatePrice('pecom', 'new');
+        $('#submitSendToPecom').click(function () {
+            event.preventDefault();
+            sendTo('pecom', 'new', $('#axiomus_form').serialize());
         });
-        function updatePrice(delivery = '', action) {
-            data = 'delivery='+delivery+'&action='+action+'&order_id={$order_id}&cart_id={$cart_id}';
+        $('#submitSendToAxiomusReturn').click(function () {
+            sendTo('{$delivery_name}', 'delete');
+            sendTo('pecom', 'delete');
+        });
+
+        function sendTo(delivery = '', action, formData = '') {
+            data = 'delivery='+delivery+'&action='+action+'&order_id={$order_id}&cart_id={$cart_id}&'+formData;
             $.ajax({
                 type: 'POST',
                 url: '{$_axiomus_sendto_link}',
@@ -39,10 +57,19 @@
                 },
                 success: function(data){
                     console.log('end... true');
-                    if(data = 'true'){
+
+                    console.log(data);
+                    if(data == '1') {
                         location.reload();
                     }else{
-                        console.log(data);
+                        data = JSON.parse(data);
+                        errorStr = '';
+                        for (var key in data) {
+                            errorStr +=  key+': '+data[key]+'; ';
+                        }
+                        $('#axiomusErrorBlock').text(errorStr);
+                        $('#axiomusErrorBlock').show();
+                        console.log(errorStr);
                     }
                 }
             });

@@ -814,16 +814,89 @@ class axiomuspostcarrier extends CarrierModule
         Configuration::updateValue('RS_AXIOMUS_TOKEN', '76793d5test0cf77');
         Configuration::updateValue('RS_AXIOMUS_CACHE_HOURLIFE', 24);
 
-//        Configuration::updateValue('RS_AXIOMUS_USE_AXIOMUS_DELIVERY', 1);
-//        Configuration::updateValue('RS_AXIOMUS_USE_TOPDELIVERY_DELIVERY', null);
-//        Configuration::updateValue('RS_AXIOMUS_USE_DPD_DELIVERY', null);
-//        Configuration::updateValue('RS_AXIOMUS_USE_BOXBERRY_DELIVERY', null);
-//
-//        Configuration::updateValue('RS_AXIOMUS_USE_AXIOMUS_CARRY', null);
-//        Configuration::updateValue('RS_AXIOMUS_USE_TOPDELIVERY_CARRY', null);
-//        Configuration::updateValue('RS_AXIOMUS_USE_DPD_CARRY', null);
-//        Configuration::updateValue('RS_AXIOMUS_USE_BOXBERRY_CARRY', null);
-//        Configuration::updateValue('RS_AXIOMUS_USE_RUSSIANPOST_CARRY', null);
+        Configuration::updateValue('RS_PECOM_NICKNAME', 'zitttz'); //ToDo перед релизом убрать
+        Configuration::updateValue('RS_PECOM_API', '43406356D86720B3AA160DA8C299E2DA035079E0');
+
+        Configuration::updateValue('RS_PECOM_SENDER_CITY', 'Москва');
+        Configuration::updateValue('RS_PECOM_SENDER_TITLE', 'ИП Тестов Тест Тестович');
+        Configuration::updateValue('RS_PECOM_SENDER_PERSON', 'Тестов Тест Тестович');
+        Configuration::updateValue('RS_PECOM_SENDER_PHONE', '(495) 111-12-12');
+        Configuration::updateValue('RS_PECOM_SENDER_EMAIL', 'testov.test@gmail.com');
+        Configuration::updateValue('RS_PECOM_SENDER_ADDRESS_OFFICE', 'г. Москва, Волоколамское шоссе, д.41, корп. 1, стр. 2, офис 16');
+        Configuration::updateValue('RS_PECOM_SENDER_ADDRESS_OFFICE_COOMENT', '');
+        Configuration::updateValue('RS_PECOM_SENDER_ADDRESS_STOCK', 'г. Москва, Волоколамское шоссе, д.41, корп. 1, стр. 2, офис 16');
+        Configuration::updateValue('RS_PECOM_SENDER_ADDRESS_STOCK_COMMENT', '');
+        Configuration::updateValue('RS_PECOM_SENDER_WORK_TIME_FROM', '10:00');
+        Configuration::updateValue('RS_PECOM_SENDER_WORK_TIME_TO', '18:00');
+        Configuration::updateValue('RS_PECOM_SENDER_LUNCH_BREAK_FROM', '14:00');
+        Configuration::updateValue('RS_PECOM_SENDER_LUNCH_BREAK_TO', '15:00');
+        Configuration::updateValue('RS_PECOM_SENDER_IS_AUTH_NEEDED', TRUE);
+        Configuration::updateValue('RS_PECOM_SENDER_IDENTITY_TYPE', 10 );
+        Configuration::updateValue('RS_PECOM_SENDER_IDENTITY_SERIES', 1111);
+        Configuration::updateValue('RS_PECOM_SENDER_NUMBER', 123123);
+        Configuration::updateValue('RS_PECOM_SENDER_DATE', '10.10.07');
+        Configuration::updateValue('RS_PECOM_VOLUME_ONE', 0.016355);
+        Configuration::updateValue('RS_PECOM_IS_FLAGILE', true);
+        Configuration::updateValue('RS_PECOM_IS_GLASS', true);
+        Configuration::updateValue('RS_PECOM_IS_LIQUID', true);
+        Configuration::updateValue('RS_PECOM_IS_OTHERTYPE', false);
+        Configuration::updateValue('RS_PECOM_OTHERTYPE_DESCRIPTION', null);
+        Configuration::updateValue('RS_PECOM_IS_OPENCAR', false);
+        Configuration::updateValue('RS_PECOM_IS_SIDELOAD', false);
+        Configuration::updateValue('RS_PECOM_IS_SPECIAL_EQ', false);
+        Configuration::updateValue('RS_PECOM_IS_DAYBYDAY', false);
+        Configuration::updateValue('RS_PECOM_REGISTER_TYPE', 1);
+        Configuration::updateValue('RS_PECOM_RESPONSIBLE', 'Тестов Тест Тестович , ИП Тестов Тест Тестович, Директор');
+        Configuration::updateValue('RS_PECOM_IS_HP', true);
+        Configuration::updateValue('RS_PECOM_HP_POSITION_COUNT', 1);
+        Configuration::updateValue('RS_PECOM_IS_INSURANCE', false);
+        Configuration::updateValue('RS_PECOM_IS_INSURANCE_PRICE', 0);
+        Configuration::updateValue('RS_PECOM_IS_SEALING', false);
+        Configuration::updateValue('RS_PECOM_SEALING_POSITION_COUNT', null);
+        Configuration::updateValue('RS_PECOM_IS_STRAPPING', false);
+        Configuration::updateValue('RS_PECOM_IS_DOCUMENTS_RETURN', false);
+        Configuration::updateValue('RS_PECOM_IS_LOADING', true);
+/*
+        Configuration::updateValue('RS_PECOM_SENDER_CITY', 'Москва');
+        Configuration::updateValue('RS_PECOM_SENDER_TITLE', 'ИП Павлов Леонид Сергеевич');
+        Configuration::updateValue('RS_PECOM_SENDER_PERSON', 'Павлов Леонид Сергеевич');
+        Configuration::updateValue('RS_PECOM_SENDER_PHONE', '(495) 212-17-30');
+        Configuration::updateValue('RS_PECOM_SENDER_EMAIL', 'leonid.s.pavlov@gmail.com');
+        Configuration::updateValue('RS_PECOM_SENDER_ADDRESS_OFFICE', 'г. Москва, Волоколамское шоссе, д.89, корп. 1, стр. 2, офис 116');
+        Configuration::updateValue('RS_PECOM_SENDER_ADDRESS_OFFICE_COOMENT', '');
+        Configuration::updateValue('RS_PECOM_SENDER_ADDRESS_STOCK', 'г. Москва, Волоколамское шоссе, д.89, корп. 1, стр. 2, офис 116');
+        Configuration::updateValue('RS_PECOM_SENDER_ADDRESS_STOCK_COMMENT', '');
+        Configuration::updateValue('RS_PECOM_SENDER_WORK_TIME_FROM', '10:00');
+        Configuration::updateValue('RS_PECOM_SENDER_WORK_TIME_TO', '18:00');
+        Configuration::updateValue('RS_PECOM_SENDER_LUNCH_BREAK_FROM', '14:00');
+        Configuration::updateValue('RS_PECOM_SENDER_LUNCH_BREAK_TO', '15:00');
+        Configuration::updateValue('RS_PECOM_SENDER_IS_AUTH_NEEDED', TRUE);
+        Configuration::updateValue('RS_PECOM_SENDER_IDENTITY_TYPE', 10 );
+        Configuration::updateValue('RS_PECOM_SENDER_IDENTITY_SERIES', 1111);
+        Configuration::updateValue('RS_PECOM_SENDER_NUMBER', 123123);
+        Configuration::updateValue('RS_PECOM_SENDER_DATE', '10.10.07');
+        Configuration::updateValue('RS_PECOM_VOLUME_ONE', 0.016355);
+        Configuration::updateValue('RS_PECOM_IS_FLAGILE', true);
+        Configuration::updateValue('RS_PECOM_IS_GLASS', true);
+        Configuration::updateValue('RS_PECOM_IS_LIQUID', true);
+        Configuration::updateValue('RS_PECOM_IS_OTHERTYPE', false);
+        Configuration::updateValue('RS_PECOM_OTHERTYPE_DESCRIPTION', null);
+        Configuration::updateValue('RS_PECOM_IS_OPENCAR', false);
+        Configuration::updateValue('RS_PECOM_IS_SIDELOAD', false);
+        Configuration::updateValue('RS_PECOM_IS_SPECIAL_EQ', false);
+        Configuration::updateValue('RS_PECOM_IS_DAYBYDAY', false);
+        Configuration::updateValue('RS_PECOM_REGISTER_TYPE', 1);
+        Configuration::updateValue('RS_PECOM_RESPONSIBLE', 'Павлов Леонид Сергеевич , ИП Павлов Леонид Сергеевич, Директор');
+        Configuration::updateValue('RS_PECOM_IS_HP', true);
+        Configuration::updateValue('RS_PECOM_HP_POSITION_COUNT', 1);
+        Configuration::updateValue('RS_PECOM_IS_INSURANCE', false);
+        Configuration::updateValue('RS_PECOM_IS_INSURANCE_PRICE', 0);
+        Configuration::updateValue('RS_PECOM_IS_SEALING', false);
+        Configuration::updateValue('RS_PECOM_SEALING_POSITION_COUNT', null);
+        Configuration::updateValue('RS_PECOM_IS_STRAPPING', false);
+        Configuration::updateValue('RS_PECOM_IS_DOCUMENTS_RETURN', false);
+        Configuration::updateValue('RS_PECOM_IS_LOADING', true);*/
+
     }
 
     public function uninstall()
@@ -1075,6 +1148,13 @@ class axiomuspostcarrier extends CarrierModule
         $carrier = new Carrier($this->context->cart->id_carrier);
         $deliveryName = $carrier->name;
 
+        $this->context->smarty->assign('deliveries_used', [
+            'axiomus' => Configuration::get('RS_AXIOMUS_MSCW_USE_AXIOMUS'),
+            'strizh'  => Configuration::get('RS_AXIOMUS_MSCW_USE_STRIZH'),
+            'pecom'   => Configuration::get('RS_AXIOMUS_MSCW_USE_PECOM')
+        ]);
+
+        $this->context->smarty->assign($this->AxiomusPost::getSettingsArray(true)['pecom_default']);
         $this->context->smarty->assign('delivery_name', $deliveryName);
         $this->context->smarty->assign('axiomus_succes', $axiomusSucces);
         $this->context->smarty->assign('axiomus_succes_code', $axiomusSuccesCode);

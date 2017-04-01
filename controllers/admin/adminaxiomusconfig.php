@@ -4,14 +4,13 @@ include_once (_PS_MODULE_DIR_ . 'axiomuspostcarrier/models/AxiomusPost.php');
 
 class AdminAxiomusConfigController extends ModuleAdminController
 {
-
     public $settingsArray = [];
     public $maintab = 0;
     public $subtab = 0;
 
     public function __construct()
     {
-        $this->settingsArray = $this->getSettingsArray(); //ToDo может в приват?
+        $this->settingsArray = AxiomusPost::getSettingsArray(true); //ToDo может в приват?
 
         //$this->context = Context::getContext();
         $this->bootstrap = true;
@@ -39,50 +38,17 @@ class AdminAxiomusConfigController extends ModuleAdminController
 
         parent::initContent();
 
-        $this->context->smarty->assign($this->getSettingsArray());
+        $this->context->smarty->assign([
+            'maintab' => $this->maintab,
+            'subtab' => $this->subtab
+        ]);
+        $this->context->smarty->assign(AxiomusPost::getSettingsArray(true));
         $this->context->smarty->assign($this->module->AxiomusPost->getWeightPriceArray());
         $this->context->smarty->assign('AxiomusPost', $this->module->AxiomusPost);
         $this->setTemplate('view.tpl');
     }
 
-    public function getSettingsArray(){
-        return [
-            //CPU
-            'maintab' => $this->maintab,
-            'subtab' => $this->subtab,
-            //Moscow
-            'use_mscw_axiomus'              => Configuration::get('RS_AXIOMUS_MSCW_USE_AXIOMUS'),
-            'use_mscw_strizh'               => Configuration::get('RS_AXIOMUS_MSCW_USE_STRIZH'),
-            'use_mscw_pecom'                  => Configuration::get('RS_AXIOMUS_MSCW_USE_pecom'),
-            'use_mscw_axiomus_carry'        => Configuration::get('RS_AXIOMUS_MSCW_USE_AXIOMUS_CARRY'),
-            'use_mscw_dpd_carry'            => Configuration::get('RS_AXIOMUS_MSCW_USE_DPD_CARRY'),
-            'use_mscw_boxberry_carry'       => Configuration::get('RS_AXIOMUS_MSCW_USE_BOXBERRY_CARRY'),
-            'use_mscw_russianpost_carry'    => Configuration::get('RS_AXIOMUS_MSCW_USE_RUSSIANPOST_CARRY'),
-            'use_mscw_pecom_carry'          => Configuration::get('RS_AXIOMUS_MSCW_USE_PECOM_CARRY'),
-            //Piter
-            'use_ptr_axiomus'              => Configuration::get('RS_AXIOMUS_PTR_USE_AXIOMUS'),
-            'use_ptr_strizh'               => Configuration::get('RS_AXIOMUS_PTR_USE_STRIZH'),
-            'use_ptr_pecom'                  => Configuration::get('RS_AXIOMUS_PTR_USE_pecom'),
-            'use_ptr_axiomus_carry'        => Configuration::get('RS_AXIOMUS_PTR_USE_AXIOMUS_CARRY'),
-            'use_ptr_dpd_carry'            => Configuration::get('RS_AXIOMUS_PTR_USE_DPD_CARRY'),
-            'use_ptr_boxberry_carry'       => Configuration::get('RS_AXIOMUS_PTR_USE_BOXBERRY_CARRY'),
-            'use_ptr_russianpost_carry'    => Configuration::get('RS_AXIOMUS_PTR_USE_RUSSIANPOST_CARRY'),
-            'use_ptr_pecom_carry'          => Configuration::get('RS_AXIOMUS_PTR_USE_PECOM_CARRY'),
-            //region
-            'use_region_axiomus_carry'        => Configuration::get('RS_AXIOMUS_REGION_USE_AXIOMUS_CARRY'),
-            'use_region_dpd_carry'            => Configuration::get('RS_AXIOMUS_REGION_USE_DPD_CARRY'),
-            'use_region_boxberry_carry'       => Configuration::get('RS_AXIOMUS_REGION_USE_BOXBERRY_CARRY'),
-            'use_region_russianpost_carry'    => Configuration::get('RS_AXIOMUS_REGION_USE_RUSSIANPOST_CARRY'),
-            'use_region_pecom_carry'          => Configuration::get('RS_AXIOMUS_REGION_USE_PECOM_CARRY'),
-            //Settings
-            'axiomus_token'                => Configuration::get('RS_AXIOMUS_TOKEN'),
-            'axiomus_cache_hourlife'       => Configuration::get('RS_AXIOMUS_CACHE_HOURLIFE'),
-            //Moscow
-            'mscw_axiomus_manual'          => Configuration::get('RS_AXIOMUS_MSCW_AXIOMUS_MANUAL'),
-            'mscw_axiomus_increment'       => Configuration::get('RS_AXIOMUS_MSCW_AXIOMUS_INCREMENT'),
-//            'mscw_axiomus_weight'          => Configuration::getMultiple('RS_AXIOMUS_MSCW_AXIOMUS_PRICE'),
-        ];
-    }
+
 
     /**
      *
@@ -94,7 +60,7 @@ class AdminAxiomusConfigController extends ModuleAdminController
             return;
         }
 
-        $this->settingsArray = $this->getSettingsArray();
+        $this->settingsArray = AxiomusPost::getSettingsArray(true);
 
         if (Tools::isSubmit('submitUseDelivery')) {
             $this->maintab = 0;
@@ -107,7 +73,7 @@ class AdminAxiomusConfigController extends ModuleAdminController
                 Configuration::updateValue('RS_AXIOMUS_MSCW_USE_STRIZH', $_POST['use-mscw-strizh']);
             }
             if ((boolean)$_POST['use-mscw-pecom'] != $this->settingsArray['use_mscw_pecom']) {
-                Configuration::updateValue('RS_AXIOMUS_MSCW_USE_pecom', $_POST['use-mscw-pecom']);
+                Configuration::updateValue('RS_AXIOMUS_MSCW_USE_PECOM', $_POST['use-mscw-pecom']);
             }
             //Carry
             if ((boolean)$_POST['use-mscw-axiomus-carry'] != $this->settingsArray['use_mscw_axiomus_carry']) {
@@ -126,31 +92,6 @@ class AdminAxiomusConfigController extends ModuleAdminController
                 Configuration::updateValue('RS_AXIOMUS_MSCW_USE_PECOM_CARRY', $_POST['use-mscw-pecom-carry']);
             }
         }
-        if (Tools::isSubmit('submitSettings')) {
-            $this->maintab = 2;
-            $this->subtab = 0;
-            if ($_POST['axiomus-token'] != $this->settingsArray['axiomus_token']) {
-                Configuration::updateValue('RS_AXIOMUS_TOKEN', $_POST['axiomus-token']);
-            }
-            if ($_POST['axiomus-cache-hourlife'] != $this->settingsArray['axiomus_cache_hourlife']) {
-                Configuration::updateValue('RS_AXIOMUS_CACHE_HOURLIFE', $_POST['axiomus-cache-hourlife']);
-            }
-        }
-        if (Tools::isSubmit('submitMscwAxiomusSettings')){
-            $this->maintab = 0;
-            $this->subtab = 1;
-            if ((boolean)$_POST['mscw-axiomus-manual'] != $this->settingsArray['mscw_axiomus_manual']) {
-                Configuration::updateValue('RS_AXIOMUS_MSCW_AXIOMUS_MANUAL', $_POST['mscw-axiomus-manual']);
-            }
-        }
-        if (Tools::isSubmit('submitMscwAxiomusIncrement')) {
-            $this->maintab = 0;
-            $this->subtab = 1;
-            if ($_POST['mscw-axiomus-increment'] != $this->settingsArray['mscw_axiomus_increment']) {
-                Configuration::updateValue('RS_AXIOMUS_MSCW_AXIOMUS_INCREMENT', $_POST['mscw-axiomus-increment']);
-            }
-        }
-
 
         //weightype
         if (Tools::isSubmit('submitMscwAxiomusWeightType')) {
@@ -239,23 +180,23 @@ class AdminAxiomusConfigController extends ModuleAdminController
         }
         //cachecarry
         if (Tools::isSubmit('submitRefreshCacheCarryAddressesAxiomus')){
-            $this->maintab = 0;
-            $this->subtab = 1;
+            $this->maintab = 3;
+            $this->subtab = 2;
             $this->module->AxiomusPost->refreshCarryAddressCacheAxiomus();
         }
         if (Tools::isSubmit('submitRefreshCacheCarryAddressesDPD')){
-            $this->maintab = 0;
-            $this->subtab = 1;
+            $this->maintab = 3;
+            $this->subtab = 2;
             $this->module->AxiomusPost->refreshCarryAddressCacheDPD();
         }
         if (Tools::isSubmit('submitRefreshCacheCarryAddressesBoxBerry')){
-            $this->maintab = 0;
-            $this->subtab = 1;
+            $this->maintab = 3;
+            $this->subtab = 2;
             $this->module->AxiomusPost->refreshCarryAddressCacheBoxBerry();
         }
         if (Tools::isSubmit('submitRefreshCacheCarryAddressesPecom')){
-            $this->maintab = 0;
-            $this->subtab = 1;
+            $this->maintab = 3;
+            $this->subtab = 2;
             $this->module->AxiomusPost->refreshCarryAddressCachePecom();
         }
         //carry
@@ -275,7 +216,61 @@ class AdminAxiomusConfigController extends ModuleAdminController
             $this->module->AxiomusPost->setCarryPrice('Москва', 'boxberry', (int)$_POST['mscw-carry-boxberry-price']);
         }
 
-        $ls = AxiomusXml::getCarryAddressesPecom();
+        if (Tools::isSubmit('submitSettingsAxiomus')) {
+            $this->maintab = 3;
+            $this->subtab = 0;
+            if ($_POST['axiomus-token'] != $this->settingsArray['axiomus_token']) {
+                Configuration::updateValue('RS_AXIOMUS_TOKEN', $_POST['axiomus-token']);
+            }
+            if ($_POST['axiomus-cache-hourlife'] != $this->settingsArray['axiomus_cache_hourlife']) {
+                Configuration::updateValue('RS_AXIOMUS_CACHE_HOURLIFE', $_POST['axiomus-cache-hourlife']);
+            }
+        }
+        if (Tools::isSubmit('submitMscwAxiomusSettings')){
+            $this->maintab = 0;
+            $this->subtab = 1;
+            if ((boolean)$_POST['mscw-axiomus-manual'] != $this->settingsArray['mscw_axiomus_manual']) {
+                Configuration::updateValue('RS_AXIOMUS_MSCW_AXIOMUS_MANUAL', $_POST['mscw-axiomus-manual']);
+            }
+        }
+        if (Tools::isSubmit('submitMscwAxiomusIncrement')) {
+            $this->maintab = 0;
+            $this->subtab = 1;
+            if ($_POST['mscw-axiomus-increment'] != $this->settingsArray['mscw_axiomus_increment']) {
+                Configuration::updateValue('RS_AXIOMUS_MSCW_AXIOMUS_INCREMENT', $_POST['mscw-axiomus-increment']);
+            }
+        }
+
+        //Settings-pecom
+        if (Tools::isSubmit('submitSettingsPecomSender')) {
+            $this->maintab = 3;
+            $this->subtab = 1;
+            foreach (AxiomusPost::getSettingsArray(false)['pecom_sender'] as $key => $item) {
+                if ($_POST[$key] != Configuration::get($item)) {
+                    Configuration::updateValue($item, $_POST[$key]);
+                }
+            }
+        }
+        if (Tools::isSubmit('submitSettingsPecomDefault')) {
+            $this->maintab = 3;
+            $this->subtab = 1;
+            foreach (AxiomusPost::getSettingsArray(false)['pecom_default'] as $key => $item) {
+                if ($_POST[$key] != Configuration::get($item)) {
+                    Configuration::updateValue($item, $_POST[$key]);
+                }
+            }
+        }
+        if (Tools::isSubmit('submitSettingsPecom')) {
+            $this->maintab = 3;
+            $this->subtab = 1;
+            foreach (AxiomusPost::getSettingsArray(false)['pecom_settings'] as $key => $item) {
+                if ($_POST[$key] != Configuration::get($item)) {
+                    Configuration::updateValue($item, $_POST[$key]);
+                }
+            }
+        }
+
+//        $ls = AxiomusXml::getCarryAddressesPecom();
 
         parent::postProcess();
     }

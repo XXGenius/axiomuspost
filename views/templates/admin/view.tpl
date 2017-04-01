@@ -142,7 +142,7 @@
                                     <div id="mscw-setting-form" class="form-horizontal">
                                         <div class="form-group">
                                             <div class="col-lg-12 alert alert-info">
-                                                <strong>Внимание!</strong> После изменении параметров идущих ниже будет <strong>создан/удален</strong> соответствующий пункт при выборе способа доставки в фронтальной части магазина
+                                                <strong>Внимание!</strong> После изменении параметров идущих ниже будет <strong>создан/удален</strong> соответствующий пункт при выборе способа доставки в <strong>админской </strong> части магазина в управления заказами
                                             </div>
                                         </div>
                                         <!-- Доставки -->
@@ -183,6 +183,11 @@
                                             </div>
                                         </div>
                                         <hr>
+                                        <div class="form-group">
+                                            <div class="col-lg-12 alert alert-info">
+                                                <strong>Внимание!</strong> После изменении параметров идущих ниже будет <strong>создан/удален</strong> соответствующий пункт при выборе способа доставки в <strong>фронтальной </strong> части магазина, при выборе способа доставки
+                                            </div>
+                                        </div>
                                         <!-- Самовывоз -->
                                         <div class="form-group">
                                             <label class="control-label col-lg-3">{l s='Использовать самовывоз Axiomus'}</label>
@@ -257,55 +262,7 @@
                             </div>
                         </div>
                         <div class="col-lg-6">
-                            <div class="panel">
-                                <div class="panel-heading">
-                                    <i class="icon-money"></i>
-                                    Кэш записей о самовывозе
-                                </div>
-                                <form action="{$smarty.server.REQUEST_URI|escape:'html':'UTF-8'}&amp;" method="post"">
-                                    <div id="mscw-setting-form" class="form-horizontal">
-                                        <div class="row">
-                                            Дата последнего обновления: <b>{$AxiomusPost->getLastUpdateCacheCarry('axiomus')}</b>
-                                            <button type="submit" id="submitRefreshCacheCarryAddressesAxiomus" class="btn btn-success pull-right" name="submitRefreshCacheCarryAddressesAxiomus">
-                                                {l s='Обновить кэш Axiomus'}
-                                            </button>
-                                        </div>
-                                    </div>
-                                </form>
-                                <br>
-                                <form action="{$smarty.server.REQUEST_URI|escape:'html':'UTF-8'}&amp;" method="post"">
-                                <div id="mscw-setting-form" class="form-horizontal">
-                                    <div class="row">
-                                        Дата последнего обновления: <b>{$AxiomusPost->getLastUpdateCacheCarry('dpd')}</b>
-                                        <button type="submit" id="submitRefreshCacheCarryAddressesDPD" class="btn btn-success pull-right" name="submitRefreshCacheCarryAddressesDPD">
-                                            {l s='Обновить кэш DPD'}
-                                        </button>
-                                    </div>
-                                </div>
-                                </form>
-                                <br>
-                                <form action="{$smarty.server.REQUEST_URI|escape:'html':'UTF-8'}&amp;" method="post"">
-                                <div id="mscw-setting-form" class="form-horizontal">
-                                    <div class="row">
-                                        Дата последнего обновления: <b>{$AxiomusPost->getLastUpdateCacheCarry('boxberry')}</b>
-                                        <button type="submit" id="submitRefreshCacheCarryAddressesBoxBerry" class="btn btn-success pull-right" name="submitRefreshCacheCarryAddressesBoxBerry">
-                                            {l s='Обновить кэш BoxBerry'}
-                                        </button>
-                                    </div>
-                                </div>
-                                </form>
-                                <br>
-                                <form action="{$smarty.server.REQUEST_URI|escape:'html':'UTF-8'}&amp;" method="post"">
-                                <div id="mscw-setting-form" class="form-horizontal">
-                                    <div class="row">
-                                        Дата последнего обновления: <b>{$AxiomusPost->getLastUpdateCacheCarry('pecom')}</b>
-                                        <button type="submit" id="submitRefreshCacheCarryAddressesPecom" class="btn btn-success pull-right" name="submitRefreshCacheCarryAddressesPecom">
-                                            {l s='Обновить кэш ПЭК'}
-                                        </button>
-                                    </div>
-                                </div>
-                                </form>
-                            </div>
+
                         </div>
                     </div>
                 </div>
@@ -833,33 +790,581 @@
             <h4>{l s='Регионы'}</h4>
         </div>
         <div class="tab-pane {if $maintab == 3}active{/if}" id="settings">
-            <h4>{l s='Настройки'}</h4>
-            <form action="{$smarty.server.REQUEST_URI|escape:'html':'UTF-8'}&amp;" method="post"">
-                <div id="setting-form" class="form-horizontal">
-                    <div class="form-group">
-                        <label class="control-label col-lg-2">{l s='Токен к Axiomus API'}</label>
-                        <div class="col-lg-4">
-                            <input type="text" id="axiomus-token" class="" name="axiomus-token" value="{$axiomus_token}">
+            <ul class="nav nav-tabs" id="tabSettings">
+                <li {if $subtab == 0}class="active"{/if}>
+                    <a href="#settings-axiomus">
+                        <i class="icon-truck "></i>
+                        {l s='Аксиомус'} {*<span class="badge"></span>*}
+                    </a>
+                </li>
+                <li {if $subtab == 1}class="active"{/if}>
+                    <a href="#settings-pecom" >
+                        <i class="icon-plane"></i>
+                        {l s='ПЭК'}
+                    </a>
+                </li>
+                <li {if $subtab == 2}class="active"{/if}>
+                    <a href="#settings-cache" >
+                        <i class="icon-AdminAdmin"></i>
+                        {l s='Кэш'}
+                    </a>
+                </li>
+            </ul>
+            <!-- Tab content -->
+            <div class="tab-content panel">
+                <!-- Tab shipping -->
+                <div class="tab-pane {if $subtab == 0}active{/if}" id="settings-axiomus">
+                    <div class="panel">
+                        <div class="panel-heading">
+                            <i class="icon-AdminAdmin"></i>
+                            Настройки Аксиомус
+                        </div>
+                        <form action="{$smarty.server.REQUEST_URI|escape:'html':'UTF-8'}&amp;" method="post"">
+                        <div id="setting-form" class="form-horizontal">
+                            <div class="form-group">
+                                <label class="control-label">Токен к Axiomus API</label>
+                                <input type="text" id="axiomus-token" class="" name="axiomus-token" value="{$axiomus_token}">
+                            </div>
+                        </div>
+                        <div id="setting-form" class="form-horizontal">
+                            <div class="form-group">
+                                <label class="control-label">Время жизни записи в кеше</label>
+                                <input type="text" id="axiomus-cache-hourlife" class="" name="axiomus-cache-hourlife" value="">
+                            </div>
+                        </div>
+                        <br>
+                        <div class="row">
+                                <button type="submit" id="submitSettingsAxiomus" class="btn btn-primary pull-right" name="submitSettingsAxiomus">
+                                    {l s='Сохранить'}
+                                </button>
+                        </div>
+                        </form>
+                    </div>
+                </div>
+
+                <div class="tab-pane {if $subtab == 1}active{/if}" id="settings-pecom">
+                    <div class="row">
+                        <div class="col-lg-6">
+                            <div class="panel">
+                                <div class="panel-heading">
+                                    <i class="icon-AdminAdmin"></i>
+                                    Основные настройки
+                                </div>
+                                <form action="{$smarty.server.REQUEST_URI|escape:'html':'UTF-8'}&amp;" method="post"">
+                                    <div id="setting-form" class="form-horizontal">
+                                        <div class="form-group">
+                                            <div class="row">
+                                                <label class="control-label col-lg-5">Имя пользователя в системе "ПЭК"</label>
+                                                <div class="col-lg-7">
+                                                    <input type="text" id="pecom_nickname" class="" name="pecom_nickname" value="{$pecom_settings.pecom_nickname}">
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="form-group">
+                                            <div class="row">
+                                                <label class="control-label col-lg-5">API "ПЭК"</label>
+                                                <div class="col-lg-7">
+                                                    <input type="text" id="pecom_api" class="" name="pecom_api" value="{$pecom_settings.pecom_api}">
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <br>
+                                        <div class="row">
+                                            <button type="submit" id="submitSettingsPecom" class="btn btn-primary pull-right" name="submitSettingsPecom">
+                                                {l s='Сохранить'}
+                                            </button>
+                                        </div>
+                                    </div>
+                                </form>
+                            </div>
+                            <div class="panel">
+                                <div class="panel-heading">
+                                    <i class="icon-AdminAdmin"></i>
+                                    Настройки Отправителя "ПЭК"
+                                </div>
+                                <form action="{$smarty.server.REQUEST_URI|escape:'html':'UTF-8'}&amp;" method="post"">
+                                    <div id="setting-form" class="form-horizontal">
+                                        <div class="form-group">
+                                            <div class="row">
+                                                <label class="control-label col-lg-5">Город</label>
+                                                <div class="col-lg-7">
+                                                    <input type="text" id="pecom_sender_city" class="" name="pecom_sender_city" value="{$pecom_sender.pecom_sender_city}">
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="form-group">
+                                            <div class="row">
+                                                <label class="control-label col-lg-5">Наименование организации</label>
+                                                <div class="col-lg-7">
+                                                    <input type="text" id="pecom_sender_title" class="" name="pecom_sender_title" value="{$pecom_sender.pecom_sender_title}">
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="form-group">
+                                            <div class="row">
+                                                <label class="control-label col-lg-5">Контактное лицо</label>
+                                                <div class="col-lg-7">
+                                                    <input type="text" id="pecom_sender_person" class="" name="pecom_sender_person" value="{$pecom_sender.pecom_sender_person}">
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="form-group">
+                                            <div class="row">
+                                                <label class="control-label col-lg-5">Телефон</label>
+                                                <div class="col-lg-7">
+                                                    <input type="text" id="pecom_sender_phone" class="" name="pecom_sender_phone" value="{$pecom_sender.pecom_sender_phone}">
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="form-group">
+                                            <div class="row">
+                                                <label class="control-label col-lg-5">E-mail</label>
+                                                <div class="col-lg-7">
+                                                    <input type="text" id="pecom_sender_email" class="" name="pecom_sender_email" value="{$pecom_sender.pecom_sender_email}">
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="form-group">
+                                            <div class="row">
+                                                <label class="control-label col-lg-5">Адрес офиса</label>
+                                                <div class="col-lg-7">
+                                                    <input type="text" id="pecom_sender_address_office" class="" name="pecom_sender_address_office" value="{$pecom_sender.pecom_sender_address_office}">
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="form-group">
+                                            <div class="row">
+                                                <label class="control-label col-lg-5">Комментарий к адресу офиса</label>
+                                                <div class="col-lg-7">
+                                                    <input type="text" id="pecom_sender_address_office_comment" class="" name="pecom_sender_address_office_comment" value="{$pecom_sender.pecom_sender_address_office_comment}">
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="form-group">
+                                            <div class="row">
+                                                <label class="control-label col-lg-5">Адрес склада</label>
+                                                <div class="col-lg-7">
+                                                    <input type="text" id="pecom_sender_address_stock" class="" name="pecom_sender_address_stock" value="{$pecom_sender.pecom_sender_address_stock}">
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="form-group">
+                                            <div class="row">
+                                            <label class="control-label col-lg-5">Комментарий к адресу склада</label>
+                                                <div class="col-lg-7">
+                                            <input type="text" id="pecom_sender_address_stock_comment" class="" name="pecom_sender_address_stock_comment" value="{$pecom_sender.pecom_sender_address_stock_comment}">
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="form-group">
+                                            <div class="row">
+                                                <label class="control-label col-lg-5">Время начала рабочего дня</label>
+                                                <div class="col-lg-7">
+                                                    <input type="text" id="pecom_sender_work_time_from" class="" name="pecom_sender_work_time_from" value="{$pecom_sender.pecom_sender_work_time_from}">
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="form-group">
+                                            <div class="row">
+                                                <label class="control-label col-lg-5">Время окончания рабочего дня</label>
+                                                <div class="col-lg-7">
+                                                    <input type="text" id="pecom_sender_work_time_to" class="" name="pecom_sender_work_time_to" value="{$pecom_sender.pecom_sender_work_time_to}">
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="form-group">
+                                            <div class="row">
+                                                <label class="control-label col-lg-5">Время начала обеденного перерыва</label>
+                                                <div class="col-lg-7">
+                                                    <input type="text" id="pecom_sender_lunch_break_from" class="" name="pecom_sender_lunch_break_from" value="{$pecom_sender.pecom_sender_lunch_break_from}">
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="form-group">
+                                            <div class="row">
+                                                <label class="control-label col-lg-5">Время окончания обеденного перерыва</label>
+                                                <div class="col-lg-7">
+                                                    <input type="text" id="pecom_sender_lunch_break_to" class="" name="pecom_sender_lunch_break_to" value="{$pecom_sender.pecom_sender_lunch_break_to}">
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="form-group">
+                                            <label class="control-label col-lg-5">Для получения груза необходима доверенность ПЭК</label>
+                                            <div class="col-lg-7">
+                                                <input type="text" id="pecom_sender_is_auth_needed" class="" name="pecom_sender_is_auth_needed" value="{$pecom_sender.pecom_sender_is_auth_needed}">
+                                            </div>
+                                        </div>
+                                        <div class="form-group">
+                                            <div class="row">
+                                                <label class="control-label col-lg-5">Документ удостоверяющий личность</label>
+                                                <div class="col-lg-7">
+                                                    <select class="form-control " id="pecom_sender_identity_type" name="pecom_sender_identity_type">
+                                                        <option value="1" {if ($pecom_sender.pecom_sender_identity_type == 1)}selected{/if}>Паспорт иностранного гражданина</option>
+                                                        <option value="2" {if ($pecom_sender.pecom_sender_identity_type == 2)}selected{/if}>Разрешение на временное проживание</option>
+                                                        <option value="3" {if ($pecom_sender.pecom_sender_identity_type == 3)}selected{/if}>Водительское удостоверение</option>
+                                                        <option value="4" {if ($pecom_sender.pecom_sender_identity_type == 4)}selected{/if}>Вид на жительство</option>
+                                                        <option value="5" {if ($pecom_sender.pecom_sender_identity_type == 5)}selected{/if}>Заграничный паспорт</option>
+                                                        <option value="6" {if ($pecom_sender.pecom_sender_identity_type == 6)}selected{/if}>Удостоверение беженца</option>
+                                                        <option value="7" {if ($pecom_sender.pecom_sender_identity_type == 7)}selected{/if}>Временное удостоверение личности гражданина РФ</option>
+                                                        <option value="8" {if ($pecom_sender.pecom_sender_identity_type == 8)}selected{/if}>Свидетельство о предоставлении временного убежища на территрории РФ</option>
+                                                        <option value="9" {if ($pecom_sender.pecom_sender_identity_type == 9)}selected{/if}>Паспорт моряка</option>
+                                                        <option value="10" {if ($pecom_sender.pecom_sender_identity_type == 10)}selected{/if}>Паспорт гражданина РФ</option>
+                                                        <option value="11" {if ($pecom_sender.pecom_sender_identity_type == 11)}selected{/if}>Свидетельство о рассмотрении ходатайства о признании беженцем</option>
+                                                        <option value="12" {if ($pecom_sender.pecom_sender_identity_type == 12)}selected{/if}>Военный билет</option>
+                                                    </select>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="form-group">
+                                            <div class="row">
+                                                <label class="control-label col-lg-5">Серия документа</label>
+                                                <div class="col-lg-7">
+                                                    <input type="text" id="pecom_sender_identity_series" class="" name="pecom_sender_identity_series" value="{$pecom_sender.pecom_sender_identity_series}">
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="form-group">
+                                            <div class="row">
+                                                <label class="control-label col-lg-5">Номер документа</label>
+                                                <div class="col-lg-7">
+                                                    <input type="text" id="pecom_sender_identity_number" class="" name="pecom_sender_identity_number" value="{$pecom_sender.pecom_sender_identity_number}">
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="form-group">
+                                            <div class="row">
+                                                <label class="control-label col-lg-5">Дата выдачи документа</label>
+                                                <div class="col-lg-7">
+                                                    <input type="text" id="pecom_sender_identity_date" class="" name="pecom_sender_identity_date" value="{$pecom_sender.pecom_sender_identity_date}">
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <br>
+                                    <div class="row">
+                                        <button type="submit" id="submitSettingsPecomSender" class="btn btn-primary pull-right" name="submitSettingsPecomSender">
+                                            {l s='Сохранить'}
+                                        </button>
+                                    </div>
+                                </form>
+                            </div>
+                        </div>
+                        <div class="col-lg-6">
+                            <div class="panel">
+                                <div class="panel-heading">
+                                    <i class="icon-AdminAdmin"></i>
+                                    Настройки параметров отправки по-умолчанию "ПЭК"
+                                </div>
+                                <form action="{$smarty.server.REQUEST_URI|escape:'html':'UTF-8'}&amp;" method="post"">
+                                <div id="setting-form" class="form-horizontal">
+                                    <div class="form-group">
+                                        <div class="row">
+                                            <label class="control-label col-lg-5">Объем одного места</label>
+                                            <div class="col-lg-7">
+                                                <input type="text" id="pecom_volume_one" class="" name="pecom_volume_one" value="{$pecom_default.pecom_volume_one}">
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="form-group">
+                                        <label class="control-label col-lg-5">Хрупкий груз</label>
+                                        <div class="col-lg-1">
+                                            <span class="switch prestashop-switch fixed-width-lg">
+                                                <input type="radio" name="pecom_is_fragile" id="pecom_is-fragile-on" value="1" {if $pecom_default.pecom_is_fragile} checked="checked"{/if}>
+                                                <label for="pecom_is-fragile-on">{l s='Да'}</label>
+                                                <input type="radio" name="pecom_is_fragile" id="pecom_is-fragile-off" value="0" {if !$pecom_default.pecom_is_fragile} checked="checked"{/if} />
+                                                <label for="pecom_is-fragile-off">{l s='Нет'}</label>
+                                                <a class="slide-button btn"></a>
+                                            </span>
+                                        </div>
+                                    </div>
+
+                                    <div class="form-group">
+                                        <label class="control-label col-lg-5">Стекло</label>
+                                        <div class="col-lg-1">
+                                            <span class="switch prestashop-switch fixed-width-lg">
+                                                <input type="radio" name="pecom_is_glass" id="pecom_is-glass-on" value="1" {if $pecom_default.pecom_is_glass} checked="checked"{/if}>
+                                                <label for="pecom_is-glass-on">{l s='Да'}</label>
+                                                <input type="radio" name="pecom_is_glass" id="pecom_is-glass-off" value="0" {if !$pecom_default.pecom_is_glass} checked="checked"{/if} />
+                                                <label for="pecom_is-glass-off">{l s='Нет'}</label>
+                                                <a class="slide-button btn"></a>
+                                            </span>
+                                        </div>
+                                    </div>
+                                    <div class="form-group">
+                                        <label class="control-label col-lg-5">Жидкость</label>
+                                        <div class="col-lg-1">
+                                            <span class="switch prestashop-switch fixed-width-lg">
+                                                <input type="radio" name="pecom_is_liquid" id="pecom_is-liquid-on" value="1" {if $pecom_default.pecom_is_liquid} checked="checked"{/if}>
+                                                <label for="pecom_is-liquid-on">{l s='Да'}</label>
+                                                <input type="radio" name="pecom_is_liquid" id="pecom_is-liquid-off" value="0" {if !$pecom_default.pecom_is_liquid} checked="checked"{/if} />
+                                                <label for="pecom_is-liquid-off">{l s='Нет'}</label>
+                                                <a class="slide-button btn"></a>
+                                            </span>
+                                        </div>
+                                    </div>
+                                    <div class="form-group">
+                                        <label class="control-label col-lg-5">Груз другого типа</label>
+                                        <div class="col-lg-1">
+                                            <span class="switch prestashop-switch fixed-width-lg">
+                                                <input type="radio" name="pecom_is_othertype" id="pecom_is-othertype-on" value="1" {if $pecom_default.pecom_is_othertype} checked="checked"{/if}>
+                                                <label for="pecom_is-othertype-on">{l s='Да'}</label>
+                                                <input type="radio" name="pecom_is_othertype" id="pecom_is-othertype-off" value="0" {if !$pecom_default.pecom_is_othertype} checked="checked"{/if} />
+                                                <label for="pecom_is-othertype-off">{l s='Нет'}</label>
+                                                <a class="slide-button btn"></a>
+                                            </span>
+                                        </div>
+                                    </div>
+                                    <div class="form-group">
+                                        <div class="row">
+                                            <label class="control-label col-lg-5">Описание груза другого типа</label>
+                                            <div class="col-lg-7">
+                                                <input type="text" id="pecom_othertype_description" class="" name="pecom_othertype_description" value="{$pecom_default.pecom_othertype_description}">
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="form-group">
+                                        <label class="control-label col-lg-5">Необходима открытая машина</label>
+                                        <div class="col-lg-1">
+                                            <span class="switch prestashop-switch fixed-width-lg">
+                                                <input type="radio" name="pecom_is_opencar" id="pecom_is-opencar-on" value="1" {if $pecom_default.pecom_is_opencar} checked="checked"{/if}>
+                                                <label for="pecom_is-opencar-on">{l s='Да'}</label>
+                                                <input type="radio" name="pecom_is_opencar" id="pecom_is-opencar-off" value="0" {if !$pecom_default.pecom_is_opencar} checked="checked"{/if} />
+                                                <label for="pecom_is-opencar-off">{l s='Нет'}</label>
+                                                <a class="slide-button btn"></a>
+                                            </span>
+                                        </div>
+                                    </div>
+                                    <div class="form-group">
+                                        <label class="control-label col-lg-5">Необходима боковая погрузка</label>
+                                        <div class="col-lg-1">
+                                            <span class="switch prestashop-switch fixed-width-lg">
+                                                <input type="radio" name="pecom_is_sideload" id="pecom_is-sideload-on" value="1" {if $pecom_default.pecom_is_sideload} checked="checked"{/if}>
+                                                <label for="pecom_is-sideload-on">{l s='Да'}</label>
+                                                <input type="radio" name="pecom_is_sideload" id="pecom_is-sideload-off" value="0" {if !$pecom_default.pecom_is_sideload} checked="checked"{/if} />
+                                                <label for="pecom_is-sideload-off">{l s='Нет'}</label>
+                                                <a class="slide-button btn"></a>
+                                            </span>
+                                        </div>
+                                    </div>
+                                    <div class="form-group">
+                                        <label class="control-label col-lg-5">Необходимо специальное оборудование</label>
+                                        <div class="col-lg-1">
+                                            <span class="switch prestashop-switch fixed-width-lg">
+                                                <input type="radio" name="pecom_is_special_eq" id="pecom_is-special-eq-on" value="1" {if $pecom_default.pecom_is_special_eq} checked="checked"{/if}>
+                                                <label for="pecom_is-special-eq-on">{l s='Да'}</label>
+                                                <input type="radio" name="pecom_is_special_eq" id="pecom_is-special-eq-off" value="0" {if !$pecom_default.pecom_is_special_eq} checked="checked"{/if} />
+                                                <label for="pecom_is-special-eq-off">{l s='Нет'}</label>
+                                                <a class="slide-button btn"></a>
+                                            </span>
+                                        </div>
+                                    </div>
+                                    <div class="form-group">
+                                        <label class="control-label col-lg-5">Необходима растентовка</label>
+                                        <div class="col-lg-1">
+                                            <span class="switch prestashop-switch fixed-width-lg">
+                                                <input type="radio" name="pecom_is_uncovered" id="pecom_is-uncovered-on" value="1" {if $pecom_default.pecom_is_uncovered} checked="checked"{/if}>
+                                                <label for="pecom_is-uncovered-on">{l s='Да'}</label>
+                                                <input type="radio" name="pecom_is_uncovered" id="pecom_is-uncovered-off" value="0" {if !$pecom_default.pecom_is_uncovered} checked="checked"{/if} />
+                                                <label for="pecom_is-uncovered-off">{l s='Нет'}</label>
+                                                <a class="slide-button btn"></a>
+                                            </span>
+                                        </div>
+                                    </div>
+                                    <div class="form-group">
+                                        <label class="control-label col-lg-5">Необходим забор день в день</label>
+                                        <div class="col-lg-1">
+                                            <span class="switch prestashop-switch fixed-width-lg">
+                                                <input type="radio" name="pecom_is_daybyday" id="pecom_is-daybyday-on" value="1" {if $pecom_default.pecom_is_daybyday} checked="checked"{/if}>
+                                                <label for="pecom_is-daybyday-on">{l s='Да'}</label>
+                                                <input type="radio" name="pecom_is_daybyday" id="pecom_is-daybyday-off" value="0" {if !$pecom_default.pecom_is_daybyday} checked="checked"{/if} />
+                                                <label for="pecom_is-daybyday-off">{l s='Нет'}</label>
+                                                <a class="slide-button btn"></a>
+                                            </span>
+                                        </div>
+                                    </div>
+
+                                    <div class="form-group">
+                                        <div class="row">
+                                            <label class="control-label col-lg-5">Представитель какой стороны оформляет заявки </label>
+                                            <div class="col-lg-7">
+                                                <select class="form-control" id="pecom_register_type" name="pecom_register_type">
+                                                    <option value="1" {if ($pecom_default.pecom_register_type == 1)}selected{/if}>Отправитель</option>
+                                                    <option value="2" {if ($pecom_default.pecom_register_type == 2)}selected{/if}>Получатель</option>
+                                                    <option value="3" {if ($pecom_default.pecom_register_type == 3)}selected{/if}>Третье лицо</option>
+                                                </select>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="form-group">
+                                        <div class="row">
+                                            <label class="control-label col-lg-5">ФИО ответственного за оформление заявки</label>
+                                            <div class="col-lg-7">
+                                                <input type="text" id="pecom_responsible_person" class="" name="pecom_responsible_person" value="{$pecom_default.pecom_responsible_person}">
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="form-group">
+                                        <label class="control-label col-lg-5">Изготовление жесткой упаковки</label>
+                                        <div class="col-lg-1">
+                                            <span class="switch prestashop-switch fixed-width-lg">
+                                                <input type="radio" name="pecom_is_hp" id="pecom_is-hp-on" value="1" {if $pecom_default.pecom_is_hp} checked="checked"{/if}>
+                                                <label for="pecom_is-hp-on">{l s='Да'}</label>
+                                                <input type="radio" name="pecom_is_hp" id="pecom_is-hp-off" value="0" {if !$pecom_default.pecom_is_hp} checked="checked"{/if} />
+                                                <label for="pecom_is-hp-off">{l s='Нет'}</label>
+                                                <a class="slide-button btn"></a>
+                                            </span>
+                                        </div>
+                                    </div>
+                                    <div class="form-group">
+                                        <div class="row">
+                                            <label class="control-label col-lg-5">Количество мест для жесткой упаковки</label>
+                                            <div class="col-lg-7">
+                                                <input type="text" id="pecom_hp_position_count" class="" name="pecom_hp_position_count" value="{$pecom_default.pecom_hp_position_count}">
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="form-group">
+                                        <label class="control-label col-lg-5">Дополнительное страхование груза</label>
+                                        <div class="col-lg-1">
+                                            <span class="switch prestashop-switch fixed-width-lg">
+                                                <input type="radio" name="pecom_is_insurance" id="pecom_is-insurance-on" value="1" {if $pecom_default.pecom_is_insurance} checked="checked"{/if}>
+                                                <label for="pecom_is-insurance-on">{l s='Да'}</label>
+                                                <input type="radio" name="pecom_is_insurance" id="pecom_is-insurance-off" value="0" {if !$pecom_default.pecom_is_insurance} checked="checked"{/if} />
+                                                <label for="pecom_is-insurance-off">{l s='Нет'}</label>
+                                                <a class="slide-button btn"></a>
+                                            </span>
+                                        </div>
+                                    </div>
+                                    <div class="form-group">
+                                        <div class="row">
+                                            <label class="control-label col-lg-5">Стоимость груза для страхования, руб</label>
+                                            <div class="col-lg-7">
+                                                <input type="text" id="pecom_insurance_price" class="" name="pecom_insurance_price" value="{$pecom_default.pecom_insurance_price}">
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="form-group">
+                                        <label class="control-label col-lg-5">Пломбировка груза (только до 3 кг)</label>
+                                        <div class="col-lg-1">
+                                            <span class="switch prestashop-switch fixed-width-lg">
+                                                <input type="radio" name="pecom_is_sealing" id="pecom_is-sealing-on" value="1" {if $pecom_default.pecom_is_sealing} checked="checked"{/if}>
+                                                <label for="pecom_is-sealing-on">{l s='Да'}</label>
+                                                <input type="radio" name="pecom_is_sealing" id="pecom_is-sealing-off" value="0" {if !$pecom_default.pecom_is_sealing} checked="checked"{/if} />
+                                                <label for="pecom_is-sealing-off">{l s='Нет'}</label>
+                                                <a class="slide-button btn"></a>
+                                            </span>
+                                        </div>
+                                    </div>
+                                    <div class="form-group">
+                                        <div class="row">
+                                            <label class="control-label col-lg-5">Количество мест для пломбировки</label>
+                                            <div class="col-lg-7">
+                                                <input type="text" id="pecom_sealing_position_count" class="" name="pecom_sealing_position_count" value="{$pecom_default.pecom_sealing_position_count}">
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="form-group">
+                                        <label class="control-label col-lg-5">Упаковка груза стреппинг‑лентой</label>
+                                        <div class="col-lg-1">
+                                            <span class="switch prestashop-switch fixed-width-lg">
+                                                <input type="radio" name="pecom_is_strapping" id="pecom_is-strapping-on" value="1" {if $pecom_default.pecom_is_strapping} checked="checked"{/if}>
+                                                <label for="pecom_is-strapping-on">{l s='Да'}</label>
+                                                <input type="radio" name="pecom_is_strapping" id="pecom_is-strapping-off" value="0" {if !$pecom_default.pecom_is_strapping} checked="checked"{/if} />
+                                                <label for="pecom_is-strapping-off">{l s='Нет'}</label>
+                                                <a class="slide-button btn"></a>
+                                            </span>
+                                        </div>
+                                    </div>
+                                    <div class="form-group">
+                                        <label class="control-label col-lg-5">Возврат документов</label>
+                                        <div class="col-lg-1">
+                                            <span class="switch prestashop-switch fixed-width-lg">
+                                                <input type="radio" name="pecom_is_documents_return" id="pecom_is-documents-return-on" value="1" {if $pecom_default.pecom_is_documents_return} checked="checked"{/if}>
+                                                <label for="pecom_is-documents-return-on">{l s='Да'}</label>
+                                                <input type="radio" name="pecom_is_documents_return" id="pecom_is-documents-return-off" value="0" {if !$pecom_default.pecom_is_documents_return} checked="checked"{/if} />
+                                                <label for="pecom_is-documents-return-off">{l s='Нет'}</label>
+                                                <a class="slide-button btn"></a>
+                                            </span>
+                                        </div>
+                                    </div>
+                                    <div class="form-group">
+                                        <label class="control-label col-lg-5">Необходима погрузка силами «ПЭК»</label>
+                                        <div class="col-lg-1">
+                                            <span class="switch prestashop-switch fixed-width-lg">
+                                                <input type="radio" name="pecom_is_loading" id="pecom_is_loading-on" value="1" {if $pecom_default.pecom_is_loading} checked="checked"{/if}>
+                                                <label for="pecom_is_loading-on">{l s='Да'}</label>
+                                                <input type="radio" name="pecom_is_loading" id="pecom_is_loading-off" value="0" {if !$pecom_default.pecom_is_loading} checked="checked"{/if} />
+                                                <label for="pecom_is_loading-off">{l s='Нет'}</label>
+                                                <a class="slide-button btn"></a>
+                                            </span>
+                                        </div>
+                                    </div>
+                                </div>
+                                <br>
+                                <div class="row">
+                                    <button type="submit" id="submitSettingsPecomDefault" class="btn btn-primary pull-right" name="submitSettingsPecomDefault">
+                                        {l s='Сохранить'}
+                                    </button>
+                                </div>
+                                </form>
+                            </div>
+
+
                         </div>
                     </div>
                 </div>
-                <div id="setting-form" class="form-horizontal">
-                    <div class="form-group">
-                        <label class="control-label col-lg-2">{l s='Время жизни записи в кеше'}</label>
-                        <div class="col-lg-4">
-                            <input type="text" id="axiomus-cache-hourlife" class="" name="axiomus-cache-hourlife" value="{$axiomus_cache_hourlife}">
+                <div class="tab-pane {if $subtab == 2}active{/if}" id="settings-cache">
+                    <div class="panel">
+                        <div class="panel-heading">
+                            <i class="icon-money"></i>
+                            Кэш записей о самовывозе
                         </div>
+                        <form action="{$smarty.server.REQUEST_URI|escape:'html':'UTF-8'}&amp;" method="post"">
+                        <div id="mscw-setting-form" class="form-horizontal">
+                            <div class="row">
+                                Дата последнего обновления: <b>{$AxiomusPost->getLastUpdateCacheCarry('axiomus')}</b>
+                                <button type="submit" id="submitRefreshCacheCarryAddressesAxiomus" class="btn btn-success pull-right" name="submitRefreshCacheCarryAddressesAxiomus">
+                                    {l s='Обновить кэш Axiomus'}
+                                </button>
+                            </div>
+                        </div>
+                        </form>
+                        <br>
+                        <form action="{$smarty.server.REQUEST_URI|escape:'html':'UTF-8'}&amp;" method="post"">
+                        <div id="mscw-setting-form" class="form-horizontal">
+                            <div class="row">
+                                Дата последнего обновления: <b>{$AxiomusPost->getLastUpdateCacheCarry('dpd')}</b>
+                                <button type="submit" id="submitRefreshCacheCarryAddressesDPD" class="btn btn-success pull-right" name="submitRefreshCacheCarryAddressesDPD">
+                                    {l s='Обновить кэш DPD'}
+                                </button>
+                            </div>
+                        </div>
+                        </form>
+                        <br>
+                        <form action="{$smarty.server.REQUEST_URI|escape:'html':'UTF-8'}&amp;" method="post"">
+                        <div id="mscw-setting-form" class="form-horizontal">
+                            <div class="row">
+                                Дата последнего обновления: <b>{$AxiomusPost->getLastUpdateCacheCarry('boxberry')}</b>
+                                <button type="submit" id="submitRefreshCacheCarryAddressesBoxBerry" class="btn btn-success pull-right" name="submitRefreshCacheCarryAddressesBoxBerry">
+                                    {l s='Обновить кэш BoxBerry'}
+                                </button>
+                            </div>
+                        </div>
+                        </form>
+                        <br>
+                        <form action="{$smarty.server.REQUEST_URI|escape:'html':'UTF-8'}&amp;" method="post"">
+                        <div id="mscw-setting-form" class="form-horizontal">
+                            <div class="row">
+                                Дата последнего обновления: <b>{$AxiomusPost->getLastUpdateCacheCarry('pecom')}</b>
+                                <button type="submit" id="submitRefreshCacheCarryAddressesPecom" class="btn btn-success pull-right" name="submitRefreshCacheCarryAddressesPecom">
+                                    {l s='Обновить кэш ПЭК'}
+                                </button>
+                            </div>
+                        </div>
+                        </form>
                     </div>
                 </div>
-                <br>
-                <div class="row">
-                    <div class="col-lg-6">
-                        <button type="submit" id="submitSettings" class="btn btn-primary pull-right" name="submitSettings">
-                            {l s='Сохранить'}
-                        </button>
-                    </div>
-                </div>
-            </form>
+            </div>
         </div>
     </div>
     <script>
@@ -884,6 +1389,10 @@
                 $(this).tab('show')
             });
             $('#tabPiter a').click(function (e) {
+                e.preventDefault()
+                $(this).tab('show')
+            });
+            $('#tabSettings a').click(function (e) {
                 e.preventDefault()
                 $(this).tab('show')
             });

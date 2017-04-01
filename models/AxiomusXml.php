@@ -15,14 +15,14 @@ public static $ukeyAxiomus = 'XXcd208495d565ef66e7dff9f98764XX';
 public static $uidAxiomus = 92;
 public static $urlAxiomus = "http://axiomus.ru/test/api_xml_test.php";
 
-public static $usernamePecom = 'zitttz';
-public static $apikeyPecom = '43406356D86720B3AA160DA8C299E2DA035079E0';
-public static $urlPecom = '';
+public static $usernamePecom = '';
+public static $apikeyPecom = '';
 
 public $delivery_date;
 public $weight;
 
 public $volume; //Объем
+public $volumeOne = 0.016355;
 public $positionsCount = 1;
 
 public $width = 0.33;
@@ -42,10 +42,11 @@ public $whoRegister = 1;
 public $responsiblePerson = 'Павлов Леонид Сергеевич , ИП Павлов Леонид Сергеевич, Директор'; //ToDo Перенести в админку
 
 public $isHP = true;
-
+public $isHPPositionCount = 1;
 public $isInsurance = false; //Дополнительная страховка
 public $isInsurancePrice = 0; //Стоимость груза для страхования
 public $isSealing = false;  //Пломбировка груза(до 3х кг)
+public $isSealingPositionCount = null;
 public $isStrapping = false; // Упаковка груза стреппинг‑лентой [Boolean]
 public $isDocumentsReturn = false;// Возврат документов [Boolean]
 public $isLoading = true;// Необходима погрузка силами «ПЭК» [Boolean]
@@ -68,40 +69,7 @@ public $okey;
 
 public $customer_fullName; //ToDo возможно не нужное поле, возможно оно есть в глубинах преста
 
-public $sender = [ //ToDo переложить это в админку
-//        'inn' => '7707083894',
-        'city' => 'Москва',
-        'title' => 'ИП Тест Тестов',
-        'person' => 'Тестов Тест Тестович',
-        'phone' => '(495) 222-77-30',
-        'email' => 'testtesttest@gmail.com',
-        'addressOffice' => 'г. Москва, Волоколамское шоссе, д.34, офис 116',
-        'addressStock' => 'г. Москва, Волоколамское шоссе, д.34, офис 116',
-        'cargoDocumentNumber' => '-',
-        'workTimeFrom' => '10:00',
-        'workTimeTo' => '18:00',
-        'lunchBreakFrom' => '14:00',
-        'lunchBreakTo' => '15:00',
-        'isAuthorityNeeded' => TRUE,
-        'identityCard' => [
-            'type' => 10
-        ],
-//        'inn' => '690209 931823',
-//        'city' => 'Москва',
-//        'title' => 'ИП Павлов Леонид Сергеевич',
-//        'person' => 'Павлов Леонид Сергеевич',
-//        'phone' => '(495) 212-17-30',
-//        'email' => 'leonid.s.pavlov@gmail.com',
-//        'addressOffice' => 'г. Москва, Волоколамское шоссе, д.89, корп. 1, стр. 2, офис 116',
-//        'addressStock' => 'г. Москва, Волоколамское шоссе, д.89, корп. 1, стр. 2, офис 116',
-//        'cargoDocumentNumber' => '-',
-//        'workTimeFrom' => '10:00',
-//        'workTimeTo' => '18:00',
-//        'lunchBreakFrom' => '14:00',
-//        'lunchBreakTo' => '15:00',
-//        'isAuthorityNeeded' => TRUE,
-    //ToDo в API полей больше
-];
+public $sender = [];
 
 public $pecomDeliveryNeeded;
 public $pecomDeliveryNeededAddress;
@@ -142,15 +110,40 @@ public $pecomDeliveryNeededAddressComment;
             $errors[2] = 'id = '.$this->moduleOrders['kadtype'].',в таблице kadtype не существует';
             return;
         }
-        $this->timefrom = $res['rangefrom'];
-        $this->timeto = $res['rangeto'];
+        $this->kadfrom = $res['rangefrom'];
+        $this->kadto = $res['rangeto'];
 
         $this->address_line = $this->address->city . ', ул. ' . $this->address->address1;
         if(!empty($this->address->address2)){
             $this->address_line .= ', '.$this->address->address2;
         }
 
-        $this->volume = 0.016355*$this->positionsCount;
+        $this->volumeOne = Configuration::get('RS_PECOM_VOLUME_ONE');
+        $this->volume = $this->volumeOne*$this->positionsCount; //0.016355
+
+        $this->isFragile = (boolean)Configuration::get('RS_PECOM_IS_FLAGILE');
+        $this->isGlass = (boolean)Configuration::get('RS_PECOM_IS_GLASS');
+        $this->isLiquid = (boolean)Configuration::get('RS_PECOM_IS_LIQUID');
+        $this->isOtherType = (boolean)Configuration::get('RS_PECOM_IS_OTHERTYPE');
+        $this->isOtherTypeDescription = Configuration::get('RS_PECOM_OTHERTYPE_DESCRIPTION');
+        $this->isOpenCar = (boolean)Configuration::get('RS_PECOM_IS_OPENCAR');
+        $this->isSideLoad = (boolean)Configuration::get('RS_PECOM_IS_SIDELOAD');
+        $this->isSpecialEquipment = (boolean)Configuration::get('RS_PECOM_IS_SPECIAL_EQ');
+        $this->isUncovered = (boolean)Configuration::get('RS_PECOM_IS_UNCOVERED');
+        $this->isDayByDay = (boolean)Configuration::get('RS_PECOM_IS_DAYBYDAY');
+        $this->whoRegister = (int)Configuration::get('RS_PECOM_REGISTER_TYPE');
+        $this->responsiblePerson = Configuration::get('RS_PECOM_RESPONSIBLE');
+        $this->isHP = (boolean)Configuration::get('RS_PECOM_IS_HP');
+        $this->isHPPositionCount = (int)Configuration::get('RS_PECOM_HP_POSITION_COUNT');
+
+        $this->isInsurance = (boolean)Configuration::get('RS_PECOM_IS_INSURANCE');
+        $this->isInsurancePrice = Configuration::get('RS_PECOM_INSURANCE_PRICE');
+        $this->isSealing = (boolean)Configuration::get('RS_PECOM_IS_SEALING');
+        $this->isSealingPositionCount = Configuration::get('RS_PECOM_SEALING_POSITION_COUNT');
+
+        $this->isStrapping = (boolean)Configuration::get('RS_PECOM_IS_STRAPPING');
+        $this->isDocumentsReturn = (boolean)Configuration::get('RS_PECOM_IS_DOCUMENTS_RETURN');
+        $this->isLoading = (boolean)Configuration::get('RS_PECOM_IS_LOADING');
 
         $this->customer_fullName = $this->customer->firstname . ' ' . $this->customer->lastname;
 
@@ -158,6 +151,32 @@ public $pecomDeliveryNeededAddressComment;
         $this->pecomDeliveryNeededAddress = null;
         $this->pecomDeliveryNeededAddressComment = null;
 
+        $this->sender = [
+            'city' => Configuration::get('RS_PECOM_SENDER_CITY'),
+            'title' => Configuration::get('RS_PECOM_SENDER_TITLE'),
+            'person' => Configuration::get('RS_PECOM_SENDER_PERSON'),
+            'phone' => Configuration::get('RS_PECOM_SENDER_PHONE'),
+            'email' => Configuration::get('RS_PECOM_SENDER_EMAIL'),
+            'addressOffice' => Configuration::get('RS_PECOM_SENDER_ADDRESS_OFFICE'),
+            'addressOfficeComment' => Configuration::get('RS_PECOM_SENDER_ADDRESS_OFFICE_COOMENT'),
+            'addressStock' => Configuration::get('RS_PECOM_SENDER_ADDRESS_STOCK'),
+            'addressStockComment' => Configuration::get('RS_PECOM_SENDER_ADDRESS_STOCK_COMMENT'),
+            'cargoDocumentNumber' => '-',
+            'workTimeFrom' => Configuration::get('RS_PECOM_SENDER_WORK_TIME_FROM'),
+            'workTimeTo' => Configuration::get('RS_PECOM_SENDER_WORK_TIME_TO'),
+            'lunchBreakFrom' => Configuration::get('RS_PECOM_SENDER_LUNCH_BREAK_FROM'),
+            'lunchBreakTo' => Configuration::get('RS_PECOM_SENDER_LUNCH_BREAK_TO'),
+            'isAuthorityNeeded' => (boolean)Configuration::get('RS_PECOM_SENDER_IS_AUTH_NEEDED'),
+            'identityCard' => [
+                'type' => (int)Configuration::get('RS_PECOM_SENDER_IDENTITY_TYPE'),
+                'series' => Configuration::get('RS_PECOM_SENDER_IDENTITY_SERIES'),
+                'number' => Configuration::get('RS_PECOM_SENDER_NUMBER'),
+                'date' => Configuration::get('RS_PECOM_SENDER_DATE')
+            ]
+        ];
+
+        self::$usernamePecom = Configuration::get('RS_PECOM_NICKNAME');
+        self::$apikeyPecom = Configuration::get('RS_PECOM_API');
     }
 
     public function sendToAxiomus($method)
@@ -176,7 +195,7 @@ public $pecomDeliveryNeededAddressComment;
         $xml_single_order = new SimpleXMLElement('<singleorder/>');
         $xml_single_order->addChild('mode', $method);
         $xml_auth = $xml_single_order->addChild('auth');
-        $xml_auth->addAttribute('ukey', $this->ukeyAxiomus);
+        $xml_auth->addAttribute('ukey', self::$ukeyAxiomus);
         $xml_order = $xml_single_order->addChild('order');
         $xml_order->addAttribute('inner_id', "Заказ #" . $this->order->id);
         $xml_order->addAttribute('name',  $this->customer_fullName); //ToDo добавить отчество?
@@ -211,12 +230,12 @@ public $pecomDeliveryNeededAddressComment;
             $totalQuantity += $product['quantity'];
         }
 
-        $checksum = md5($this->uidAxiomus."u". count($this->products) . $totalQuantity );
+        $checksum = md5(self::$uidAxiomus."u". count($this->products) . $totalQuantity );
         $xml_auth->addAttribute('checksum', $checksum);
 
         $ch = curl_init();
 
-        curl_setopt($ch, CURLOPT_URL, $this->urlAxiomus); // set url to post to
+        curl_setopt($ch, CURLOPT_URL, self::$urlAxiomus); // set url to post to
         curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1); // return into a variable
         curl_setopt($ch, CURLOPT_POST, 1); // set POST method
         curl_setopt($ch, CURLOPT_POSTFIELDS, "data=" . urlencode($xml_single_order->asXML())); // add POST fields
@@ -229,12 +248,13 @@ public $pecomDeliveryNeededAddressComment;
 
         if ($status_code == 0)
         {
-            $authId = $result->auth[0];
+            $authId = (string)$result->auth[0];
             $oid = (int)$result->auth['objectid']; //id заявки в системе axiomus
             return ['oid' => $oid,'okey' => $authId];
-        }
-        else
-        {
+        }elseif ($status_code == 4){ //После 22:00 часов не допускается заявка на выбранный день
+            $this->errors[11] = (string)$result->status;
+            return false;
+        } else {
             $this->errors[10] = 'Ответ от Axiomus пришел без номера заявки'; //Добавить код ошибки и описание из ответа
             return false;
         }
@@ -250,7 +270,7 @@ public $pecomDeliveryNeededAddressComment;
         $xml_single_order = new SimpleXMLElement('<singleorder/>');
         $xml_single_order->addChild('mode', 'delete');
         $xml_auth = $xml_single_order->addChild('auth');
-        $xml_auth->addAttribute('ukey', $this->ukeyAxiomus);
+        $xml_auth->addAttribute('ukey', self::$ukeyAxiomus);
         $xml_single_order->addChild('okey', $this->okey);
 
 
@@ -310,10 +330,38 @@ public $pecomDeliveryNeededAddressComment;
 
     }
 
-    public function sendToPecom(){
+    public function sendToPecom($params){
+
+        if(isset($params['pecom_position_count'])){
+            $this->positionsCount=$params['pecom_position_count'];
+            $this->volume = $this->positionsCount*$this->volumeOne;
+        }
+
+        if(isset($params['pecom_is_fragile']))$this->isFragile=(boolean)$params['pecom_is_fragile'];
+        if(isset($params['pecom_is_glass']))$this->isGlass=(boolean)$params['pecom_is_glass'];
+        if(isset($params['pecom_is_liquid']))$this->isLiquid=(boolean)$params['pecom_is_liquid'];
+        if(isset($params['pecom_is_othertype']))$this->isOtherType=(boolean)$params['pecom_is_othertype'];
+        if(isset($params['pecom_othertype_description']))$this->isOtherTypeDescription=$params['pecom_othertype_description'];
+        if(isset($params['pecom_is_opencar']))$this->isOpenCar=(boolean)$params['pecom_is_opencar'];
+        if(isset($params['pecom_is_sideload']))$this->isSideLoad=(boolean)$params['pecom_is_sideload'];
+        if(isset($params['pecom_is_special_eq']))$this->isSpecialEquipment=(boolean)$params['pecom_is_special_eq'];
+        if(isset($params['pecom_is_uncovered']))$this->isUncovered=(boolean)$params['pecom_is_uncovered'];
+        if(isset($params['pecom_is_daybyday']))$this->isDayByDay=(boolean)$params['pecom_is_daybyday'];
+        if(isset($params['pecom_register_type']))$this->whoRegister=$params['pecom_register_type'];
+        if(isset($params['pecom_responsible_person']))$this->responsiblePerson=$params['pecom_responsible_person'];
+        if(isset($params['pecom_is_hp']))$this->isHP=(boolean)$params['pecom_is_hp'];
+        if(isset($params['pecom_hp_position_count']))$this->isHPPositionCount=$params['pecom_hp_position_count'];
+        if(isset($params['pecom_is_insurance']))$this->isInsurance=(boolean)$params['pecom_is_insurance'];
+        if(isset($params['pecom_insurance_price']))$this->isInsurancePrice=$params['pecom_insurance_price'];
+        if(isset($params['pecom_is_sealing']))$this->isSealing=(boolean)$params['pecom_is_sealing'];
+        if(isset($params['pecom_sealing_position_count']))$this->isSealingPositionCount=$params['pecom_sealing_position_count'];
+        if(isset($params['pecom_is_strapping']))$this->isStrapping=(boolean)$params['pecom_is_strapping'];
+        if(isset($params['pecom_is_documents_return']))$this->isDocumentsReturn=(boolean)$params['pecom_is_documents_return'];
+        if(isset($params['pecom_is_loading']))$this->isLoading=(boolean)$params['pecom_is_loading'];
+
 
         // Создание экземпляра класса
-        $sdk = new PecomKabinet($this->usernamePecom, $this->apikeyPecom);
+        $sdk = new PecomKabinet(self::$usernamePecom, self::$apikeyPecom);
         // Вызов метода
 
         $request = array(
@@ -342,13 +390,12 @@ public $pecomDeliveryNeededAddressComment;
                 'responsiblePerson' => $this->responsiblePerson,
             ),
             'services' => array(
-
                 'isHP' => $this->isHP,
-                'isHPPositionsCount' => $this->positionsCount,
+                'isHPPositionsCount' => $this->isHPPositionCount,
                 'isInsurance' => $this->isInsurance,
                 'isInsurancePrice' => $this->isInsurancePrice,
                 'isSealing' => $this->isSealing,
-                'isSealingPositionsCount' => ($this->isSealing)?$this->positionsCount:null,
+                'isSealingPositionsCount' => ($this->isSealing)?$this->isSealingPositionCount:null,
                 'isStrapping' => $this->isStrapping,
                 'isDocumentsReturn' => $this->isDocumentsReturn,
                 'isLoading' => $this->isLoading,
@@ -410,7 +457,7 @@ public $pecomDeliveryNeededAddressComment;
 
     public function deleteToPecom(){
         // Создание экземпляра класса
-        $sdk = new PecomKabinet($this->usernamePecom, $this->apikeyPecom);
+        $sdk = new PecomKabinet(self::$usernamePecom, self::$apikeyPecom);
         // Вызов метода
 
         $request = [
@@ -420,13 +467,17 @@ public $pecomDeliveryNeededAddressComment;
         $result = $sdk->call('requests', 'requestcancellation', $request);
 
         if ( ! isset($result->error)) { //ToDo Никак не могу проверить выполнение. Возвращает пустой массив
-            if ((boolean)$result->success){
-                $sdk->close();
-                return true;
+            if(!empty($result)) {
+                if ((boolean)$result->success) {
+                    $sdk->close();
+                    return true;
+                } else {
+                    $this->errors[30] = $result->description;
+                    $sdk->close();
+                    return true; //ToDo Убрать true после проверки удаления
+                }
             }else{
-                $this->errors[30] = $result->description;
-                $sdk->close();
-                return true; //ToDo Убрать true после проверки удаления
+                return true;//ToDo Убрать true после проверки удаления
             }
         }else{
             $errorText =  'Ошибка ответа ПЭК. '.$result->error->title.'. ';
@@ -440,8 +491,10 @@ public $pecomDeliveryNeededAddressComment;
     }
 
     public static function getCarryAddressesPecom(){
+
+
         // Создание экземпляра класса
-        $sdk = new PecomKabinet(self::$usernamePecom, self::$apikeyPecom);
+        $sdk = new PecomKabinet(Configuration::get('RS_PECOM_NICKNAME'), Configuration::get('RS_PECOM_API'));
         // Вызов метода
 
         $request = [

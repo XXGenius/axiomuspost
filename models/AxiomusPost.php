@@ -1233,4 +1233,93 @@ class AxiomusPost extends ObjectModel {
         return true;
     }
 
+    public static function getSettingsArray($getvalue){
+        return [
+            //CPU
+
+            //Moscow
+            'use_mscw_axiomus'              => Configuration::get('RS_AXIOMUS_MSCW_USE_AXIOMUS'),
+            'use_mscw_strizh'               => Configuration::get('RS_AXIOMUS_MSCW_USE_STRIZH'),
+            'use_mscw_pecom'                => Configuration::get('RS_AXIOMUS_MSCW_USE_PECOM'),
+            'use_mscw_axiomus_carry'        => Configuration::get('RS_AXIOMUS_MSCW_USE_AXIOMUS_CARRY'),
+            'use_mscw_dpd_carry'            => Configuration::get('RS_AXIOMUS_MSCW_USE_DPD_CARRY'),
+            'use_mscw_boxberry_carry'       => Configuration::get('RS_AXIOMUS_MSCW_USE_BOXBERRY_CARRY'),
+            'use_mscw_russianpost_carry'    => Configuration::get('RS_AXIOMUS_MSCW_USE_RUSSIANPOST_CARRY'),
+            'use_mscw_pecom_carry'          => Configuration::get('RS_AXIOMUS_MSCW_USE_PECOM_CARRY'),
+            //Piter
+            'use_ptr_axiomus'              => Configuration::get('RS_AXIOMUS_PTR_USE_AXIOMUS'),
+            'use_ptr_strizh'               => Configuration::get('RS_AXIOMUS_PTR_USE_STRIZH'),
+            'use_ptr_pecom'                => Configuration::get('RS_AXIOMUS_PTR_USE_pecom'),
+            'use_ptr_axiomus_carry'        => Configuration::get('RS_AXIOMUS_PTR_USE_AXIOMUS_CARRY'),
+            'use_ptr_dpd_carry'            => Configuration::get('RS_AXIOMUS_PTR_USE_DPD_CARRY'),
+            'use_ptr_boxberry_carry'       => Configuration::get('RS_AXIOMUS_PTR_USE_BOXBERRY_CARRY'),
+            'use_ptr_russianpost_carry'    => Configuration::get('RS_AXIOMUS_PTR_USE_RUSSIANPOST_CARRY'),
+            'use_ptr_pecom_carry'          => Configuration::get('RS_AXIOMUS_PTR_USE_PECOM_CARRY'),
+            //region
+            'use_region_axiomus_carry'        => Configuration::get('RS_AXIOMUS_REGION_USE_AXIOMUS_CARRY'),
+            'use_region_dpd_carry'            => Configuration::get('RS_AXIOMUS_REGION_USE_DPD_CARRY'),
+            'use_region_boxberry_carry'       => Configuration::get('RS_AXIOMUS_REGION_USE_BOXBERRY_CARRY'),
+            'use_region_russianpost_carry'    => Configuration::get('RS_AXIOMUS_REGION_USE_RUSSIANPOST_CARRY'),
+            'use_region_pecom_carry'          => Configuration::get('RS_AXIOMUS_REGION_USE_PECOM_CARRY'),
+            //Settings
+            'axiomus_token'                => Configuration::get('RS_AXIOMUS_TOKEN'),
+            'axiomus_cache_hourlife'       => Configuration::get('RS_AXIOMUS_CACHE_HOURLIFE'),
+
+            //Settings-pecom
+            'pecom_sender' => [
+                'pecom_sender_city'                     => ($getvalue)?Configuration::get('RS_PECOM_SENDER_CITY'):'RS_PECOM_SENDER_CITY',
+                'pecom_sender_title'                    => ($getvalue)?Configuration::get('RS_PECOM_SENDER_TITLE'):'RS_PECOM_SENDER_TITLE',
+                'pecom_sender_person'                   => ($getvalue)?Configuration::get('RS_PECOM_SENDER_PERSON'):'RS_PECOM_SENDER_PERSON',
+                'pecom_sender_phone'                    => ($getvalue)?Configuration::get('RS_PECOM_SENDER_PHONE'):'RS_PECOM_SENDER_PHONE',
+                'pecom_sender_email'                    => ($getvalue)?Configuration::get('RS_PECOM_SENDER_EMAIL'):'RS_PECOM_SENDER_EMAIL',
+                'pecom_sender_address_office'           => ($getvalue)?Configuration::get('RS_PECOM_SENDER_ADDRESS_OFFICE'):'RS_PECOM_SENDER_ADDRESS_OFFICE',
+                'pecom_sender_address_office_comment'   => ($getvalue)?Configuration::get('RS_PECOM_SENDER_ADDRESS_OFFICE_COOMENT'):'RS_PECOM_SENDER_ADDRESS_OFFICE_COOMENT',
+                'pecom_sender_address_stock'            => ($getvalue)?Configuration::get('RS_PECOM_SENDER_ADDRESS_STOCK'):'RS_PECOM_SENDER_ADDRESS_STOCK',
+                'pecom_sender_address_stock_comment'    => ($getvalue)?Configuration::get('RS_PECOM_SENDER_ADDRESS_STOCK_COMMENT'):'RS_PECOM_SENDER_ADDRESS_STOCK_COMMENT',
+                'pecom_sender_work_time_from'           => ($getvalue)?Configuration::get('RS_PECOM_SENDER_WORK_TIME_FROM'):'RS_PECOM_SENDER_WORK_TIME_FROM',
+                'pecom_sender_work_time_to'             => ($getvalue)?Configuration::get('RS_PECOM_SENDER_WORK_TIME_TO'):'RS_PECOM_SENDER_WORK_TIME_TO',
+                'pecom_sender_lunch_break_from'         => ($getvalue)?Configuration::get('RS_PECOM_SENDER_LUNCH_BREAK_FROM'):'RS_PECOM_SENDER_LUNCH_BREAK_FROM',
+                'pecom_sender_lunch_break_to'           => ($getvalue)?Configuration::get('RS_PECOM_SENDER_LUNCH_BREAK_TO'):'RS_PECOM_SENDER_LUNCH_BREAK_TO',
+                'pecom_sender_is_auth_needed'           => ($getvalue)?Configuration::get('RS_PECOM_SENDER_IS_AUTH_NEEDED'):'RS_PECOM_SENDER_IS_AUTH_NEEDED',
+                'pecom_sender_identity_type'            => ($getvalue)?Configuration::get('RS_PECOM_SENDER_IDENTITY_TYPE'):'RS_PECOM_SENDER_IDENTITY_TYPE',
+                'pecom_sender_identity_series'          => ($getvalue)?Configuration::get('RS_PECOM_SENDER_IDENTITY_SERIES'):'RS_PECOM_SENDER_IDENTITY_SERIES',
+                'pecom_sender_identity_number'          => ($getvalue)?Configuration::get('RS_PECOM_SENDER_NUMBER'):'RS_PECOM_SENDER_NUMBER',
+                'pecom_sender_identity_date'            => ($getvalue)?Configuration::get('RS_PECOM_SENDER_DATE'):'RS_PECOM_SENDER_DATE',
+            ],
+            'pecom_default' => [
+                'pecom_volume_one'                      => ($getvalue)?Configuration::get('RS_PECOM_VOLUME_ONE'):'RS_PECOM_VOLUME_ONE',
+                'pecom_is_fragile'                      => ($getvalue)?Configuration::get('RS_PECOM_IS_FLAGILE'):'RS_PECOM_IS_FLAGILE',
+                'pecom_is_glass'                        => ($getvalue)?Configuration::get('RS_PECOM_IS_GLASS'):'RS_PECOM_IS_GLASS',
+                'pecom_is_liquid'                       => ($getvalue)?Configuration::get('RS_PECOM_IS_LIQUID'):'RS_PECOM_IS_LIQUID',
+                'pecom_is_othertype'                    => ($getvalue)?Configuration::get('RS_PECOM_IS_OTHERTYPE'):'RS_PECOM_IS_OTHERTYPE',
+                'pecom_othertype_description'           => ($getvalue)?Configuration::get('RS_PECOM_OTHERTYPE_DESCRIPTION'):'RS_PECOM_OTHERTYPE_DESCRIPTION',
+                'pecom_is_opencar'                      => ($getvalue)?Configuration::get('RS_PECOM_IS_OPENCAR'):'RS_PECOM_IS_OPENCAR',
+                'pecom_is_sideload'                     => ($getvalue)?Configuration::get('RS_PECOM_IS_SIDELOAD'):'RS_PECOM_IS_SIDELOAD',
+                'pecom_is_special_eq'                   => ($getvalue)?Configuration::get('RS_PECOM_IS_SPECIAL_EQ'):'RS_PECOM_IS_SPECIAL_EQ',
+                'pecom_is_uncovered'                    => ($getvalue)?Configuration::get('RS_PECOM_IS_UNCOVERED'):'RS_PECOM_IS_UNCOVERED',
+                'pecom_is_daybyday'                     => ($getvalue)?Configuration::get('RS_PECOM_IS_DAYBYDAY'):'RS_PECOM_IS_DAYBYDAY',
+                'pecom_register_type'                   => ($getvalue)?Configuration::get('RS_PECOM_REGISTER_TYPE'):'RS_PECOM_REGISTER_TYPE',
+                'pecom_responsible_person'              => ($getvalue)?Configuration::get('RS_PECOM_RESPONSIBLE'):'RS_PECOM_RESPONSIBLE',
+                'pecom_is_hp'                           => ($getvalue)?Configuration::get('RS_PECOM_IS_HP'):'RS_PECOM_IS_HP',
+                'pecom_hp_position_count'               => ($getvalue)?Configuration::get('RS_PECOM_HP_POSITION_COUNT'):'RS_PECOM_HP_POSITION_COUNT',
+                'pecom_is_insurance'                    => ($getvalue)?Configuration::get('RS_PECOM_IS_INSURANCE'):'RS_PECOM_IS_INSURANCE',
+                'pecom_insurance_price'                 => ($getvalue)?Configuration::get('RS_PECOM_INSURANCE_PRICE'):'RS_PECOM_INSURANCE_PRICE',
+                'pecom_is_sealing'                      => ($getvalue)?Configuration::get('RS_PECOM_IS_SEALING'):'RS_PECOM_IS_SEALING',
+                'pecom_sealing_position_count'          => ($getvalue)?Configuration::get('RS_PECOM_SEALING_POSITION_COUNT'):'RS_PECOM_SEALING_POSITION_COUNT',
+                'pecom_is_strapping'                    => ($getvalue)?Configuration::get('RS_PECOM_IS_STRAPPING'):'RS_PECOM_IS_STRAPPING',
+                'pecom_is_documents_return'             => ($getvalue)?Configuration::get('RS_PECOM_IS_DOCUMENTS_RETURN'):'RS_PECOM_IS_DOCUMENTS_RETURN',
+                'pecom_is_loading'                      => ($getvalue)?Configuration::get('RS_PECOM_IS_LOADING'):'RS_PECOM_IS_LOADING',
+            ],
+            'pecom_settings' => [
+                'pecom_nickname'                      => ($getvalue)?Configuration::get('RS_PECOM_NICKNAME'):'RS_PECOM_NICKNAME',
+                'pecom_api'                      => ($getvalue)?Configuration::get('RS_PECOM_API'):'RS_PECOM_API',
+            ],
+
+            //Moscow
+            'mscw_axiomus_manual'          => Configuration::get('RS_AXIOMUS_MSCW_AXIOMUS_MANUAL'),
+            'mscw_axiomus_increment'       => Configuration::get('RS_AXIOMUS_MSCW_AXIOMUS_INCREMENT'),
+//            'mscw_axiomus_weight'          => Configuration::getMultiple('RS_AXIOMUS_MSCW_AXIOMUS_PRICE'),
+        ];
+    }
+
 }
