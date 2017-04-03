@@ -25,10 +25,10 @@ class AdminAxiomussendController extends ModuleAdminController
 
             if($_POST['action']=='new') {
                 if($_POST['delivery']=='axiomus') {
-                    $Response = $sendNewAxiomus->sendToAxiomus('new');
+                    $Response = $sendNewAxiomus->sendToAxiomus('new', $_POST);
                     $carrier_id = (int)Configuration::get('RS_AXIOMUS_ID_AXIOMUS_DELIVERY');
                 }elseif ($_POST['delivery']=='strizh'){
-                    $Response = $sendNewAxiomus->sendToAxiomus('new_strizh');
+                    $Response = $sendNewAxiomus->sendToAxiomus('new_strizh', $_POST);
                     $carrier_id = (int)Configuration::get('RS_AXIOMUS_ID_STRIZH_DELIVERY');
                 }elseif($_POST['delivery']=='pecom'){
                     $Response = $sendNewAxiomus->sendToPecom($_POST);

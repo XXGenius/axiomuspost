@@ -179,8 +179,12 @@ public $pecomDeliveryNeededAddressComment;
         self::$apikeyPecom = Configuration::get('RS_PECOM_API');
     }
 
-    public function sendToAxiomus($method)
+    public function sendToAxiomus($method, $params)
     {
+        if(isset($params['axiomus_position_count'])){
+            $this->positionsCount = (int)$params['axiomus_position_count'];
+        }
+
         if ($this->address->city == 'Москва'){
             $city = 0;
         }elseif($this->address->city == 'Санкт-Петербург'){
@@ -333,7 +337,7 @@ public $pecomDeliveryNeededAddressComment;
     public function sendToPecom($params){
 
         if(isset($params['pecom_position_count'])){
-            $this->positionsCount=$params['pecom_position_count'];
+            $this->positionsCount = (int)$params['pecom_position_count'];
             $this->volume = $this->positionsCount*$this->volumeOne;
         }
 

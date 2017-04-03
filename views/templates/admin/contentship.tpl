@@ -10,12 +10,38 @@
     <div class="col-lg-12 alert alert-warning" style="display: none" id="axiomusErrorBlock">
 
     </div>
+    <div class="row">
+        <table class="table table-bordered">
+            <colgroup>
+                <col class="col-lg-4">
+                <col class="col-lg-8">
+            </colgroup>
+            <tr class="info">
+                <td>Тип доставки:</td>
+                <td>{$order_axiomus_data.type}</td>
+            </tr>
+            <tr>
+                <td>Заказ на дату:</td>
+                <td>{$order_axiomus_data.date}</td>
+            </tr>
+            <tr>
+                <td>Тип до кад:</td>
+                <td>{$order_axiomus_data.kadname}</td>
+            </tr>
+            <tr>
+                <td>Заказ на время:</td>
+                <td>{$order_axiomus_data.timename}</td>
+            </tr>
+        </table>
+
+    </div>
+
     {if (!$axiomus_succes)}
         {if $deliveries_used.axiomus}
             <button type="submit" class="btn btn-primary" data-toggle="modal" data-target="#axiomusModal">Отправить через Axiomus</button>
         {/if}
         {if $deliveries_used.strizh}
-            <button type="submit" class="btn btn-primary" data-toggle="modal" data-target="#axiomusModal">Отправить через Стриж</button>
+            <button type="submit" class="btn btn-primary" data-toggle="modal" data-target="#strizhModal">Отправить через Стриж</button>
         {/if}
         {if $deliveries_used.pecom}
             <button type="submit" class="btn btn-primary"   data-toggle="modal" data-target="#pecomModal">Отправить через ПЭК</button>
@@ -23,9 +49,8 @@
     {/if}
 
     {include file="$_axiomus_module_path/views/templates/admin/axiomus_modal.tpl"}
+    {include file="$_axiomus_module_path/views/templates/admin/strizh_modal.tpl"}
     {include file="$_axiomus_module_path/views/templates/admin/pecom_modal.tpl"}
-
-//ToDo работа остановилась на том что нужно проделать страницу дефолтных настроке и для Axiomus
 
 </div>
 

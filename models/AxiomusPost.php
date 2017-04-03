@@ -790,7 +790,7 @@ class AxiomusPost extends ObjectModel {
     }
 
     //Order
-    public function setOrder($id_cart, $delivery_id, $date = null, $kad = null, $time = null, $carry, $carry_address_id = null){
+    public function setOrder($id_cart, $carrier_id, $date = null, $kad = null, $time = null, $carry, $carry_address_id = null){
 
 
         if ($carry == 0) {
@@ -819,15 +819,17 @@ class AxiomusPost extends ObjectModel {
         $price_weight = $this->getWeightPrice($city, $carry, $weighttype);
         $price_condition = $this->getConditionPrice($city, $carry, $price, $kad, $time);
 
+        $carryCode = $this->getCarryAddresses((int)$carrier_id, null, $carry_address_id);
+
         if ($this->issetOrder($cart->id)){
-            $res = Db::getInstance()->update(AxiomusPost::$definition['tableOrder'], ['delivery_id' => $delivery_id,'date' => $date, 'carry' => (boolean)$carry, 'kadtype' => $kad, 'timetype' => $time, 'price_weight' => (int)$price_weight, 'price_condition' => (int)$price_condition, 'carry_address_id' => (int)$carry_address_id],"`id_cart` = {$id_cart}");
+            $res = Db::getInstance()->update(AxiomusPost::$definition['tableOrder'], ['delivery_id' => $carrier_id,'date' => $date, 'carry' => (boolean)$carry, 'kadtype' => $kad, 'timetype' => $time, 'price_weight' => (int)$price_weight, 'price_condition' => (int)$price_condition, 'carry_address_id' => (int)$carryCode],"`id_cart` = {$id_cart}");
             if (!$res){
                 return false;
             }else{
                 return true;
             }
         }else {
-            $res = Db::getInstance()->autoExecuteWithNullValues($this->tableOrderWithPrefix, ['id_cart' => $id_cart, 'delivery_id' => $delivery_id,'date' => $date, 'carry' => $carry, 'kadtype' => $kad, 'timetype' => $time, 'price_weight' => $price_weight, 'price_condition' => $price_condition, 'carry_address_id' => (int)$carry_address_id], 'INSERT');
+            $res = Db::getInstance()->autoExecuteWithNullValues($this->tableOrderWithPrefix, ['id_cart' => $id_cart, 'delivery_id' => $carrier_id,'date' => $date, 'carry' => $carry, 'kadtype' => $kad, 'timetype' => $time, 'price_weight' => $price_weight, 'price_condition' => $price_condition, 'carry_address_id' => (int)$carryCode], 'INSERT');
             if ($res) {
                 return true;
             } else {
@@ -867,6 +869,7 @@ class AxiomusPost extends ObjectModel {
             return false;
         }
     }
+
     //Carry
     public function getActiveCarry($city){
         $arr = [];
@@ -922,18 +925,39 @@ class AxiomusPost extends ObjectModel {
         return $arr;
     }
 
-    public function getCarryAddressesArray($carry_id, $city){
+    public function getCarryAddresses($carry_id, $city = null, $id = null){
         if ($carry_id == (int)Configuration::get('RS_AXIOMUS_ID_AXIOMUS_CARRY')) { //axiomus
             $activeTable = $this->tableCacheCarryAxiomusWithPrefix;
-            $data = Db::getInstance()->ExecuteS("SELECT * FROM `{$activeTable}` WHERE `city_name` = '{$city}'");
+            $sql = "SELECT * FROM `{$activeTable}`";
+            if (empty(city) and !empty(id)){
+                $sql .= " WHERE `id` = '{$id}'";
+                $data = Db::getInstance()->getRow($sql);
+            }else{
+                $sql .= " WHERE `city_name` = '{$city}'";
+                $data = Db::getInstance()->ExecuteS($sql);
+            }
             return $data;
         }elseif ($carry_id == (int)Configuration::get('RS_AXIOMUS_ID_DPD_CARRY')){ //dpd
             $activeTable = $this->tableCacheCarryDPDWithPrefix;
-            $data = Db::getInstance()->ExecuteS("SELECT * FROM `{$activeTable}` WHERE `city` = '{$city}'");
+            $sql = "SELECT * FROM `{$activeTable}`";
+            if (empty(city) and !empty(id)){
+                $sql .= " WHERE `id` = '{$id}'";
+                $data = Db::getInstance()->getRow($sql);
+            }else{
+                $sql .= " WHERE `city` = '{$city}'";
+                $data = Db::getInstance()->ExecuteS($sql);
+            }
             return $data;
         }elseif ($carry_id == (int)Configuration::get('RS_AXIOMUS_ID_BOXBERRY_CARRY')){ //boxberry
             $activeTable = $this->tableCacheCarryBoxBerryWithPrefix;
-            $data = Db::getInstance()->ExecuteS("SELECT * FROM `{$activeTable}` WHERE `city_name` = '{$city}'");
+            $sql = "SELECT * FROM `{$activeTable}`";
+            if (empty(city) and !empty(id)){
+                $sql .= " WHERE `id` = '{$id}'";
+                $data = Db::getInstance()->getRow($sql);
+            }else{
+                $sql .= " WHERE `city_name` = '{$city}'";
+                $data = Db::getInstance()->ExecuteS($sql);
+            }
             return $data;
         }elseif ($carry_id == (int)Configuration::get('RS_AXIOMUS_ID_RUSSIANPOST_CARRY')){ //boxberry
 //            $activeTable = $this->tableCacheCarryBoxBerryWithPrefix;
@@ -941,7 +965,14 @@ class AxiomusPost extends ObjectModel {
 //            return $data;
         }elseif ($carry_id == (int)Configuration::get('RS_AXIOMUS_ID_PECOM_CARRY')){ //boxberry
             $activeTable = $this->tableCacheCarryPecomWithPrefix;
-            $data = Db::getInstance()->ExecuteS("SELECT * FROM `{$activeTable}` WHERE `city_name` = '{$city}'");
+            $sql = "SELECT * FROM `{$activeTable}`";
+            if (empty(city) and !empty(id)){
+                $sql .= " WHERE `id` = '{$id}'";
+                $data = Db::getInstance()->getRow($sql);
+            }else{
+                $sql .= " WHERE `city_name` = '{$city}'";
+                $data = Db::getInstance()->ExecuteS($sql);
+            }
             return $data;
         }else{
             return false;
@@ -992,6 +1023,12 @@ class AxiomusPost extends ObjectModel {
             }
             return $error;
         }
+    }
+
+    private function getCarryCodeByIdAxiomus($id){
+        $sql = "SELECT * FROM {$this->tableCacheCarryAxiomusWithPrefix} WHERE `id` = '{$id}'";
+        $res = Db::getInstance()->getRow($sql);
+        return $res;
     }
 
     public function refreshCarryAddressCacheDPD(){

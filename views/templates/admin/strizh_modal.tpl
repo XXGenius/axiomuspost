@@ -1,10 +1,10 @@
 <!-- Modal -->
-<div class="modal fade" id="axiomusModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+<div class="modal fade" id="strizhModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
     <div class="modal-dialog modal-lg">
         <div class="modal-content">
             <div class="modal-header">
                 <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
-                <h4 class="modal-title" id="myModalLabel">Дополнительные параметры доставки Axiomus</h4>
+                <h4 class="modal-title" id="myModalLabel">Дополнительные параметры доставки Стриж</h4>
             </div>
             <div class="modal-body">
     <form action="{$_axiomus_sendto_link|escape:'html':'UTF-8'}&amp;" method="post" id="axiomus_form">
@@ -23,7 +23,7 @@
             </div>
             <div class="modal-footer">
                 <button type="button" class="btn btn-default" data-dismiss="modal">Закрыть</button>
-                <button type="button" class="btn btn-primary" id="submitSendToAxiomus">Отправить в Axiomus</button>
+                <button type="button" class="btn btn-primary" id="submitSendToStrizh">Отправить в Axiomus</button>
             </div>
         </div>
     </div>

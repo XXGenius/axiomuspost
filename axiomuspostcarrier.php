@@ -1135,6 +1135,19 @@ class axiomuspostcarrier extends CarrierModule
     }
 
     public function hookDisplayAdminOrderContentShip($params = null){
+
+        $order_axiomus = $this->AxiomusPost->getOrderByIdCart($this->context->cart->id);
+        if ($order_axiomus['carry']){
+            $order_axiomus['type'] = 'Самовывоз';
+            $order_axiomus['kadname'] = 'Это самовывоз';
+            $order_axiomus['timename'] = 'Это самовывоз';
+//            $order_axiomus['deliveryname'] =
+        }else{
+            $order_axiomus['type'] = 'Доставка';
+            $order_axiomus['kadname'] = $this->AxiomusPost->getKadTypeById((int)$order_axiomus['kadtype'])['name'];
+            $order_axiomus['timename'] = $this->AxiomusPost->getTimeTypeById((int)$order_axiomus['timetype'])['name'];
+        }
+
         if(!empty($params['order']->shipping_number)){
             $axiomusSucces = true;
             $axiomusSuccesCode = (int)$params['order']->shipping_number;
@@ -1153,6 +1166,8 @@ class axiomuspostcarrier extends CarrierModule
             'strizh'  => Configuration::get('RS_AXIOMUS_MSCW_USE_STRIZH'),
             'pecom'   => Configuration::get('RS_AXIOMUS_MSCW_USE_PECOM')
         ]);
+        $this->context->smarty->assign('order_axiomus_data', $order_axiomus);
+
 
         $this->context->smarty->assign($this->AxiomusPost::getSettingsArray(true)['pecom_default']);
         $this->context->smarty->assign('delivery_name', $deliveryName);
