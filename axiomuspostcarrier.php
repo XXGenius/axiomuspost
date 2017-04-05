@@ -26,7 +26,7 @@ class axiomuspostcarrier extends CarrierModule
     {
         $this->name = 'axiomuspostcarrier';
         $this->tab = 'shipping_logistics';
-        $this->version = '1.1.0';
+        $this->version = '1.10.1';
         $this->author = 'Robert Spectrum';
         $this->controllers = array('changecarrieroptions'); //ToDo зачем это и может добавить все контроллеры?
         $this->displayName = $this->l('Axiomus Post');
