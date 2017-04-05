@@ -7,14 +7,14 @@
                 <h4 class="modal-title" id="myModalLabel">Дополнительные параметры доставки "ПЭК"</h4>
             </div>
             <div class="modal-body">
-    <form action="{$_axiomus_sendto_link|escape:'html':'UTF-8'}&amp;" method="post" id="axiomus_form">
+    <form action="{$_axiomus_sendto_link|escape:'html':'UTF-8'}&amp;" method="post" id="pecom_form">
         <div id="setting-form" class="form-horizontal">
             <div class="form-group">
                 <div class="row">
                     <div class="col-lg-1"></div>
                     <label class="control-label col-lg-2">Количество упаковок</label>
                     <div class="col-lg-8">
-                        <input type="text" id="pecom_position_count" class="" name="pecom_position_count" value="1">
+                        <input type="text" id="position_count" class="" name="position_count" value="1">
                     </div>
                 </div>
             </div>

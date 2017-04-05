@@ -22,7 +22,7 @@ class AxiomusPost extends ObjectModel {
     public $tableCacheCarryDPDWithPrefix;
     public $tableCacheCarryBoxBerryWithPrefix;
 
-    public $tableCarryPriceWithPrefix;
+    public static $tableCarryPriceWithPrefix;
     public $tableCacheCarryPecomWithPrefix;
 
     protected $dbconn;
@@ -66,7 +66,7 @@ class AxiomusPost extends ObjectModel {
         $this->tableCacheCarryDPDWithPrefix = _DB_PREFIX_. AxiomusPost::$definition['tableCacheCarryDPD'];
         $this->tableCacheCarryBoxBerryWithPrefix = _DB_PREFIX_. AxiomusPost::$definition['tableCacheCarryBoxBerry'];
         $this->tableCacheCarryPecomWithPrefix = _DB_PREFIX_. AxiomusPost::$definition['tableCacheCarrypecom'];
-        $this->tableCarryPriceWithPrefix = _DB_PREFIX_. AxiomusPost::$definition['tableCarryPrice'];
+        self::$tableCarryPriceWithPrefix = _DB_PREFIX_. AxiomusPost::$definition['tableCarryPrice'];
     }
 
     public function createTabless() {
@@ -75,7 +75,6 @@ class AxiomusPost extends ObjectModel {
             '`id` INT(11) NOT NULL AUTO_INCREMENT,' .
             '`city` VARCHAR(255) NOT NULL,' .
             '`delivery` VARCHAR(255) NOT NULL,' .
-            '`carry` BOOLEAN NOT NULL,' .
             '`sumfrom` INT(11) NOT NULL,'.
             '`sumto` INT(11) NOT NULL,'.
             '`timetype` INT(11) NOT NULL,' .
@@ -91,8 +90,6 @@ class AxiomusPost extends ObjectModel {
         $sql = "CREATE TABLE IF NOT EXISTS `{$this->tableWeightPriceWithPrefix}` (" .
             '`id` INT(11) NOT NULL AUTO_INCREMENT,' .
             '`city` VARCHAR(255) NOT NULL,' .
-            '`delivery` VARCHAR(50) NOT NULL,' .
-            '`carry` BOOLEAN NOT NULL,' .
             '`type` INT(11) NOT NULL,' .
             '`sum` INT(11),' .
             'PRIMARY KEY (`id`)' .
@@ -152,9 +149,10 @@ class AxiomusPost extends ObjectModel {
             '`timetype` INT(11) NULL,'.
             '`price_weight` INT(11),' .
             '`price_condition` INT(11),' .
-            '`carry_address_id` INT(11),' .
+            '`carry_code` VARCHAR(255),' .
+            '`position_count` INT(11),' .
             '`oid` INT(11),' .
-            '`okay` VARCHAR(255),' .
+            '`okey` VARCHAR(255),' .
             'PRIMARY KEY (`id`)' .
             ") DEFAULT CHARSET=utf8;".
             "CREATE UNIQUE INDEX {$this->tableOrderWithPrefix}_id_cart_uindex ON ps_axiomus_order (id_cart);";
@@ -188,7 +186,7 @@ class AxiomusPost extends ObjectModel {
         $sql = "CREATE TABLE IF NOT EXISTS `{$this->tableCacheCarryAxiomusWithPrefix}` (" .
             '`id` INT(11) NOT NULL AUTO_INCREMENT,' .
             '`datetime` DATETIME DEFAULT NOW() NOT NULL,' .
-            '`code` INT(11) NOT NULL,' .
+            '`code` VARCHAR(255) NOT NULL,' .
             '`name` VARCHAR(255) NOT NULL,' .
             '`address` VARCHAR(255) NOT NULL,' .
             '`city_code` INT(11) NOT NULL,' .
@@ -224,12 +222,12 @@ class AxiomusPost extends ObjectModel {
         $sql = "CREATE TABLE IF NOT EXISTS `{$this->tableCacheCarryDPDWithPrefix}` (" .
             '`id` INT(11) NOT NULL AUTO_INCREMENT,' .
             '`datetime` DATETIME DEFAULT NOW() NOT NULL,' .
-            '`code` VARCHAR(11) NOT NULL,' .
+            '`code` VARCHAR(255) NOT NULL,' .
             '`type` VARCHAR(11) NOT NULL,' .
             '`name` VARCHAR(255) NOT NULL,' .
             '`address` VARCHAR(255) NOT NULL,' .
             '`region` VARCHAR(255) NOT NULL,' .
-            '`city` VARCHAR(255) NOT NULL,' .
+            '`city_name` VARCHAR(255) NOT NULL,' .
             '`GPS` VARCHAR(255) NOT NULL,'.
             '`work_schedule` VARCHAR(255) NULL,'.
             '`cash` BOOLEAN,'.
@@ -249,7 +247,7 @@ class AxiomusPost extends ObjectModel {
         $sql = "CREATE TABLE IF NOT EXISTS `{$this->tableCacheCarryBoxBerryWithPrefix}` (" .
             '`id` INT(11) NOT NULL AUTO_INCREMENT,' .
             '`datetime` DATETIME DEFAULT NOW() NOT NULL,' .
-            '`code` INT(11) NOT NULL,' .
+            '`code` VARCHAR(255) NOT NULL,' .
             '`name` VARCHAR(255) NOT NULL,' .
             '`address` VARCHAR(255) NOT NULL,' .
             '`city_code` INT(11) NOT NULL,' .
@@ -275,7 +273,8 @@ class AxiomusPost extends ObjectModel {
             return false;
         }
 
-        $sql = "CREATE TABLE IF NOT EXISTS `{$this->tableCarryPriceWithPrefix}` (" .
+        $table = self::$tableCarryPriceWithPrefix;
+        $sql = "CREATE TABLE IF NOT EXISTS `{$table}` (" .
             '`id` INT(11) NOT NULL AUTO_INCREMENT,' .
             '`city` VARCHAR(255) NOT NULL,' .
             '`delivery` VARCHAR(50) NOT NULL,' .
@@ -292,6 +291,7 @@ class AxiomusPost extends ObjectModel {
             '`id` INT(11) NOT NULL AUTO_INCREMENT,' .
             '`datetime` DATETIME DEFAULT NOW() NOT NULL,' .
             '`warehouseId` VARCHAR(255) NOT NULL,' .
+            '`code` VARCHAR(255) NOT NULL,' .
             '`divisionId` VARCHAR(255) NOT NULL,' .
             '`name` VARCHAR(255),' .
             '`divisionName` VARCHAR(255),' .
@@ -397,14 +397,12 @@ class AxiomusPost extends ObjectModel {
         $id = 0;
         $sum = 10;
         foreach ($this->cities as $city){
-            foreach ($this->deliveries as $delivery){
-                foreach ($this->getAllWeightType($city) as $type) {
-                    $id++;
-                    $res = Db::getInstance()->autoExecuteWithNullValues($this->tableWeightPriceWithPrefix, ['id' => 0, 'city' => $city, 'delivery' => $delivery, 'carry' => false, 'type' => (int)$type['id'],'sum' => $sum],'INSERT');
-                    $sum += 10;
-                    if (!$res){
-                        return false;
-                    }
+            foreach ($this->getAllWeightType($city) as $type) {
+                $id++;
+                $res = Db::getInstance()->autoExecuteWithNullValues($this->tableWeightPriceWithPrefix, ['id' => 0, 'city' => $city, 'type' => (int)$type['id'],'sum' => $sum],'INSERT');
+                $sum += 10;
+                if (!$res){
+                    return false;
                 }
             }
         }
@@ -413,53 +411,131 @@ class AxiomusPost extends ObjectModel {
     }
 
     private function _insertStartConditionPrice(){
-        $res = Db::getInstance()->autoExecuteWithNullValues($this->tableConditionPriceWithPrefix, ['id' => 0, 'city' => 'Москва', 'carry' => false, 'delivery' => 'axiomus', 'sumfrom' => 0, 'sumto' => 2100, 'timetype' => 1, 'kadtype' => 1, 'sum' => 0],'INSERT');
-        $res = Db::getInstance()->autoExecuteWithNullValues($this->tableConditionPriceWithPrefix, ['id' => 0, 'city' => 'Москва', 'carry' => false, 'delivery' => 'axiomus', 'sumfrom' => 0, 'sumto' => 2100, 'timetype' => 1, 'kadtype' => 2, 'sum' => 50],'INSERT');
-        $res = Db::getInstance()->autoExecuteWithNullValues($this->tableConditionPriceWithPrefix, ['id' => 0, 'city' => 'Москва', 'carry' => false, 'delivery' => 'axiomus', 'sumfrom' => 0, 'sumto' => 2100, 'timetype' => 1, 'kadtype' => 3,  'sum' => 200],'INSERT');
-        $res = Db::getInstance()->autoExecuteWithNullValues($this->tableConditionPriceWithPrefix, ['id' => 0, 'city' => 'Москва', 'carry' => false, 'delivery' => 'axiomus', 'sumfrom' => 0, 'sumto' => 2100, 'timetype' => 1, 'kadtype' => 4,  'sum' => 400],'INSERT');
-        $res = Db::getInstance()->autoExecuteWithNullValues($this->tableConditionPriceWithPrefix, ['id' => 0, 'city' => 'Москва', 'carry' => false, 'delivery' => 'axiomus', 'sumfrom' => 0, 'sumto' => 2100, 'timetype' => 1, 'kadtype' => 5,  'sum' => 480],'INSERT');
-        $res = Db::getInstance()->autoExecuteWithNullValues($this->tableConditionPriceWithPrefix, ['id' => 0, 'city' => 'Москва', 'carry' => false, 'delivery' => 'axiomus', 'sumfrom' => 2100, 'sumto' => 5100, 'timetype' => 1, 'kadtype' => 1, 'sum' => 0],'INSERT');
-        $res = Db::getInstance()->autoExecuteWithNullValues($this->tableConditionPriceWithPrefix, ['id' => 0, 'city' => 'Москва', 'carry' => false, 'delivery' => 'axiomus', 'sumfrom' => 2100, 'sumto' => 5100, 'timetype' => 1, 'kadtype' => 2, 'sum' => 50],'INSERT');
-        $res = Db::getInstance()->autoExecuteWithNullValues($this->tableConditionPriceWithPrefix, ['id' => 0, 'city' => 'Москва', 'carry' => false, 'delivery' => 'axiomus', 'sumfrom' => 2100, 'sumto' => 5100, 'timetype' => 1, 'kadtype' => 3, 'sum' => 200],'INSERT');
-        $res = Db::getInstance()->autoExecuteWithNullValues($this->tableConditionPriceWithPrefix, ['id' => 0, 'city' => 'Москва', 'carry' => false, 'delivery' => 'axiomus', 'sumfrom' => 2100, 'sumto' => 5100, 'timetype' => 1, 'kadtype' => 4, 'sum' => 400],'INSERT');
-        $res = Db::getInstance()->autoExecuteWithNullValues($this->tableConditionPriceWithPrefix, ['id' => 0, 'city' => 'Москва', 'carry' => false, 'delivery' => 'axiomus', 'sumfrom' => 2100, 'sumto' => 5100, 'timetype' => 1, 'kadtype' => 5, 'sum' => 480],'INSERT');
-        $res = Db::getInstance()->autoExecuteWithNullValues($this->tableConditionPriceWithPrefix, ['id' => 0, 'city' => 'Москва', 'carry' => false, 'delivery' => 'axiomus', 'sumfrom' => 5100, 'sumto' => 999999, 'timetype' => 1, 'kadtype' => 1, 'sum' => 0],'INSERT');
-        $res = Db::getInstance()->autoExecuteWithNullValues($this->tableConditionPriceWithPrefix, ['id' => 0, 'city' => 'Москва', 'carry' => false, 'delivery' => 'axiomus', 'sumfrom' => 5100, 'sumto' => 999999, 'timetype' => 1, 'kadtype' => 2, 'sum' => 0],'INSERT');
-        $res = Db::getInstance()->autoExecuteWithNullValues($this->tableConditionPriceWithPrefix, ['id' => 0, 'city' => 'Москва', 'carry' => false, 'delivery' => 'axiomus', 'sumfrom' => 5100, 'sumto' => 999999, 'timetype' => 1, 'kadtype' => 3, 'sum' => 0],'INSERT');
-        $res = Db::getInstance()->autoExecuteWithNullValues($this->tableConditionPriceWithPrefix, ['id' => 0, 'city' => 'Москва', 'carry' => false, 'delivery' => 'axiomus', 'sumfrom' => 5100, 'sumto' => 999999, 'timetype' => 1, 'kadtype' => 4, 'sum' => 400],'INSERT');
-        $res = Db::getInstance()->autoExecuteWithNullValues($this->tableConditionPriceWithPrefix, ['id' => 0, 'city' => 'Москва', 'carry' => false, 'delivery' => 'axiomus', 'sumfrom' => 5100, 'sumto' => 999999, 'timetype' => 1, 'kadtype' => 5, 'sum' => 480],'INSERT');
-        $res = Db::getInstance()->autoExecuteWithNullValues($this->tableConditionPriceWithPrefix, ['id' => 0, 'city' => 'Москва', 'carry' => false, 'delivery' => 'axiomus', 'sumfrom' => 0, 'sumto' => 999999, 'timetype' => 5, 'kadtype' => 1, 'sum' => 0],'INSERT');
-        $res = Db::getInstance()->autoExecuteWithNullValues($this->tableConditionPriceWithPrefix, ['id' => 0, 'city' => 'Москва', 'carry' => false, 'delivery' => 'axiomus', 'sumfrom' => 0, 'sumto' => 999999, 'timetype' => 5, 'kadtype' => 2, 'sum' => 50],'INSERT');
-        $res = Db::getInstance()->autoExecuteWithNullValues($this->tableConditionPriceWithPrefix, ['id' => 0, 'city' => 'Москва', 'carry' => false, 'delivery' => 'axiomus', 'sumfrom' => 0, 'sumto' => 999999, 'timetype' => 5, 'kadtype' => 3, 'sum' => 200],'INSERT');
-        $res = Db::getInstance()->autoExecuteWithNullValues($this->tableConditionPriceWithPrefix, ['id' => 0, 'city' => 'Москва', 'carry' => false, 'delivery' => 'axiomus', 'sumfrom' => 0, 'sumto' => 999999, 'timetype' => 5, 'kadtype' => 4, 'sum' => 400],'INSERT');
-        $res = Db::getInstance()->autoExecuteWithNullValues($this->tableConditionPriceWithPrefix, ['id' => 0, 'city' => 'Москва', 'carry' => false, 'delivery' => 'axiomus', 'sumfrom' => 0, 'sumto' => 999999, 'timetype' => 5, 'kadtype' => 5, 'sum' => 480],'INSERT');
-        $res = Db::getInstance()->autoExecuteWithNullValues($this->tableConditionPriceWithPrefix, ['id' => 0, 'city' => 'Москва', 'carry' => false, 'delivery' => 'axiomus', 'sumfrom' => 0, 'sumto' => 999999, 'timetype' => 2, 'kadtype' => 1, 'sum' => 0],'INSERT');
-        $res = Db::getInstance()->autoExecuteWithNullValues($this->tableConditionPriceWithPrefix, ['id' => 0, 'city' => 'Москва', 'carry' => false, 'delivery' => 'axiomus', 'sumfrom' => 0, 'sumto' => 999999, 'timetype' => 2, 'kadtype' => 2, 'sum' => 50],'INSERT');
-        $res = Db::getInstance()->autoExecuteWithNullValues($this->tableConditionPriceWithPrefix, ['id' => 0, 'city' => 'Москва', 'carry' => false, 'delivery' => 'axiomus', 'sumfrom' => 0, 'sumto' => 999999, 'timetype' => 2, 'kadtype' => 3, 'sum' => 200],'INSERT');
-        $res = Db::getInstance()->autoExecuteWithNullValues($this->tableConditionPriceWithPrefix, ['id' => 0, 'city' => 'Москва', 'carry' => false, 'delivery' => 'axiomus', 'sumfrom' => 0, 'sumto' => 999999, 'timetype' => 2, 'kadtype' => 4, 'sum' => 400],'INSERT');
-        $res = Db::getInstance()->autoExecuteWithNullValues($this->tableConditionPriceWithPrefix, ['id' => 0, 'city' => 'Москва', 'carry' => false, 'delivery' => 'axiomus', 'sumfrom' => 0, 'sumto' => 999999, 'timetype' => 2, 'kadtype' => 5, 'sum' => 480],'INSERT');
-        $res = Db::getInstance()->autoExecuteWithNullValues($this->tableConditionPriceWithPrefix, ['id' => 0, 'city' => 'Москва', 'carry' => false, 'delivery' => 'axiomus', 'sumfrom' => 0, 'sumto' => 999999, 'timetype' => 3, 'kadtype' => 1, 'sum' => 0],'INSERT');
-        $res = Db::getInstance()->autoExecuteWithNullValues($this->tableConditionPriceWithPrefix, ['id' => 0, 'city' => 'Москва', 'carry' => false, 'delivery' => 'axiomus', 'sumfrom' => 0, 'sumto' => 999999, 'timetype' => 3, 'kadtype' => 2, 'sum' => 50],'INSERT');
-        $res = Db::getInstance()->autoExecuteWithNullValues($this->tableConditionPriceWithPrefix, ['id' => 0, 'city' => 'Москва', 'carry' => false, 'delivery' => 'axiomus', 'sumfrom' => 0, 'sumto' => 999999, 'timetype' => 3, 'kadtype' => 3, 'sum' => 200],'INSERT');
-        $res = Db::getInstance()->autoExecuteWithNullValues($this->tableConditionPriceWithPrefix, ['id' => 0, 'city' => 'Москва', 'carry' => false, 'delivery' => 'axiomus', 'sumfrom' => 0, 'sumto' => 999999, 'timetype' => 3, 'kadtype' => 4, 'sum' => 400],'INSERT');
-        $res = Db::getInstance()->autoExecuteWithNullValues($this->tableConditionPriceWithPrefix, ['id' => 0, 'city' => 'Москва', 'carry' => false, 'delivery' => 'axiomus', 'sumfrom' => 0, 'sumto' => 999999, 'timetype' => 3, 'kadtype' => 5, 'sum' => 480],'INSERT');
-        $res = Db::getInstance()->autoExecuteWithNullValues($this->tableConditionPriceWithPrefix, ['id' => 0, 'city' => 'Москва', 'carry' => false, 'delivery' => 'axiomus', 'sumfrom' => 0, 'sumto' => 999999, 'timetype' => 4, 'kadtype' => 1, 'sum' => 0],'INSERT');
-        $res = Db::getInstance()->autoExecuteWithNullValues($this->tableConditionPriceWithPrefix, ['id' => 0, 'city' => 'Москва', 'carry' => false, 'delivery' => 'axiomus', 'sumfrom' => 0, 'sumto' => 999999, 'timetype' => 4, 'kadtype' => 2, 'sum' => 50],'INSERT');
-        $res = Db::getInstance()->autoExecuteWithNullValues($this->tableConditionPriceWithPrefix, ['id' => 0, 'city' => 'Москва', 'carry' => false, 'delivery' => 'axiomus', 'sumfrom' => 0, 'sumto' => 999999, 'timetype' => 4, 'kadtype' => 3, 'sum' => 200],'INSERT');
-        $res = Db::getInstance()->autoExecuteWithNullValues($this->tableConditionPriceWithPrefix, ['id' => 0, 'city' => 'Москва', 'carry' => false, 'delivery' => 'axiomus', 'sumfrom' => 0, 'sumto' => 999999, 'timetype' => 4, 'kadtype' => 4, 'sum' => 400],'INSERT');
-        $res = Db::getInstance()->autoExecuteWithNullValues($this->tableConditionPriceWithPrefix, ['id' => 0, 'city' => 'Москва', 'carry' => false, 'delivery' => 'axiomus', 'sumfrom' => 0, 'sumto' => 999999, 'timetype' => 4, 'kadtype' => 5, 'sum' => 480],'INSERT');
+        $res = Db::getInstance()->autoExecuteWithNullValues($this->tableConditionPriceWithPrefix, ['id' => 0, 'city' => 'Москва', 'delivery' => 'axiomus', 'sumfrom' => 5100, 'sumto' => 99999, 'timetype' => 1, 'kadtype' => 1, 'sum' => 0],'INSERT');
+        $res = Db::getInstance()->autoExecuteWithNullValues($this->tableConditionPriceWithPrefix, ['id' => 0, 'city' => 'Москва', 'delivery' => 'axiomus', 'sumfrom' => 5100, 'sumto' => 99999, 'timetype' => 1, 'kadtype' => 2, 'sum' => 0],'INSERT');
+        $res = Db::getInstance()->autoExecuteWithNullValues($this->tableConditionPriceWithPrefix, ['id' => 0, 'city' => 'Москва', 'delivery' => 'axiomus', 'sumfrom' => 5100, 'sumto' => 99999, 'timetype' => 1, 'kadtype' => 3,  'sum' => 0],'INSERT');
+        $res = Db::getInstance()->autoExecuteWithNullValues($this->tableConditionPriceWithPrefix, ['id' => 0, 'city' => 'Москва', 'delivery' => 'axiomus', 'sumfrom' => 5100, 'sumto' => 99999, 'timetype' => 1, 'kadtype' => 4,  'sum' => 750],'INSERT');
+        $res = Db::getInstance()->autoExecuteWithNullValues($this->tableConditionPriceWithPrefix, ['id' => 0, 'city' => 'Москва', 'delivery' => 'axiomus', 'sumfrom' => 5100, 'sumto' => 99999, 'timetype' => 1, 'kadtype' => 5,  'sum' => 830],'INSERT');
+        $res = Db::getInstance()->autoExecuteWithNullValues($this->tableConditionPriceWithPrefix, ['id' => 0, 'city' => 'Москва', 'delivery' => 'axiomus', 'sumfrom' => 5100, 'sumto' => 99999, 'timetype' => 2, 'kadtype' => 1, 'sum' => 0],'INSERT');
+        $res = Db::getInstance()->autoExecuteWithNullValues($this->tableConditionPriceWithPrefix, ['id' => 0, 'city' => 'Москва', 'delivery' => 'axiomus', 'sumfrom' => 5100, 'sumto' => 99999, 'timetype' => 2, 'kadtype' => 2, 'sum' => 0],'INSERT');
+        $res = Db::getInstance()->autoExecuteWithNullValues($this->tableConditionPriceWithPrefix, ['id' => 0, 'city' => 'Москва', 'delivery' => 'axiomus', 'sumfrom' => 5100, 'sumto' => 99999, 'timetype' => 2, 'kadtype' => 3,  'sum' => 0],'INSERT');
+        $res = Db::getInstance()->autoExecuteWithNullValues($this->tableConditionPriceWithPrefix, ['id' => 0, 'city' => 'Москва', 'delivery' => 'axiomus', 'sumfrom' => 5100, 'sumto' => 99999, 'timetype' => 2, 'kadtype' => 4,  'sum' => 750],'INSERT');
+        $res = Db::getInstance()->autoExecuteWithNullValues($this->tableConditionPriceWithPrefix, ['id' => 0, 'city' => 'Москва', 'delivery' => 'axiomus', 'sumfrom' => 5100, 'sumto' => 99999, 'timetype' => 2, 'kadtype' => 5,  'sum' => 830],'INSERT');
+        $res = Db::getInstance()->autoExecuteWithNullValues($this->tableConditionPriceWithPrefix, ['id' => 0, 'city' => 'Москва', 'delivery' => 'axiomus', 'sumfrom' => 5100, 'sumto' => 99999, 'timetype' => 3, 'kadtype' => 1, 'sum' => 0],'INSERT');
+        $res = Db::getInstance()->autoExecuteWithNullValues($this->tableConditionPriceWithPrefix, ['id' => 0, 'city' => 'Москва', 'delivery' => 'axiomus', 'sumfrom' => 5100, 'sumto' => 99999, 'timetype' => 3, 'kadtype' => 2, 'sum' => 0],'INSERT');
+        $res = Db::getInstance()->autoExecuteWithNullValues($this->tableConditionPriceWithPrefix, ['id' => 0, 'city' => 'Москва', 'delivery' => 'axiomus', 'sumfrom' => 5100, 'sumto' => 99999, 'timetype' => 3, 'kadtype' => 3,  'sum' => 0],'INSERT');
+        $res = Db::getInstance()->autoExecuteWithNullValues($this->tableConditionPriceWithPrefix, ['id' => 0, 'city' => 'Москва', 'delivery' => 'axiomus', 'sumfrom' => 5100, 'sumto' => 99999, 'timetype' => 3, 'kadtype' => 4,  'sum' => 750],'INSERT');
+        $res = Db::getInstance()->autoExecuteWithNullValues($this->tableConditionPriceWithPrefix, ['id' => 0, 'city' => 'Москва', 'delivery' => 'axiomus', 'sumfrom' => 5100, 'sumto' => 99999, 'timetype' => 3, 'kadtype' => 5,  'sum' => 830],'INSERT');
+        $res = Db::getInstance()->autoExecuteWithNullValues($this->tableConditionPriceWithPrefix, ['id' => 0, 'city' => 'Москва', 'delivery' => 'axiomus', 'sumfrom' => 5100, 'sumto' => 99999, 'timetype' => 4, 'kadtype' => 1, 'sum' => 0],'INSERT');
+        $res = Db::getInstance()->autoExecuteWithNullValues($this->tableConditionPriceWithPrefix, ['id' => 0, 'city' => 'Москва', 'delivery' => 'axiomus', 'sumfrom' => 5100, 'sumto' => 99999, 'timetype' => 4, 'kadtype' => 2, 'sum' => 0],'INSERT');
+        $res = Db::getInstance()->autoExecuteWithNullValues($this->tableConditionPriceWithPrefix, ['id' => 0, 'city' => 'Москва', 'delivery' => 'axiomus', 'sumfrom' => 5100, 'sumto' => 99999, 'timetype' => 4, 'kadtype' => 3,  'sum' => 0],'INSERT');
+        $res = Db::getInstance()->autoExecuteWithNullValues($this->tableConditionPriceWithPrefix, ['id' => 0, 'city' => 'Москва', 'delivery' => 'axiomus', 'sumfrom' => 5100, 'sumto' => 99999, 'timetype' => 4, 'kadtype' => 4,  'sum' => 750],'INSERT');
+        $res = Db::getInstance()->autoExecuteWithNullValues($this->tableConditionPriceWithPrefix, ['id' => 0, 'city' => 'Москва', 'delivery' => 'axiomus', 'sumfrom' => 5100, 'sumto' => 99999, 'timetype' => 4, 'kadtype' => 5,  'sum' => 830],'INSERT');
+        $res = Db::getInstance()->autoExecuteWithNullValues($this->tableConditionPriceWithPrefix, ['id' => 0, 'city' => 'Москва', 'delivery' => 'axiomus', 'sumfrom' => 5100, 'sumto' => 99999, 'timetype' => 5, 'kadtype' => 1, 'sum' => 0],'INSERT');
+        $res = Db::getInstance()->autoExecuteWithNullValues($this->tableConditionPriceWithPrefix, ['id' => 0, 'city' => 'Москва', 'delivery' => 'axiomus', 'sumfrom' => 5100, 'sumto' => 99999, 'timetype' => 5, 'kadtype' => 2, 'sum' => 0],'INSERT');
+        $res = Db::getInstance()->autoExecuteWithNullValues($this->tableConditionPriceWithPrefix, ['id' => 0, 'city' => 'Москва', 'delivery' => 'axiomus', 'sumfrom' => 5100, 'sumto' => 99999, 'timetype' => 5, 'kadtype' => 3,  'sum' => 0],'INSERT');
+        $res = Db::getInstance()->autoExecuteWithNullValues($this->tableConditionPriceWithPrefix, ['id' => 0, 'city' => 'Москва', 'delivery' => 'axiomus', 'sumfrom' => 5100, 'sumto' => 99999, 'timetype' => 5, 'kadtype' => 4,  'sum' => 750],'INSERT');
+        $res = Db::getInstance()->autoExecuteWithNullValues($this->tableConditionPriceWithPrefix, ['id' => 0, 'city' => 'Москва', 'delivery' => 'axiomus', 'sumfrom' => 5100, 'sumto' => 99999, 'timetype' => 5, 'kadtype' => 5,  'sum' => 830],'INSERT');
+
+        $res = Db::getInstance()->autoExecuteWithNullValues($this->tableConditionPriceWithPrefix, ['id' => 0, 'city' => 'Москва', 'delivery' => 'axiomus', 'sumfrom' => 4200, 'sumto' => 5100, 'timetype' => 1, 'kadtype' => 1, 'sum' => 0],'INSERT');
+        $res = Db::getInstance()->autoExecuteWithNullValues($this->tableConditionPriceWithPrefix, ['id' => 0, 'city' => 'Москва', 'delivery' => 'axiomus', 'sumfrom' => 4200, 'sumto' => 5100, 'timetype' => 1, 'kadtype' => 2, 'sum' => 400],'INSERT');
+        $res = Db::getInstance()->autoExecuteWithNullValues($this->tableConditionPriceWithPrefix, ['id' => 0, 'city' => 'Москва', 'delivery' => 'axiomus', 'sumfrom' => 4200, 'sumto' => 5100, 'timetype' => 1, 'kadtype' => 3,  'sum' => 550],'INSERT');
+        $res = Db::getInstance()->autoExecuteWithNullValues($this->tableConditionPriceWithPrefix, ['id' => 0, 'city' => 'Москва', 'delivery' => 'axiomus', 'sumfrom' => 4200, 'sumto' => 5100, 'timetype' => 1, 'kadtype' => 4,  'sum' => 750],'INSERT');
+        $res = Db::getInstance()->autoExecuteWithNullValues($this->tableConditionPriceWithPrefix, ['id' => 0, 'city' => 'Москва', 'delivery' => 'axiomus', 'sumfrom' => 4200, 'sumto' => 5100, 'timetype' => 1, 'kadtype' => 5,  'sum' => 830],'INSERT');
+        $res = Db::getInstance()->autoExecuteWithNullValues($this->tableConditionPriceWithPrefix, ['id' => 0, 'city' => 'Москва', 'delivery' => 'axiomus', 'sumfrom' => 4200, 'sumto' => 5100, 'timetype' => 2, 'kadtype' => 1, 'sum' => 0],'INSERT');
+        $res = Db::getInstance()->autoExecuteWithNullValues($this->tableConditionPriceWithPrefix, ['id' => 0, 'city' => 'Москва', 'delivery' => 'axiomus', 'sumfrom' => 4200, 'sumto' => 5100, 'timetype' => 2, 'kadtype' => 2, 'sum' => 400],'INSERT');
+        $res = Db::getInstance()->autoExecuteWithNullValues($this->tableConditionPriceWithPrefix, ['id' => 0, 'city' => 'Москва', 'delivery' => 'axiomus', 'sumfrom' => 4200, 'sumto' => 5100, 'timetype' => 2, 'kadtype' => 3,  'sum' => 550],'INSERT');
+        $res = Db::getInstance()->autoExecuteWithNullValues($this->tableConditionPriceWithPrefix, ['id' => 0, 'city' => 'Москва', 'delivery' => 'axiomus', 'sumfrom' => 4200, 'sumto' => 5100, 'timetype' => 2, 'kadtype' => 4,  'sum' => 750],'INSERT');
+        $res = Db::getInstance()->autoExecuteWithNullValues($this->tableConditionPriceWithPrefix, ['id' => 0, 'city' => 'Москва', 'delivery' => 'axiomus', 'sumfrom' => 4200, 'sumto' => 5100, 'timetype' => 2, 'kadtype' => 5,  'sum' => 830],'INSERT');
+        $res = Db::getInstance()->autoExecuteWithNullValues($this->tableConditionPriceWithPrefix, ['id' => 0, 'city' => 'Москва', 'delivery' => 'axiomus', 'sumfrom' => 4200, 'sumto' => 5100, 'timetype' => 3, 'kadtype' => 1, 'sum' => 0],'INSERT');
+        $res = Db::getInstance()->autoExecuteWithNullValues($this->tableConditionPriceWithPrefix, ['id' => 0, 'city' => 'Москва', 'delivery' => 'axiomus', 'sumfrom' => 4200, 'sumto' => 5100, 'timetype' => 3, 'kadtype' => 2, 'sum' => 400],'INSERT');
+        $res = Db::getInstance()->autoExecuteWithNullValues($this->tableConditionPriceWithPrefix, ['id' => 0, 'city' => 'Москва', 'delivery' => 'axiomus', 'sumfrom' => 4200, 'sumto' => 5100, 'timetype' => 3, 'kadtype' => 3,  'sum' => 550],'INSERT');
+        $res = Db::getInstance()->autoExecuteWithNullValues($this->tableConditionPriceWithPrefix, ['id' => 0, 'city' => 'Москва', 'delivery' => 'axiomus', 'sumfrom' => 4200, 'sumto' => 5100, 'timetype' => 3, 'kadtype' => 4,  'sum' => 750],'INSERT');
+        $res = Db::getInstance()->autoExecuteWithNullValues($this->tableConditionPriceWithPrefix, ['id' => 0, 'city' => 'Москва', 'delivery' => 'axiomus', 'sumfrom' => 4200, 'sumto' => 5100, 'timetype' => 3, 'kadtype' => 5,  'sum' => 830],'INSERT');
+        $res = Db::getInstance()->autoExecuteWithNullValues($this->tableConditionPriceWithPrefix, ['id' => 0, 'city' => 'Москва', 'delivery' => 'axiomus', 'sumfrom' => 4200, 'sumto' => 5100, 'timetype' => 4, 'kadtype' => 1, 'sum' => 0],'INSERT');
+        $res = Db::getInstance()->autoExecuteWithNullValues($this->tableConditionPriceWithPrefix, ['id' => 0, 'city' => 'Москва', 'delivery' => 'axiomus', 'sumfrom' => 4200, 'sumto' => 5100, 'timetype' => 4, 'kadtype' => 2, 'sum' => 400],'INSERT');
+        $res = Db::getInstance()->autoExecuteWithNullValues($this->tableConditionPriceWithPrefix, ['id' => 0, 'city' => 'Москва', 'delivery' => 'axiomus', 'sumfrom' => 4200, 'sumto' => 5100, 'timetype' => 4, 'kadtype' => 3,  'sum' => 550],'INSERT');
+        $res = Db::getInstance()->autoExecuteWithNullValues($this->tableConditionPriceWithPrefix, ['id' => 0, 'city' => 'Москва', 'delivery' => 'axiomus', 'sumfrom' => 4200, 'sumto' => 5100, 'timetype' => 4, 'kadtype' => 4,  'sum' => 750],'INSERT');
+        $res = Db::getInstance()->autoExecuteWithNullValues($this->tableConditionPriceWithPrefix, ['id' => 0, 'city' => 'Москва', 'delivery' => 'axiomus', 'sumfrom' => 4200, 'sumto' => 5100, 'timetype' => 4, 'kadtype' => 5,  'sum' => 830],'INSERT');
+        $res = Db::getInstance()->autoExecuteWithNullValues($this->tableConditionPriceWithPrefix, ['id' => 0, 'city' => 'Москва', 'delivery' => 'axiomus', 'sumfrom' => 4200, 'sumto' => 5100, 'timetype' => 5, 'kadtype' => 1, 'sum' => 0],'INSERT');
+        $res = Db::getInstance()->autoExecuteWithNullValues($this->tableConditionPriceWithPrefix, ['id' => 0, 'city' => 'Москва', 'delivery' => 'axiomus', 'sumfrom' => 4200, 'sumto' => 5100, 'timetype' => 5, 'kadtype' => 2, 'sum' => 400],'INSERT');
+        $res = Db::getInstance()->autoExecuteWithNullValues($this->tableConditionPriceWithPrefix, ['id' => 0, 'city' => 'Москва', 'delivery' => 'axiomus', 'sumfrom' => 4200, 'sumto' => 5100, 'timetype' => 5, 'kadtype' => 3,  'sum' => 550],'INSERT');
+        $res = Db::getInstance()->autoExecuteWithNullValues($this->tableConditionPriceWithPrefix, ['id' => 0, 'city' => 'Москва', 'delivery' => 'axiomus', 'sumfrom' => 4200, 'sumto' => 5100, 'timetype' => 5, 'kadtype' => 4,  'sum' => 750],'INSERT');
+        $res = Db::getInstance()->autoExecuteWithNullValues($this->tableConditionPriceWithPrefix, ['id' => 0, 'city' => 'Москва', 'delivery' => 'axiomus', 'sumfrom' => 4200, 'sumto' => 5100, 'timetype' => 5, 'kadtype' => 5,  'sum' => 830],'INSERT');
+
+        $res = Db::getInstance()->autoExecuteWithNullValues($this->tableConditionPriceWithPrefix, ['id' => 0, 'city' => 'Москва', 'delivery' => 'axiomus', 'sumfrom' => 2100, 'sumto' => 4200, 'timetype' => 1, 'kadtype' => 1, 'sum' => 350],'INSERT');
+        $res = Db::getInstance()->autoExecuteWithNullValues($this->tableConditionPriceWithPrefix, ['id' => 0, 'city' => 'Москва', 'delivery' => 'axiomus', 'sumfrom' => 2100, 'sumto' => 4200, 'timetype' => 1, 'kadtype' => 2, 'sum' => 400],'INSERT');
+        $res = Db::getInstance()->autoExecuteWithNullValues($this->tableConditionPriceWithPrefix, ['id' => 0, 'city' => 'Москва', 'delivery' => 'axiomus', 'sumfrom' => 2100, 'sumto' => 4200, 'timetype' => 1, 'kadtype' => 3, 'sum' => 550],'INSERT');
+        $res = Db::getInstance()->autoExecuteWithNullValues($this->tableConditionPriceWithPrefix, ['id' => 0, 'city' => 'Москва', 'delivery' => 'axiomus', 'sumfrom' => 2100, 'sumto' => 4200, 'timetype' => 1, 'kadtype' => 4, 'sum' => 750],'INSERT');
+        $res = Db::getInstance()->autoExecuteWithNullValues($this->tableConditionPriceWithPrefix, ['id' => 0, 'city' => 'Москва', 'delivery' => 'axiomus', 'sumfrom' => 2100, 'sumto' => 5100, 'timetype' => 1, 'kadtype' => 5, 'sum' => 830],'INSERT');
+        $res = Db::getInstance()->autoExecuteWithNullValues($this->tableConditionPriceWithPrefix, ['id' => 0, 'city' => 'Москва', 'delivery' => 'axiomus', 'sumfrom' => 2100, 'sumto' => 4200, 'timetype' => 2, 'kadtype' => 1, 'sum' => 350],'INSERT');
+        $res = Db::getInstance()->autoExecuteWithNullValues($this->tableConditionPriceWithPrefix, ['id' => 0, 'city' => 'Москва', 'delivery' => 'axiomus', 'sumfrom' => 2100, 'sumto' => 4200, 'timetype' => 2, 'kadtype' => 2, 'sum' => 400],'INSERT');
+        $res = Db::getInstance()->autoExecuteWithNullValues($this->tableConditionPriceWithPrefix, ['id' => 0, 'city' => 'Москва', 'delivery' => 'axiomus', 'sumfrom' => 2100, 'sumto' => 4200, 'timetype' => 2, 'kadtype' => 3, 'sum' => 550],'INSERT');
+        $res = Db::getInstance()->autoExecuteWithNullValues($this->tableConditionPriceWithPrefix, ['id' => 0, 'city' => 'Москва', 'delivery' => 'axiomus', 'sumfrom' => 2100, 'sumto' => 4200, 'timetype' => 2, 'kadtype' => 4, 'sum' => 750],'INSERT');
+        $res = Db::getInstance()->autoExecuteWithNullValues($this->tableConditionPriceWithPrefix, ['id' => 0, 'city' => 'Москва', 'delivery' => 'axiomus', 'sumfrom' => 2100, 'sumto' => 5100, 'timetype' => 2, 'kadtype' => 5, 'sum' => 830],'INSERT');
+        $res = Db::getInstance()->autoExecuteWithNullValues($this->tableConditionPriceWithPrefix, ['id' => 0, 'city' => 'Москва', 'delivery' => 'axiomus', 'sumfrom' => 2100, 'sumto' => 4200, 'timetype' => 3, 'kadtype' => 1, 'sum' => 350],'INSERT');
+        $res = Db::getInstance()->autoExecuteWithNullValues($this->tableConditionPriceWithPrefix, ['id' => 0, 'city' => 'Москва', 'delivery' => 'axiomus', 'sumfrom' => 2100, 'sumto' => 4200, 'timetype' => 3, 'kadtype' => 2, 'sum' => 400],'INSERT');
+        $res = Db::getInstance()->autoExecuteWithNullValues($this->tableConditionPriceWithPrefix, ['id' => 0, 'city' => 'Москва', 'delivery' => 'axiomus', 'sumfrom' => 2100, 'sumto' => 4200, 'timetype' => 3, 'kadtype' => 3, 'sum' => 550],'INSERT');
+        $res = Db::getInstance()->autoExecuteWithNullValues($this->tableConditionPriceWithPrefix, ['id' => 0, 'city' => 'Москва', 'delivery' => 'axiomus', 'sumfrom' => 2100, 'sumto' => 4200, 'timetype' => 3, 'kadtype' => 4, 'sum' => 750],'INSERT');
+        $res = Db::getInstance()->autoExecuteWithNullValues($this->tableConditionPriceWithPrefix, ['id' => 0, 'city' => 'Москва', 'delivery' => 'axiomus', 'sumfrom' => 2100, 'sumto' => 5100, 'timetype' => 3, 'kadtype' => 5, 'sum' => 830],'INSERT');
+
+        $res = Db::getInstance()->autoExecuteWithNullValues($this->tableConditionPriceWithPrefix, ['id' => 0, 'city' => 'Москва', 'delivery' => 'axiomus', 'sumfrom' => 2100, 'sumto' => 4200, 'timetype' => 4, 'kadtype' => 1, 'sum' => 0],'INSERT');
+        $res = Db::getInstance()->autoExecuteWithNullValues($this->tableConditionPriceWithPrefix, ['id' => 0, 'city' => 'Москва', 'delivery' => 'axiomus', 'sumfrom' => 2100, 'sumto' => 4200, 'timetype' => 4, 'kadtype' => 2, 'sum' => 400],'INSERT');
+        $res = Db::getInstance()->autoExecuteWithNullValues($this->tableConditionPriceWithPrefix, ['id' => 0, 'city' => 'Москва', 'delivery' => 'axiomus', 'sumfrom' => 2100, 'sumto' => 4200, 'timetype' => 4, 'kadtype' => 3, 'sum' => 550],'INSERT');
+        $res = Db::getInstance()->autoExecuteWithNullValues($this->tableConditionPriceWithPrefix, ['id' => 0, 'city' => 'Москва', 'delivery' => 'axiomus', 'sumfrom' => 2100, 'sumto' => 4200, 'timetype' => 4, 'kadtype' => 4, 'sum' => 750],'INSERT');
+        $res = Db::getInstance()->autoExecuteWithNullValues($this->tableConditionPriceWithPrefix, ['id' => 0, 'city' => 'Москва', 'delivery' => 'axiomus', 'sumfrom' => 2100, 'sumto' => 4200, 'timetype' => 4, 'kadtype' => 5, 'sum' => 830],'INSERT');
+        $res = Db::getInstance()->autoExecuteWithNullValues($this->tableConditionPriceWithPrefix, ['id' => 0, 'city' => 'Москва', 'delivery' => 'axiomus', 'sumfrom' => 2100, 'sumto' => 4200, 'timetype' => 5, 'kadtype' => 1, 'sum' => 0],'INSERT');
+        $res = Db::getInstance()->autoExecuteWithNullValues($this->tableConditionPriceWithPrefix, ['id' => 0, 'city' => 'Москва', 'delivery' => 'axiomus', 'sumfrom' => 2100, 'sumto' => 4200, 'timetype' => 5, 'kadtype' => 2, 'sum' => 400],'INSERT');
+        $res = Db::getInstance()->autoExecuteWithNullValues($this->tableConditionPriceWithPrefix, ['id' => 0, 'city' => 'Москва', 'delivery' => 'axiomus', 'sumfrom' => 2100, 'sumto' => 4200, 'timetype' => 5, 'kadtype' => 3, 'sum' => 550],'INSERT');
+        $res = Db::getInstance()->autoExecuteWithNullValues($this->tableConditionPriceWithPrefix, ['id' => 0, 'city' => 'Москва', 'delivery' => 'axiomus', 'sumfrom' => 2100, 'sumto' => 4200, 'timetype' => 5, 'kadtype' => 4, 'sum' => 750],'INSERT');
+        $res = Db::getInstance()->autoExecuteWithNullValues($this->tableConditionPriceWithPrefix, ['id' => 0, 'city' => 'Москва', 'delivery' => 'axiomus', 'sumfrom' => 2100, 'sumto' => 5100, 'timetype' => 5, 'kadtype' => 5, 'sum' => 830],'INSERT');
+
+        $res = Db::getInstance()->autoExecuteWithNullValues($this->tableConditionPriceWithPrefix, ['id' => 0, 'city' => 'Москва', 'delivery' => 'axiomus', 'sumfrom' => 0, 'sumto' => 2100, 'timetype' => 1, 'kadtype' => 1, 'sum' => 350],'INSERT');
+        $res = Db::getInstance()->autoExecuteWithNullValues($this->tableConditionPriceWithPrefix, ['id' => 0, 'city' => 'Москва', 'delivery' => 'axiomus', 'sumfrom' => 0, 'sumto' => 2100, 'timetype' => 1, 'kadtype' => 2, 'sum' => 400],'INSERT');
+        $res = Db::getInstance()->autoExecuteWithNullValues($this->tableConditionPriceWithPrefix, ['id' => 0, 'city' => 'Москва', 'delivery' => 'axiomus', 'sumfrom' => 0, 'sumto' => 2100, 'timetype' => 1, 'kadtype' => 3, 'sum' => 550],'INSERT');
+        $res = Db::getInstance()->autoExecuteWithNullValues($this->tableConditionPriceWithPrefix, ['id' => 0, 'city' => 'Москва', 'delivery' => 'axiomus', 'sumfrom' => 0, 'sumto' => 2100, 'timetype' => 1, 'kadtype' => 4, 'sum' => 750],'INSERT');
+        $res = Db::getInstance()->autoExecuteWithNullValues($this->tableConditionPriceWithPrefix, ['id' => 0, 'city' => 'Москва', 'delivery' => 'axiomus', 'sumfrom' => 0, 'sumto' => 2100, 'timetype' => 1, 'kadtype' => 5, 'sum' => 830],'INSERT');
+        $res = Db::getInstance()->autoExecuteWithNullValues($this->tableConditionPriceWithPrefix, ['id' => 0, 'city' => 'Москва', 'delivery' => 'axiomus', 'sumfrom' => 0, 'sumto' => 2100, 'timetype' => 2, 'kadtype' => 1, 'sum' => 350],'INSERT');
+        $res = Db::getInstance()->autoExecuteWithNullValues($this->tableConditionPriceWithPrefix, ['id' => 0, 'city' => 'Москва', 'delivery' => 'axiomus', 'sumfrom' => 0, 'sumto' => 2100, 'timetype' => 2, 'kadtype' => 2, 'sum' => 400],'INSERT');
+        $res = Db::getInstance()->autoExecuteWithNullValues($this->tableConditionPriceWithPrefix, ['id' => 0, 'city' => 'Москва', 'delivery' => 'axiomus', 'sumfrom' => 0, 'sumto' => 2100, 'timetype' => 2, 'kadtype' => 3, 'sum' => 550],'INSERT');
+        $res = Db::getInstance()->autoExecuteWithNullValues($this->tableConditionPriceWithPrefix, ['id' => 0, 'city' => 'Москва', 'delivery' => 'axiomus', 'sumfrom' => 0, 'sumto' => 2100, 'timetype' => 2, 'kadtype' => 4, 'sum' => 750],'INSERT');
+        $res = Db::getInstance()->autoExecuteWithNullValues($this->tableConditionPriceWithPrefix, ['id' => 0, 'city' => 'Москва', 'delivery' => 'axiomus', 'sumfrom' => 0, 'sumto' => 2100, 'timetype' => 2, 'kadtype' => 5, 'sum' => 830],'INSERT');
+        $res = Db::getInstance()->autoExecuteWithNullValues($this->tableConditionPriceWithPrefix, ['id' => 0, 'city' => 'Москва', 'delivery' => 'axiomus', 'sumfrom' => 0, 'sumto' => 2100, 'timetype' => 3, 'kadtype' => 1, 'sum' => 350],'INSERT');
+        $res = Db::getInstance()->autoExecuteWithNullValues($this->tableConditionPriceWithPrefix, ['id' => 0, 'city' => 'Москва', 'delivery' => 'axiomus', 'sumfrom' => 0, 'sumto' => 2100, 'timetype' => 3, 'kadtype' => 2, 'sum' => 400],'INSERT');
+        $res = Db::getInstance()->autoExecuteWithNullValues($this->tableConditionPriceWithPrefix, ['id' => 0, 'city' => 'Москва', 'delivery' => 'axiomus', 'sumfrom' => 0, 'sumto' => 2100, 'timetype' => 3, 'kadtype' => 3, 'sum' => 550],'INSERT');
+        $res = Db::getInstance()->autoExecuteWithNullValues($this->tableConditionPriceWithPrefix, ['id' => 0, 'city' => 'Москва', 'delivery' => 'axiomus', 'sumfrom' => 0, 'sumto' => 2100, 'timetype' => 3, 'kadtype' => 4, 'sum' => 750],'INSERT');
+        $res = Db::getInstance()->autoExecuteWithNullValues($this->tableConditionPriceWithPrefix, ['id' => 0, 'city' => 'Москва', 'delivery' => 'axiomus', 'sumfrom' => 0, 'sumto' => 2100, 'timetype' => 3, 'kadtype' => 5, 'sum' => 830],'INSERT');
+        $res = Db::getInstance()->autoExecuteWithNullValues($this->tableConditionPriceWithPrefix, ['id' => 0, 'city' => 'Москва', 'delivery' => 'axiomus', 'sumfrom' => 0, 'sumto' => 2100, 'timetype' => 4, 'kadtype' => 1, 'sum' => 350],'INSERT');
+        $res = Db::getInstance()->autoExecuteWithNullValues($this->tableConditionPriceWithPrefix, ['id' => 0, 'city' => 'Москва', 'delivery' => 'axiomus', 'sumfrom' => 0, 'sumto' => 2100, 'timetype' => 4, 'kadtype' => 2, 'sum' => 400],'INSERT');
+        $res = Db::getInstance()->autoExecuteWithNullValues($this->tableConditionPriceWithPrefix, ['id' => 0, 'city' => 'Москва', 'delivery' => 'axiomus', 'sumfrom' => 0, 'sumto' => 2100, 'timetype' => 4, 'kadtype' => 3, 'sum' => 550],'INSERT');
+        $res = Db::getInstance()->autoExecuteWithNullValues($this->tableConditionPriceWithPrefix, ['id' => 0, 'city' => 'Москва', 'delivery' => 'axiomus', 'sumfrom' => 0, 'sumto' => 2100, 'timetype' => 4, 'kadtype' => 4, 'sum' => 750],'INSERT');
+        $res = Db::getInstance()->autoExecuteWithNullValues($this->tableConditionPriceWithPrefix, ['id' => 0, 'city' => 'Москва', 'delivery' => 'axiomus', 'sumfrom' => 0, 'sumto' => 2100, 'timetype' => 4, 'kadtype' => 5, 'sum' => 830],'INSERT');
+        $res = Db::getInstance()->autoExecuteWithNullValues($this->tableConditionPriceWithPrefix, ['id' => 0, 'city' => 'Москва', 'delivery' => 'axiomus', 'sumfrom' => 0, 'sumto' => 2100, 'timetype' => 5, 'kadtype' => 1, 'sum' => 350],'INSERT');
+        $res = Db::getInstance()->autoExecuteWithNullValues($this->tableConditionPriceWithPrefix, ['id' => 0, 'city' => 'Москва', 'delivery' => 'axiomus', 'sumfrom' => 0, 'sumto' => 2100, 'timetype' => 5, 'kadtype' => 2, 'sum' => 400],'INSERT');
+        $res = Db::getInstance()->autoExecuteWithNullValues($this->tableConditionPriceWithPrefix, ['id' => 0, 'city' => 'Москва', 'delivery' => 'axiomus', 'sumfrom' => 0, 'sumto' => 2100, 'timetype' => 5, 'kadtype' => 3, 'sum' => 550],'INSERT');
+        $res = Db::getInstance()->autoExecuteWithNullValues($this->tableConditionPriceWithPrefix, ['id' => 0, 'city' => 'Москва', 'delivery' => 'axiomus', 'sumfrom' => 0, 'sumto' => 2100, 'timetype' => 5, 'kadtype' => 4, 'sum' => 750],'INSERT');
+        $res = Db::getInstance()->autoExecuteWithNullValues($this->tableConditionPriceWithPrefix, ['id' => 0, 'city' => 'Москва', 'delivery' => 'axiomus', 'sumfrom' => 0, 'sumto' => 2100, 'timetype' => 5, 'kadtype' => 5, 'sum' => 830],'INSERT');
+
         return true;
     }
 
     private function _insertStartCarryPrice(){
 
-        $res = Db::getInstance()->autoExecuteWithNullValues($this->tableCarryPriceWithPrefix, ['id' => 1, 'city' => 'Москва', 'delivery' => 'axiomus', 'sum' => 22],'INSERT');
-        $res = Db::getInstance()->autoExecuteWithNullValues($this->tableCarryPriceWithPrefix, ['id' => 2, 'city' => 'Москва', 'delivery' => 'dpd', 'sum' => 33],'INSERT');
-        $res = Db::getInstance()->autoExecuteWithNullValues($this->tableCarryPriceWithPrefix, ['id' => 3, 'city' => 'Москва', 'delivery' => 'boxberry', 'sum' => 44],'INSERT');
-        $res = Db::getInstance()->autoExecuteWithNullValues($this->tableCarryPriceWithPrefix, ['id' => 4, 'city' => 'Санкт-Петербург', 'delivery' => 'axiomus', 'sum' => 55],'INSERT');
-        $res = Db::getInstance()->autoExecuteWithNullValues($this->tableCarryPriceWithPrefix, ['id' => 5, 'city' => 'Санкт-Петербург', 'delivery' => 'dpd', 'sum' => 66],'INSERT');
-        $res = Db::getInstance()->autoExecuteWithNullValues($this->tableCarryPriceWithPrefix, ['id' => 6, 'city' => 'Санкт-Петербург', 'delivery' => 'boxberry', 'sum' => 77],'INSERT');
-
+        $res = Db::getInstance()->autoExecuteWithNullValues(self::$tableCarryPriceWithPrefix, ['id' => 0, 'city' => 'Москва', 'delivery' => 'axiomus', 'sum' => 22],'INSERT');
+        $res = Db::getInstance()->autoExecuteWithNullValues(self::$tableCarryPriceWithPrefix, ['id' => 0, 'city' => 'Москва', 'delivery' => 'dpd', 'sum' => 33],'INSERT');
+        $res = Db::getInstance()->autoExecuteWithNullValues(self::$tableCarryPriceWithPrefix, ['id' => 0, 'city' => 'Москва', 'delivery' => 'boxberry', 'sum' => 44],'INSERT');
+        $res = Db::getInstance()->autoExecuteWithNullValues(self::$tableCarryPriceWithPrefix, ['id' => 0, 'city' => 'Москва', 'delivery' => 'russianpost', 'sum' => 77],'INSERT');
+        $res = Db::getInstance()->autoExecuteWithNullValues(self::$tableCarryPriceWithPrefix, ['id' => 0, 'city' => 'Москва', 'delivery' => 'pecom', 'sum' => 77],'INSERT');
+        $res = Db::getInstance()->autoExecuteWithNullValues(self::$tableCarryPriceWithPrefix, ['id' => 0, 'city' => 'Санкт-Петербург', 'delivery' => 'axiomus', 'sum' => 55],'INSERT');
+        $res = Db::getInstance()->autoExecuteWithNullValues(self::$tableCarryPriceWithPrefix, ['id' => 0, 'city' => 'Санкт-Петербург', 'delivery' => 'dpd', 'sum' => 66],'INSERT');
+        $res = Db::getInstance()->autoExecuteWithNullValues(self::$tableCarryPriceWithPrefix, ['id' => 0, 'city' => 'Санкт-Петербург', 'delivery' => 'boxberry', 'sum' => 77],'INSERT');
+        $res = Db::getInstance()->autoExecuteWithNullValues(self::$tableCarryPriceWithPrefix, ['id' => 0, 'city' => 'Санкт-Петербург', 'delivery' => 'russianpost', 'sum' => 88],'INSERT');
+        $res = Db::getInstance()->autoExecuteWithNullValues(self::$tableCarryPriceWithPrefix, ['id' => 0, 'city' => 'Санкт-Петербург', 'delivery' => 'pecom', 'sum' => 88],'INSERT');
+        $res = Db::getInstance()->autoExecuteWithNullValues(self::$tableCarryPriceWithPrefix, ['id' => 0, 'city' => 'регионы', 'delivery' => 'axiomus', 'sum' => 55],'INSERT');
+        $res = Db::getInstance()->autoExecuteWithNullValues(self::$tableCarryPriceWithPrefix, ['id' => 0, 'city' => 'регионы', 'delivery' => 'dpd', 'sum' => 66],'INSERT');
+        $res = Db::getInstance()->autoExecuteWithNullValues(self::$tableCarryPriceWithPrefix, ['id' => 0, 'city' => 'регионы', 'delivery' => 'boxberry', 'sum' => 77],'INSERT');
+        $res = Db::getInstance()->autoExecuteWithNullValues(self::$tableCarryPriceWithPrefix, ['id' => 0, 'city' => 'регионы', 'delivery' => 'russianpost', 'sum' => 77],'INSERT');
+        $res = Db::getInstance()->autoExecuteWithNullValues(self::$tableCarryPriceWithPrefix, ['id' => 0, 'city' => 'регионы', 'delivery' => 'pecom', 'sum' => 88],'INSERT');
         if (!$res){
             return false;
         }
@@ -519,7 +595,7 @@ class AxiomusPost extends ObjectModel {
             return false;
         }
 
-        $sql = "DROP TABLE IF EXISTS `".$this->tableCarryPriceWithPrefix."`;";
+        $sql = "DROP TABLE IF EXISTS `".self::$tableCarryPriceWithPrefix."`;";
         if (!Db::getInstance()->execute($sql)) {
             return false;
         }
@@ -544,14 +620,14 @@ class AxiomusPost extends ObjectModel {
         //определение типа веса
         if ($carry){
             $delivery = $this->getActiveCarry($city)[$carrytype];
-            return $this->getCarryPriceByName($city, $delivery);
+            return self::getCarryPriceByName($city, $delivery);
         }else {
             $weighttype = $this->getWeightTypeId($weight);
             //По весу
             $sumWeight = $this->getWeightPrice($city, $carry, $weighttype);
 
             //Надбавка
-            $sumCondition = $this->getConditionPrice($city, $carry, $price, $kad, $time);
+            $sumCondition = $this->getConditionPrice($city, $price, $kad, $time);
 
             return $sumWeight + $sumCondition;
         }
@@ -577,8 +653,8 @@ class AxiomusPost extends ObjectModel {
         return $res['name'];
     }
 
-    public function insertWeightType( $name, $weightfrom, $weightto){
-        $res = Db::getInstance()->autoExecuteWithNullValues($this->tableWeightTypeWithPrefix, ['name' => $name, 'weightfrom' => $weightfrom, 'weightto' => $weightto],'INSERT');
+    public function insertWeightType($city, $name, $weightfrom, $weightto){
+        $res = Db::getInstance()->autoExecuteWithNullValues($this->tableWeightTypeWithPrefix, ['city' => $city, 'name' => $name, 'weightfrom' => $weightfrom, 'weightto' => $weightto],'INSERT');
         if (!$res){
             return false;
         }else{
@@ -587,7 +663,7 @@ class AxiomusPost extends ObjectModel {
     }
 
     public function updateWeightType($id, $name, $weightfrom, $weightto){
-        $res = Db::getInstance()->update(AxiomusPost::$definition['tableWeightType'], [ 'name' => $name, 'weightfrom' => $weightfrom, 'weightto' => $weightto]," `id` = {$id}");
+        $res = Db::getInstance()->update(AxiomusPost::$definition['tableWeightType'], ['name' => $name, 'weightfrom' => $weightfrom, 'weightto' => $weightto]," `id` = {$id}");
         if (!$res){
             return false;
         }else{
@@ -616,8 +692,8 @@ class AxiomusPost extends ObjectModel {
         return $data;
     }
 
-    public function insertTimeType($name, $timefrom, $timeto){
-        $res = Db::getInstance()->autoExecuteWithNullValues($this->tableTimeTypeWithPrefix, ['name' => $name, 'timefrom' => $timefrom, 'timeto' => $timeto],'INSERT');
+    public function insertTimeType($city, $name, $timefrom, $timeto){
+        $res = Db::getInstance()->autoExecuteWithNullValues($this->tableTimeTypeWithPrefix, ['city' => $city, 'name' => $name, 'timefrom' => $timefrom, 'timeto' => $timeto],'INSERT');
         if (!$res){
             return false;
         }else{
@@ -683,19 +759,6 @@ class AxiomusPost extends ObjectModel {
     }
 
     //WeightPrice
-    public function getWeightPriceArray() {
-        $arr = [];
-        foreach ($this->cities as $city) {
-            foreach ($this->deliveries as $delivery) {
-                foreach ($this->priceTypes as $type) {
-                    $row = Db::getInstance()->getRow("SELECT * FROM `{$this->tableWeightPriceWithPrefix}` WHERE `type` = {$type} AND (`city` = '{$city}' AND `delivery` = '{$delivery}')");
-                    $arr[$row['city'] . '_' . str_replace('-','_',$row['delivery']) . '_price_' . $type] = $row['sum'];
-                }
-            }
-        }
-
-        return $arr;
-    } //ToDo нужен ли этот метод?
 
     public function getOneRowWeightPrice($city, $delivery, $type)
     {
@@ -712,15 +775,15 @@ class AxiomusPost extends ObjectModel {
         return $data;
     }
 
-    public function getWeightPrice($city, $carry, $weighttype){
+    public function getWeightPrice($city, $weighttype){
         $sql = "SELECT * FROM {$this->tableWeightPriceWithPrefix} WHERE ";
-        $sql .= "(`city` = '{$city}' AND `delivery` = 'axiomus' AND `carry` = '{$carry}' AND `type` = {$weighttype})";
+        $sql .= "(`city` = '{$city}' AND `delivery` = 'axiomus'  AND `type` = {$weighttype})";
         $res = Db::getInstance()->getRow($sql);
         return $res['sum'];
     }
 
-    public function insertWeightPrice($city, $delivery, $carry, $type, $sum){
-        $res = Db::getInstance()->autoExecuteWithNullValues($this->tableConditionPriceWithPrefix, ['city' => $city, 'delivery' => $delivery, 'carry' => $carry, 'type' => $type, 'sum' => $sum],'INSERT');
+    public function insertWeightPrice($city, $type, $sum){
+        $res = Db::getInstance()->autoExecuteWithNullValues($this->tableWeightPriceWithPrefix, ['city' => $city, 'type' => $type, 'sum' => $sum],'INSERT');
         if (!$res){
             return false;
         }else{
@@ -728,8 +791,8 @@ class AxiomusPost extends ObjectModel {
         }
     }
 
-    public function updateWeightPrice($id, $city, $delivery, $carry, $type, $sum){
-        $res = Db::getInstance()->update(AxiomusPost::$definition['tableWeightPrice'], ['city' => $city, 'delivery' => $delivery, 'carry' => $carry, 'type' => $type, 'sum' => $sum]," `id` = {$id})");
+    public function updateWeightPrice($id, $city, $type, $sum){
+        $res = Db::getInstance()->update(AxiomusPost::$definition['tableWeightPrice'], ['city' => $city, 'type' => $type, 'sum' => $sum]," `id` = {$id})");
         if (!$res){
             return false;
         }else{
@@ -747,10 +810,10 @@ class AxiomusPost extends ObjectModel {
     }
 
     //ConditionPrice
-    public function getConditionPrice($city, $carry, $price, $kad, $time){
+    public function getConditionPrice($city, $price, $kad, $time){
         $sql = "SELECT * FROM `{$this->tableConditionPriceWithPrefix}` WHERE ";
-        $sql .= "(`city` = '{$city}' AND `carry` = '{$carry}')";
-        $sql .= " AND (`sumfrom` < '{$price}' AND `sumto` > '{$price}')";
+        $sql .= "(`city` = '{$city}')";
+        $sql .= " AND (`sumfrom` <= '{$price}' AND `sumto` > '{$price}')";
         $sql .= " AND (`kadtype` = {$kad})";
         $sql .= " AND (`timetype` = {$time})";
         $res = Db::getInstance()->getRow($sql);
@@ -762,8 +825,8 @@ class AxiomusPost extends ObjectModel {
         return $data;
     }
 
-    public function insertConditionPrice($city, $delivery, $carry, $sumfrom, $sumto, $timetype, $kadtype, $sum){
-        $res = Db::getInstance()->autoExecuteWithNullValues($this->tableConditionPriceWithPrefix, ['city' => $city, 'delivery' => $delivery, 'carry' => $carry, 'sumfrom' => $sumfrom, 'sumto' => $sumto, 'timetype' => $timetype, 'kadtype' => $kadtype, 'sum' => $sum],'INSERT');
+    public function insertConditionPrice($city, $delivery, $sumfrom, $sumto, $timetype, $kadtype, $sum){
+        $res = Db::getInstance()->autoExecuteWithNullValues($this->tableConditionPriceWithPrefix, ['city' => $city, 'delivery' => $delivery, 'sumfrom' => $sumfrom, 'sumto' => $sumto, 'timetype' => $timetype, 'kadtype' => $kadtype, 'sum' => $sum],'INSERT');
         if ($res) {
             return true;
         }else{
@@ -771,8 +834,8 @@ class AxiomusPost extends ObjectModel {
         }
     }
 
-    public function updateConditionPrice($id, $city, $delivery, $carry, $sumfrom, $sumto, $timetype, $kadtype, $sum){
-        $res = Db::getInstance()->update(AxiomusPost::$definition['tableConditionPrice'], ['city' => $city, 'delivery' => $delivery, 'carry' => $carry, 'sumfrom' => $sumfrom, 'sumto' => $sumto, 'timetype' => $timetype, 'kadtype' => $kadtype, 'sum' => $sum]," `id` = {$id}");
+    public function updateConditionPrice($id, $city, $delivery, $sumfrom, $sumto, $timetype, $kadtype, $sum){
+        $res = Db::getInstance()->update(AxiomusPost::$definition['tableConditionPrice'], ['city' => $city, 'delivery' => $delivery, 'sumfrom' => $sumfrom, 'sumto' => $sumto, 'timetype' => $timetype, 'kadtype' => $kadtype, 'sum' => $sum]," `id` = {$id}");
         if ($res) {
             return true;
         }else{
@@ -817,19 +880,19 @@ class AxiomusPost extends ObjectModel {
         }
 
         $price_weight = $this->getWeightPrice($city, $carry, $weighttype);
-        $price_condition = $this->getConditionPrice($city, $carry, $price, $kad, $time);
+        $price_condition = $this->getConditionPrice($city, $price, $kad, $time);
 
-        $carryCode = $this->getCarryAddresses((int)$carrier_id, null, $carry_address_id);
+        $carryCode = $this->getCarryAddresses((int)$carrier_id, null, $carry_address_id)['code'];
 
         if ($this->issetOrder($cart->id)){
-            $res = Db::getInstance()->update(AxiomusPost::$definition['tableOrder'], ['delivery_id' => $carrier_id,'date' => $date, 'carry' => (boolean)$carry, 'kadtype' => $kad, 'timetype' => $time, 'price_weight' => (int)$price_weight, 'price_condition' => (int)$price_condition, 'carry_address_id' => (int)$carryCode],"`id_cart` = {$id_cart}");
+            $res = Db::getInstance()->update(AxiomusPost::$definition['tableOrder'], ['delivery_id' => $carrier_id,'date' => $date, 'carry' => (boolean)$carry, 'kadtype' => $kad, 'timetype' => $time, 'price_weight' => (int)$price_weight, 'price_condition' => (int)$price_condition, 'carry_code' => $carryCode],"`id_cart` = {$id_cart}");
             if (!$res){
                 return false;
             }else{
                 return true;
             }
         }else {
-            $res = Db::getInstance()->autoExecuteWithNullValues($this->tableOrderWithPrefix, ['id_cart' => $id_cart, 'delivery_id' => $carrier_id,'date' => $date, 'carry' => $carry, 'kadtype' => $kad, 'timetype' => $time, 'price_weight' => $price_weight, 'price_condition' => $price_condition, 'carry_address_id' => (int)$carryCode], 'INSERT');
+            $res = Db::getInstance()->autoExecuteWithNullValues($this->tableOrderWithPrefix, ['id_cart' => $id_cart, 'delivery_id' => $carrier_id,'date' => $date, 'carry' => $carry, 'kadtype' => $kad, 'timetype' => $time, 'price_weight' => $price_weight, 'price_condition' => $price_condition, 'carry_code' => $carryCode], 'INSERT');
             if ($res) {
                 return true;
             } else {
@@ -838,9 +901,9 @@ class AxiomusPost extends ObjectModel {
         }
     }
 
-    public function setOrderResponse($id_cart, $oid, $okay = null){
+    public function setOrderResponse($id_cart, $oid, $okey = null, $position_count){
         if ($this->issetOrder($id_cart)){
-            $res = Db::getInstance()->update(AxiomusPost::$definition['tableOrder'], ['oid' => $oid, 'okay' => $okay],"`id_cart` = {$id_cart}");
+            $res = Db::getInstance()->update(AxiomusPost::$definition['tableOrder'], ['oid' => $oid, 'okey' => $okey, 'position_count' => (int)$position_count],"`id_cart` = {$id_cart}");
             if (!$res){
                 return false;
             }else{
@@ -889,7 +952,7 @@ class AxiomusPost extends ObjectModel {
             if (Configuration::get('RS_AXIOMUS_MSCW_USE_PECOM_CARRY')) {
                 $arr[Configuration::get('RS_AXIOMUS_ID_PECOM_CARRY')] = 'pecom';
             }
-        }elseif ($city='Санкт-Петербург'){
+        }elseif ($city=='Санкт-Петербург'){
             if (Configuration::get('RS_AXIOMUS_PTR_USE_AXIOMUS_CARRY')) {
                 $arr[Configuration::get('RS_AXIOMUS_oid_CARRY')] = 'axiomus';
             }
@@ -907,57 +970,76 @@ class AxiomusPost extends ObjectModel {
             }
         }else{
             if (Configuration::get('RS_AXIOMUS_REGION_USE_AXIOMUS_CARRY')) {
-                $arr[Configuration::get('RS_AXIOMUS_oid_CARRY')] = 'axiomus';
+                if ($this->issetCityInCache($city, 'axiomus')) {
+                    $arr[Configuration::get('RS_AXIOMUS_ID_CARRY')] = 'axiomus';
+                }
             }
             if (Configuration::get('RS_AXIOMUS_REGION_USE_DPD_CARRY')) {
-                $arr[Configuration::get('RS_AXIOMUS_ID_DPD_CARRY')] = 'dpd';
+                if ($this->issetCityInCache($city, 'dpd')) {
+                    $arr[Configuration::get('RS_AXIOMUS_ID_DPD_CARRY')] = 'dpd';
+                }
             }
             if (Configuration::get('RS_AXIOMUS_REGION_USE_BOXBERRY_CARRY')) {
-                $arr[Configuration::get('RS_AXIOMUS_ID_BOXBERRY_CARRY')] = 'boxberry';
+                if ($this->issetCityInCache($city, 'boxberry')) {
+                    $arr[Configuration::get('RS_AXIOMUS_ID_BOXBERRY_CARRY')] = 'boxberry';
+                }
             }
             if (Configuration::get('RS_AXIOMUS_REGION_USE_RUSSIANPOST_CARRY')) {
-                $arr[Configuration::get('RS_AXIOMUS_ID_RUSSIANPOST_CARRY')] = 'russianpost';
+                if ($this->issetCityInCache($city, 'russianpost')) {
+                    $arr[Configuration::get('RS_AXIOMUS_ID_RUSSIANPOST_CARRY')] = 'russianpost';
+                }
             }
             if (Configuration::get('RS_AXIOMUS_REGION_USE_PECOM_CARRY')) {
-                $arr[Configuration::get('RS_AXIOMUS_ID_PECOM_CARRY')] = 'pecom';
+                if ($this->issetCityInCache($city, 'pecom')) {
+                    $arr[Configuration::get('RS_AXIOMUS_ID_PECOM_CARRY')] = 'pecom';
+                }
             }
         }
         return $arr;
     }
 
-    public function getCarryAddresses($carry_id, $city = null, $id = null){
+    public function getCarryAddresses($carry_id, $city = null, $id = null, $code = null){
         if ($carry_id == (int)Configuration::get('RS_AXIOMUS_ID_AXIOMUS_CARRY')) { //axiomus
             $activeTable = $this->tableCacheCarryAxiomusWithPrefix;
             $sql = "SELECT * FROM `{$activeTable}`";
-            if (empty(city) and !empty(id)){
+            if (!empty($id)){
                 $sql .= " WHERE `id` = '{$id}'";
                 $data = Db::getInstance()->getRow($sql);
-            }else{
+            }elseif(!empty($city)){
                 $sql .= " WHERE `city_name` = '{$city}'";
+                $data = Db::getInstance()->ExecuteS($sql);
+            }elseif(!empty($code)){
+                $sql .= " WHERE `code` = '{$code}'";
                 $data = Db::getInstance()->ExecuteS($sql);
             }
             return $data;
         }elseif ($carry_id == (int)Configuration::get('RS_AXIOMUS_ID_DPD_CARRY')){ //dpd
             $activeTable = $this->tableCacheCarryDPDWithPrefix;
             $sql = "SELECT * FROM `{$activeTable}`";
-            if (empty(city) and !empty(id)){
+            if (!empty($id)){
                 $sql .= " WHERE `id` = '{$id}'";
                 $data = Db::getInstance()->getRow($sql);
-            }else{
-                $sql .= " WHERE `city` = '{$city}'";
+            }elseif(!empty($city)){
+                $sql .= " WHERE `city_name` = '{$city}'";
                 $data = Db::getInstance()->ExecuteS($sql);
-            }
+            }elseif(!empty($code)){
+            $sql .= " WHERE `code` = '{$code}'";
+            $data = Db::getInstance()->ExecuteS($sql);
+        }
             return $data;
         }elseif ($carry_id == (int)Configuration::get('RS_AXIOMUS_ID_BOXBERRY_CARRY')){ //boxberry
             $activeTable = $this->tableCacheCarryBoxBerryWithPrefix;
             $sql = "SELECT * FROM `{$activeTable}`";
-            if (empty(city) and !empty(id)){
+            if (!empty($id)){
                 $sql .= " WHERE `id` = '{$id}'";
                 $data = Db::getInstance()->getRow($sql);
-            }else{
+            }elseif(!empty($city)){
                 $sql .= " WHERE `city_name` = '{$city}'";
                 $data = Db::getInstance()->ExecuteS($sql);
-            }
+            }elseif(!empty($code)){
+            $sql .= " WHERE `code` = '{$code}'";
+            $data = Db::getInstance()->ExecuteS($sql);
+        }
             return $data;
         }elseif ($carry_id == (int)Configuration::get('RS_AXIOMUS_ID_RUSSIANPOST_CARRY')){ //boxberry
 //            $activeTable = $this->tableCacheCarryBoxBerryWithPrefix;
@@ -966,13 +1048,16 @@ class AxiomusPost extends ObjectModel {
         }elseif ($carry_id == (int)Configuration::get('RS_AXIOMUS_ID_PECOM_CARRY')){ //boxberry
             $activeTable = $this->tableCacheCarryPecomWithPrefix;
             $sql = "SELECT * FROM `{$activeTable}`";
-            if (empty(city) and !empty(id)){
+            if (!empty($id)){
                 $sql .= " WHERE `id` = '{$id}'";
                 $data = Db::getInstance()->getRow($sql);
-            }else{
+            }elseif(!empty($city)){
                 $sql .= " WHERE `city_name` = '{$city}'";
                 $data = Db::getInstance()->ExecuteS($sql);
-            }
+            }elseif(!empty($code)){
+            $sql .= " WHERE `code` = '{$code}'";
+            $data = Db::getInstance()->ExecuteS($sql);
+        }
             return $data;
         }else{
             return false;
@@ -1044,7 +1129,7 @@ class AxiomusPost extends ObjectModel {
                         'name' => (string)$row['name'],
                         'address' => (string)$row['address'],
                         'region' => (string)$row['region'],
-                        'city' => (string)$row['city'],
+                        'city_name' => (string)$row['city'],
                         'GPS' => (string)$row['GPS'],
                         'work_schedule' => (string)$row['WorkSchedule'],
                         'cash' => (boolean)$row['cash'],
@@ -1130,6 +1215,7 @@ class AxiomusPost extends ObjectModel {
 
                                 $res = Db::getInstance()->autoExecuteWithNullValues($this->tableCacheCarryPecomWithPrefix, [
                                     'warehouseId' => (string)$warehouse->id,
+                                    'code' => (string)$warehouse->id,
                                     'divisionId' => (string)$warehouse->divisionId,
                                     'name' => (string)$warehouse->name,
                                     'divisionName' => (string)$warehouse->divisionName,
@@ -1196,9 +1282,12 @@ class AxiomusPost extends ObjectModel {
 
     //carry
 
-    public function getCarryPriceByName($city, $name){
-
-        $row = Db::getInstance()->getRow("SELECT * FROM `{$this->tableCarryPriceWithPrefix}` WHERE `delivery` = '{$name}' AND `city` = '{$city}';");
+    public static function getCarryPriceByName($city, $name){
+        $tab = self::$tableCarryPriceWithPrefix;
+        if ($city != 'Москва' && $city != 'Санкт-Петербург'){
+            $city = 'регионы';
+        }
+        $row = Db::getInstance()->getRow("SELECT * FROM `{$tab}` WHERE `delivery` = '{$name}' AND `city` = '{$city}';");
         if (!empty($row)) {
             return (int)$row['sum'];
         }else{
@@ -1270,6 +1359,30 @@ class AxiomusPost extends ObjectModel {
         return true;
     }
 
+    public function issetCityInCache($city, $deliveryname){
+        if ($deliveryname == 'axiomus'){
+            $table = $this->tableCacheCarryAxiomusWithPrefix;
+        }elseif ($deliveryname == 'dpd'){
+            $table = $this->tableCacheCarryDPDWithPrefix;
+        }elseif ($deliveryname == 'boxberry'){
+            $table = $this->tableCacheCarryBoxBerryWithPrefix;
+        }elseif ($deliveryname == 'russianpost'){
+            return;
+        }elseif ($deliveryname == 'pecom'){
+            $table = $this->tableCacheCarryPecomWithPrefix;
+        }else{
+            return false;
+        }
+
+        $sql = "Select * FROM {$table} WHERE `city_name` = '{$city}'";
+        $res = Db::getInstance()->getRow($sql);
+        if ($res) {
+            return true;
+        }else{
+            return false;
+        }
+    }
+
     public static function getSettingsArray($getvalue){
         return [
             //CPU
@@ -1286,7 +1399,7 @@ class AxiomusPost extends ObjectModel {
             //Piter
             'use_ptr_axiomus'              => Configuration::get('RS_AXIOMUS_PTR_USE_AXIOMUS'),
             'use_ptr_strizh'               => Configuration::get('RS_AXIOMUS_PTR_USE_STRIZH'),
-            'use_ptr_pecom'                => Configuration::get('RS_AXIOMUS_PTR_USE_pecom'),
+            'use_ptr_pecom'                => Configuration::get('RS_AXIOMUS_PTR_USE_PECOM'),
             'use_ptr_axiomus_carry'        => Configuration::get('RS_AXIOMUS_PTR_USE_AXIOMUS_CARRY'),
             'use_ptr_dpd_carry'            => Configuration::get('RS_AXIOMUS_PTR_USE_DPD_CARRY'),
             'use_ptr_boxberry_carry'       => Configuration::get('RS_AXIOMUS_PTR_USE_BOXBERRY_CARRY'),
@@ -1299,9 +1412,9 @@ class AxiomusPost extends ObjectModel {
             'use_region_russianpost_carry'    => Configuration::get('RS_AXIOMUS_REGION_USE_RUSSIANPOST_CARRY'),
             'use_region_pecom_carry'          => Configuration::get('RS_AXIOMUS_REGION_USE_PECOM_CARRY'),
             //Settings
-            'axiomus_token'                => Configuration::get('RS_AXIOMUS_TOKEN'),
-            'axiomus_cache_hourlife'       => Configuration::get('RS_AXIOMUS_CACHE_HOURLIFE'),
-
+            'axiomus_ukey'                => Configuration::get('RS_AXIOMUS_UKEY'),
+            'axiomus_uid'       => Configuration::get('RS_AXIOMUS_UID'),
+            'axiomus_url'       => Configuration::get('RS_AXIOMUS_URL'),
             //Settings-pecom
             'pecom_sender' => [
                 'pecom_sender_city'                     => ($getvalue)?Configuration::get('RS_PECOM_SENDER_CITY'):'RS_PECOM_SENDER_CITY',
@@ -1352,6 +1465,12 @@ class AxiomusPost extends ObjectModel {
                 'pecom_api'                      => ($getvalue)?Configuration::get('RS_PECOM_API'):'RS_PECOM_API',
             ],
 
+            'mscw_carry_axiomus' => [
+                'daycount'                              => ($getvalue)?Configuration::get('RS_AXIOMUS_MSCW_DAYCOUNT'):'RS_AXIOMUS_MSCW_DAYCOUNT', //ToDo в данный момент не используется в isSubmit
+            ],
+            'ptr_carry_axiomus' => [
+                'daycount'                              => ($getvalue)?Configuration::get('RS_AXIOMUS_MSCW_DAYCOUNT'):'RS_AXIOMUS_MSCW_DAYCOUNT', //ToDo в данный момент не используется в isSubmit
+            ],
             //Moscow
             'mscw_axiomus_manual'          => Configuration::get('RS_AXIOMUS_MSCW_AXIOMUS_MANUAL'),
             'mscw_axiomus_increment'       => Configuration::get('RS_AXIOMUS_MSCW_AXIOMUS_INCREMENT'),

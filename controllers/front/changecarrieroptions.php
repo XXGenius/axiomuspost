@@ -20,6 +20,7 @@ class axiomuspostcarrierChangeCarrierOptionsModuleFrontController extends Module
         $this->context->controller->addJqueryUI('ui.datepicker');
         $this->_path = _PS_ROOT_DIR_.$this->module->getPathUri();
         $this->context->controller->addJS($this->_path.'/views/js/jquery.timepicker.min.js');
+        $this->context->controller->addJS($this->_path.'/views/js/jquery.timepicker.min.js');
         $this->context->controller->addCSS($this->_path.'/views/css/jquery.timepicker.css', 'all');
 
         $this->display_column_left = false;
@@ -78,7 +79,7 @@ class axiomuspostcarrierChangeCarrierOptionsModuleFrontController extends Module
             'this_path_ssl' => Tools::getShopDomainSsl(true, true).__PS_BASE_URI__.'modules/'.$this->module->name.'/'
         ));
 
-        $this->setTemplate('mypage.tpl'); //ToDo добавить вывод мест carry
+        $this->setTemplate('delivery-page.tpl'); //ToDo добавить вывод мест carry
     }
 
     public function postProcess()

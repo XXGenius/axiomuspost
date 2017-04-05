@@ -19,6 +19,7 @@ public static $usernamePecom = '';
 public static $apikeyPecom = '';
 
 public $delivery_date;
+public $b_date, $e_date;
 public $weight;
 
 public $volume; //Объем
@@ -95,7 +96,7 @@ public $pecomDeliveryNeededAddressComment;
         $this->moduleOrders = $res;
 
         $this->delivery_date = new DateTime($this->moduleOrders['date']);
-        $this->okey = $this->moduleOrders['okay'];
+        $this->okey = $this->moduleOrders['okey'];
 
         $res = $AxiomusPost->getTimeTypeById($this->moduleOrders['timetype']);
         if (!$res){
@@ -174,6 +175,10 @@ public $pecomDeliveryNeededAddressComment;
                 'date' => Configuration::get('RS_PECOM_SENDER_DATE')
             ]
         ];
+
+        self::$ukeyAxiomus = Configuration::get('RS_AXIOMUS_UKEY');
+        self::$uidAxiomus = Configuration::get('RS_AXIOMUS_UID');
+        self::$urlAxiomus = Configuration::get('RS_AXIOMUS_URL');
 
         self::$usernamePecom = Configuration::get('RS_PECOM_NICKNAME');
         self::$apikeyPecom = Configuration::get('RS_PECOM_API');
@@ -265,6 +270,277 @@ public $pecomDeliveryNeededAddressComment;
 
     }
 
+    public function sendToAxiomusCarry($params)
+    {
+        if(isset($params['axiomus_position_count'])){
+            $this->positionsCount = (int)$params['axiomus_position_count'];
+        }
+
+        if ($this->address->city == 'Москва'){
+            $city = 0;
+        }elseif($this->address->city == 'Санкт-Петербург'){
+            $city = 1;
+        }else{
+            return false;
+        }
+
+
+        if(isset($params['mscw-carry-axiomus-daycount'])){
+            $b_date = new DateTime();
+            $e_date = new DateTime();
+            $e_date->modify('+'.$params['mscw-carry-axiomus-daycount'].' day');
+            $this->b_date = $b_date;
+            $this->e_date = $e_date;
+        }
+
+        $incl_deliv_sum = AxiomusPost::getCarryPriceByName($this->address->city, 'axiomus');
+        $AxiomusPost = new AxiomusPost();
+
+
+
+        $xml_single_order = new SimpleXMLElement('<singleorder/>');
+        $xml_single_order->addChild('mode', 'new_carry');
+        $xml_auth = $xml_single_order->addChild('auth');
+        $xml_auth->addAttribute('ukey', self::$ukeyAxiomus);
+        $xml_order = $xml_single_order->addChild('order');
+        $xml_order->addAttribute('inner_id', "Самовывоз #" . $this->order->id);
+        $xml_order->addAttribute('name',  $this->customer_fullName); //ToDo добавить отчество?
+
+        $xml_order->addAttribute('b_date', $this->b_date->format('Y-m-d'));
+        $xml_order->addAttribute('e_date', $this->e_date->format('Y-m-d'));
+
+        $xml_order->addAttribute('office', $this->moduleOrders['carry_code']);
+
+        $xml_order->addAttribute('incl_deliv_sum', $incl_deliv_sum); //ToDo тут цена берется из админки
+        $xml_order->addAttribute('places', $this->positionsCount);
+
+
+        $xml_order->addChild('contacts', ($this->address->phone_mobile == '') ? $this->address->phone : $this->address->phone_mobile);
+//            $xml_order->addChild('sms', 'тел. ');
+//            $xml_order->addChild('sms_sender', 'тел. ');
+//            $xml_order->addChild('description', $additionalInfo);
+        $xml_services = $xml_order->addChild('services');
+        $xml_services->addAttribute('cash', 'no');
+        $xml_services->addAttribute('cheque', 'no'); //ToDo переработать
+        $xml_services->addAttribute('selsize', 'no');
+        $xml_items = $xml_order->addChild('items');
+
+        $sum = $this->order->total_shipping;
+        $totalQuantity = 0;
+        $names = 0;
+
+        foreach ($this->products as $product) {
+            $xml_item = $xml_items->addChild('item');
+            $xml_item->addAttribute('name', $product['name']);
+            $xml_item->addAttribute('weight', $product['weight']);
+            $xml_item->addAttribute('quantity', $product['quantity']);
+            $xml_item->addAttribute('price', $product['total']); //ToDo или total_wt?
+            $totalQuantity += $product['quantity'];
+        }
+
+        $checksum = md5(self::$uidAxiomus."u". count($this->products) . $totalQuantity );
+        $xml_auth->addAttribute('checksum', $checksum);
+
+        $ch = curl_init();
+
+        curl_setopt($ch, CURLOPT_URL, self::$urlAxiomus); // set url to post to
+        curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1); // return into a variable
+        curl_setopt($ch, CURLOPT_POST, 1); // set POST method
+        curl_setopt($ch, CURLOPT_POSTFIELDS, "data=" . urlencode($xml_single_order->asXML())); // add POST fields
+        $result_xml = curl_exec($ch);
+
+
+        $result = simplexml_load_string($result_xml);
+
+        if ($result) {
+            $status_code = $result->status['code'];
+
+            if ($status_code == 0) {
+                $authId = (string)$result->auth[0];
+                $oid = (int)$result->auth['objectid']; //id заявки в системе axiomus
+                return ['oid' => $oid, 'okey' => $authId];
+            } elseif ($status_code == 4) { //После 22:00 часов не допускается заявка на выбранный день
+                $this->errors[11] = (string)$result->status;
+                return false;
+            } else {
+                $this->errors[10] = 'Ответ от Axiomus пришел без номера заявки'; //Добавить код ошибки и описание из ответа
+                return false;
+            }
+        }else{
+            $this->errors[100] = 'Ответ от Axiomus не пришел';
+            return false;
+        }
+    }
+
+
+    public function sendToDpdCarry($params)
+    {
+
+        $incl_deliv_sum = AxiomusPost::getCarryPriceByName($this->address->city, 'dpd');
+
+        $this->b_date = new DateTime();
+        $this->b_date->modify('+1 day');
+
+        $xml_single_order = new SimpleXMLElement('<singleorder/>');
+        $xml_single_order->addChild('mode', 'new_dpd');
+        $xml_auth = $xml_single_order->addChild('auth');
+        $xml_auth->addAttribute('ukey', self::$ukeyAxiomus);
+        $xml_order = $xml_single_order->addChild('order');
+        $xml_order->addAttribute('inner_id', "Самовывоз #" . $this->order->id);
+        $xml_order->addAttribute('name',  $this->customer_fullName); //ToDo добавить отчество?
+
+        $xml_order->addAttribute('b_date', $this->b_date->format('Y-m-d'));
+
+        $xml_services = $xml_order->addChild('address');
+        $xml_services->addAttribute('index', '123123');
+        $xml_services->addAttribute('region', $this->address->city);
+        $xml_services->addAttribute('area', $this->address->city);
+        $xml_services->addAttribute('street','carry, not street');
+        $xml_services->addAttribute('house', 'carry, not house');
+
+        $xml_order->addAttribute('carrymode', $this->moduleOrders['carry_code']);
+
+        $xml_order->addAttribute('incl_deliv_sum', $incl_deliv_sum); //ToDo тут цена берется из админки
+//        $xml_order->addAttribute('places', $this->positionsCount);
+
+
+        $xml_order->addChild('contacts', ($this->address->phone_mobile == '') ? $this->address->phone : $this->address->phone_mobile);
+//            $xml_order->addChild('sms', 'тел. ');
+//            $xml_order->addChild('sms_sender', 'тел. ');
+//            $xml_order->addChild('description', $additionalInfo);
+        $xml_services = $xml_order->addChild('services');
+        $xml_services->addAttribute('valuation', 'no');
+//        $xml_services->addAttribute('fragile', 'no'); //ToDo переработать
+//        $xml_services->addAttribute('cod', 'no');
+//        $xml_services->addAttribute('big', 'no');
+//        $xml_services->addAttribute('waiting', 'no');
+        $xml_items = $xml_order->addChild('items');
+
+        $sum = $this->order->total_shipping;
+        $totalQuantity = 0;
+        $names = 0;
+
+        foreach ($this->products as $product) {
+            $xml_item = $xml_items->addChild('item');
+            $xml_item->addAttribute('name', $product['name']);
+            $xml_item->addAttribute('weight', $product['weight']);
+            $xml_item->addAttribute('quantity', $product['quantity']);
+            $xml_item->addAttribute('price', $product['total']); //ToDo или total_wt?
+            $totalQuantity += $product['quantity'];
+        }
+
+        $checksum = md5(self::$uidAxiomus."u". count($this->products) . $totalQuantity );
+        $xml_auth->addAttribute('checksum', $checksum);
+
+        $ch = curl_init();
+
+        curl_setopt($ch, CURLOPT_URL, self::$urlAxiomus); // set url to post to
+        curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1); // return into a variable
+        curl_setopt($ch, CURLOPT_POST, 1); // set POST method
+        curl_setopt($ch, CURLOPT_POSTFIELDS, "data=" . urlencode($xml_single_order->asXML())); // add POST fields
+        $result_xml = curl_exec($ch);
+
+
+        $result = simplexml_load_string($result_xml);
+
+        if ($result) {
+            $status_code = $result->status['code'];
+
+            if ($status_code == 0) {
+                $authId = (string)$result->auth[0];
+                $oid = (int)$result->auth['objectid']; //id заявки в системе axiomus
+                return ['oid' => $oid, 'okey' => $authId];
+            } elseif ($status_code == 4) { //После 22:00 часов не допускается заявка на выбранный день
+                $this->errors[11] = (string)$result->status;
+                return false;
+            } else {
+                $this->errors[10] = 'Ответ от Axiomus пришел без номера заявки'; //Добавить код ошибки и описание из ответа
+                return false;
+            }
+        }else{
+            $this->errors[100] = 'Ответ от Axiomus не пришел';
+            return false;
+        }
+    }
+
+    public function sendToBoxBerryCarry($params)
+    {
+
+        $incl_deliv_sum = AxiomusPost::getCarryPriceByName($this->address->city, 'boxberry');
+
+        $this->delivery_date = new DateTime();
+        $this->delivery_date->modify('+1 day');
+
+        $xml_single_order = new SimpleXMLElement('<singleorder/>');
+        $xml_single_order->addChild('mode', 'new_boxberry_pickup');
+        $xml_auth = $xml_single_order->addChild('auth');
+        $xml_auth->addAttribute('ukey', self::$ukeyAxiomus);
+        $xml_order = $xml_single_order->addChild('order');
+        $xml_order->addAttribute('inner_id', "Самовывоз #" . $this->order->id);
+        $xml_order->addAttribute('name',  $this->customer_fullName); //ToDo добавить отчество?
+
+        $xml_order->addAttribute('d_date', $this->delivery_date->format('Y-m-d'));
+
+        $xml_services = $xml_order->addChild('address');
+        $xml_services->addAttribute('office_code', $this->moduleOrders['carry_code']);
+
+        $xml_order->addAttribute('incl_deliv_sum', $incl_deliv_sum); //ToDo тут цена берется из админки
+
+        $xml_order->addChild('contacts', ($this->address->phone_mobile == '') ? $this->address->phone : $this->address->phone_mobile);
+        $xml_services = $xml_order->addChild('services');
+
+//        $xml_services->addAttribute('cod', 'no');
+//        $xml_services->addAttribute('checkup', 'no');
+
+        $xml_items = $xml_order->addChild('items');
+
+        $sum = $this->order->total_shipping;
+        $totalQuantity = 0;
+        $names = 0;
+
+        foreach ($this->products as $product) {
+            $xml_item = $xml_items->addChild('item');
+            $xml_item->addAttribute('name', $product['name']);
+            $xml_item->addAttribute('weight', $product['weight']);
+            $xml_item->addAttribute('quantity', $product['quantity']);
+            $xml_item->addAttribute('price', $product['total']); //ToDo или total_wt?
+            $totalQuantity += $product['quantity'];
+        }
+
+        $checksum = md5(self::$uidAxiomus."u". count($this->products) . $totalQuantity );
+        $xml_auth->addAttribute('checksum', $checksum);
+
+        $ch = curl_init();
+
+        curl_setopt($ch, CURLOPT_URL, self::$urlAxiomus); // set url to post to
+        curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1); // return into a variable
+        curl_setopt($ch, CURLOPT_POST, 1); // set POST method
+        curl_setopt($ch, CURLOPT_POSTFIELDS, "data=" . urlencode($xml_single_order->asXML())); // add POST fields
+        $result_xml = curl_exec($ch);
+
+
+        $result = simplexml_load_string($result_xml);
+
+        if ($result) {
+            $status_code = $result->status['code'];
+
+            if ($status_code == 0) {
+                $authId = (string)$result->auth[0];
+                $oid = (int)$result->auth['objectid']; //id заявки в системе axiomus
+                return ['oid' => $oid, 'okey' => $authId];
+            } elseif ($status_code == 4) { //После 22:00 часов не допускается заявка на выбранный день
+                $this->errors[11] = (string)$result->status;
+                return false;
+            } else {
+                $this->errors[10] = 'Ответ от Axiomus пришел без номера заявки'; //Добавить код ошибки и описание из ответа
+                return false;
+            }
+        }else{
+            $this->errors[100] = 'Ответ от Axiomus не пришел';
+            return false;
+        }
+    }
+
     public function deleteToAxiomus()
     {
 
@@ -280,7 +556,7 @@ public $pecomDeliveryNeededAddressComment;
 
         $ch = curl_init();
 
-        curl_setopt($ch, CURLOPT_URL, $this->urlAxiomus); // set url to post to
+        curl_setopt($ch, CURLOPT_URL, self::$urlAxiomus); // set url to post to
         curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1); // return into a variable
         curl_setopt($ch, CURLOPT_POST, 1); // set POST method
         curl_setopt($ch, CURLOPT_POSTFIELDS, "data=" . urlencode($xml_single_order->asXML())); // add POST fields
@@ -336,8 +612,8 @@ public $pecomDeliveryNeededAddressComment;
 
     public function sendToPecom($params){
 
-        if(isset($params['pecom_position_count'])){
-            $this->positionsCount = (int)$params['pecom_position_count'];
+        if(isset($params['position_count'])){
+            $this->positionsCount = (int)$params['position_count'];
             $this->volume = $this->positionsCount*$this->volumeOne;
         }
 
@@ -415,7 +691,10 @@ public $pecomDeliveryNeededAddressComment;
                 'isCityDeliveryNeededAddress' => $this->pecomDeliveryNeededAddress,
                 'isCityDeliveryNeededAddressComment' => $this->pecomDeliveryNeededAddressComment,
                 'identityCard' => [
-                    'type' => 10
+                    'type' => 10,
+                    'series' => 5675,
+                    'number' => 345345,
+                    'date' => '1985-01-01'
                 ]
                 //ToDo в Api больше полей
             ),
@@ -444,10 +723,10 @@ public $pecomDeliveryNeededAddressComment;
 
         if ( ! isset($result->error)) {
             $oid = (int)$result->documentId;
-            $okay = $result->cargos[0]->cargoCode;
+            $okey = $result->cargos[0]->cargoCode;
 
             $sdk->close();
-            return ['oid' => $oid, 'okay' => $okay];
+            return ['oid' => $oid, 'okey' => $okey];
         }else{
             $errorText =  'Ошибка ответа ПЭК. '.$result->error->title.'. ';
             foreach ($result->error->fields as $fields){
@@ -465,7 +744,7 @@ public $pecomDeliveryNeededAddressComment;
         // Вызов метода
 
         $request = [
-            $this->moduleOrders['okay']
+            $this->moduleOrders['okey']
         ];
 
         $result = $sdk->call('requests', 'requestcancellation', $request);
