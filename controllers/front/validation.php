@@ -14,6 +14,13 @@ class axiomuspostcarrierValidationModuleFrontController extends ModuleFrontContr
 
     public function postProcess(){
         if(Tools::isSubmit('processCarrier')){
+
+            $delivery_date = new DateTime($_POST['delivery-date']);
+            $date_now = new DateTime();
+            if ($delivery_date<$date_now){
+                Tools::redirect("index.php?controller=order&step=2");
+            }
+
             $cart = $this->context->cart;
             $customer = new Customer($cart->id_customer);
 

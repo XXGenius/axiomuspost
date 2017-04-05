@@ -20,7 +20,7 @@ class axiomuspostcarrierGetCarryModuleFrontController extends ModuleFrontControl
         if(isset($_POST['carry'])) {
             if (isset($_POST['city'])) {
                 $AxiomusPost = new AxiomusPost();
-                $AddressesArray = $AxiomusPost->getCarryAddressesArray($_POST['carry'], $_POST['city']);
+                $AddressesArray = $AxiomusPost->getCarryAddresses($_POST['carry'], $_POST['city'], null);
 
                 echo json_encode($AddressesArray);
                 exit;

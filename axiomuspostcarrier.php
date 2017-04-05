@@ -18,15 +18,15 @@ class axiomuspostcarrier extends CarrierModule
     // Хоть и неочевидно, но здесь это должно быть. Кем-то присваивается.
     public $id_carrier;
     public $value_prefix = 'RS_AXIOMUS';
-    public $deliveryNames = ['undefined', 'axiomus', 'strizh', 'pek'];
-    public $carryNames = ['axiomus', 'dpd', 'boxberry', 'russianpost'];
+    public $deliveryNames = ['undefined', 'axiomus', 'strizh', 'pecom'];
+    public $carryNames = ['axiomus', 'dpd', 'boxberry', 'russianpost', 'pecom'];
     private $_postErrors = array();
 
     public function __construct()
     {
         $this->name = 'axiomuspostcarrier';
         $this->tab = 'shipping_logistics';
-        $this->version = '1.0.6';
+        $this->version = '1.1.0';
         $this->author = 'Robert Spectrum';
         $this->controllers = array('changecarrieroptions'); //ToDo зачем это и может добавить все контроллеры?
         $this->displayName = $this->l('Axiomus Post');
@@ -252,6 +252,7 @@ class axiomuspostcarrier extends CarrierModule
         $this->AxiomusPost->refreshCarryAddressCacheAxiomus();
         $this->AxiomusPost->refreshCarryAddressCacheDPD();
         $this->AxiomusPost->refreshCarryAddressCacheBoxBerry();
+        $this->AxiomusPost->refreshCarryAddressCachePecom();
 
         $this->_createMenuTab();
 
@@ -746,29 +747,29 @@ class axiomuspostcarrier extends CarrierModule
         }
         Configuration::updateValue('RS_AXIOMUS_CONFIG_TAB_ID', $tab->id);
 
-        // Здесь мы создаем пункт вехнего подменю.
-        $idTab = Tab::getIdFromClassName('AdminAxiomusOrder');
-        if (!$idTab) {
-            $tab = new Tab();
-            $tab->class_name = 'AdminAxiomusOrder';
-            $tab->module = 'axiomuspostcarrier';
-            $tab->id_parent = Tab::getIdFromClassName('AdminParentOrders');
-
-            $languages = Language::getLanguages(false);
-            foreach ($languages as $lang) {
-                $tab->name[$lang['id_lang']] = 'Axiomus';
-            }
-
-            $res = $tab->save();
-            // Если что-то пошло не так, удалим перевозчика и закруглимся
-            if (!$res) {
-                $this->_uninstallAllCarrier();
-                return false;
-            }
-        } else {
-            $tab = new Tab($idTab);
-        }
-        Configuration::updateValue('RS_AXIOMUS_ORDER_TAB_ID', $tab->id);
+//        // Здесь мы создаем пункт вехнего подменю.
+//        $idTab = Tab::getIdFromClassName('AdminAxiomusOrder');
+//        if (!$idTab) {
+//            $tab = new Tab();
+//            $tab->class_name = 'AdminAxiomusOrder';
+//            $tab->module = 'axiomuspostcarrier';
+//            $tab->id_parent = Tab::getIdFromClassName('AdminParentOrders');
+//
+//            $languages = Language::getLanguages(false);
+//            foreach ($languages as $lang) {
+//                $tab->name[$lang['id_lang']] = 'Axiomus';
+//            }
+//
+//            $res = $tab->save();
+//            // Если что-то пошло не так, удалим перевозчика и закруглимся
+//            if (!$res) {
+//                $this->_uninstallAllCarrier();
+//                return false;
+//            }
+//        } else {
+//            $tab = new Tab($idTab);
+//        }
+//        Configuration::updateValue('RS_AXIOMUS_ORDER_TAB_ID', $tab->id);
 
         return true;
     }
@@ -782,44 +783,120 @@ class axiomuspostcarrier extends CarrierModule
 
         Configuration::updateValue('RS_AXIOMUS_MSCW_USE_AXIOMUS', 1);
         Configuration::updateValue('RS_AXIOMUS_MSCW_USE_STRIZH', 1);
-        Configuration::updateValue('RS_AXIOMUS_MSCW_USE_PEK', 1);
+        Configuration::updateValue('RS_AXIOMUS_MSCW_USE_PECOM', 0);
         Configuration::updateValue('RS_AXIOMUS_MSCW_USE_AXIOMUS_CARRY', 1);
         Configuration::updateValue('RS_AXIOMUS_MSCW_USE_DPD_CARRY', 1);
         Configuration::updateValue('RS_AXIOMUS_MSCW_USE_BOXBERRY_CARRY', 1);
-        Configuration::updateValue('RS_AXIOMUS_MSCW_USE_RUSSIANPOST_CARRY', 1);
+        Configuration::updateValue('RS_AXIOMUS_MSCW_USE_RUSSIANPOST_CARRY', 0);
+        Configuration::updateValue('RS_AXIOMUS_MSCW_USE_PECOM_CARRY', 1);
             //Piter
         Configuration::updateValue('RS_AXIOMUS_PTR_USE_AXIOMUS', 1);
         Configuration::updateValue('RS_AXIOMUS_PTR_USE_STRIZH', 1);
-        Configuration::updateValue('RS_AXIOMUS_PTR_USE_PEK', 1);
+        Configuration::updateValue('RS_AXIOMUS_PTR_USE_PECOM', 1);
         Configuration::updateValue('RS_AXIOMUS_PTR_USE_AXIOMUS_CARRY', 1);
         Configuration::updateValue('RS_AXIOMUS_PTR_USE_DPD_CARRY', 1);
         Configuration::updateValue('RS_AXIOMUS_PTR_USE_BOXBERRY_CARRY', 1);
         Configuration::updateValue('RS_AXIOMUS_PTR_USE_RUSSIANPOST_CARRY', 1);
+        Configuration::updateValue('RS_AXIOMUS_PTR_USE_PECOM_CARRY', 1);
             //region
         Configuration::updateValue('RS_AXIOMUS_REGION_USE_AXIOMUS_CARRY', 1);
         Configuration::updateValue('RS_AXIOMUS_REGION_USE_DPD_CARRY', 1);
         Configuration::updateValue('RS_AXIOMUS_REGION_USE_BOXBERRY_CARRY', 1);
-        Configuration::updateValue('RS_AXIOMUS_REGION_USE_RUSSIANPOST_CARRY', 1);
+        Configuration::updateValue('RS_AXIOMUS_REGION_USE_RUSSIANPOST_CARRY', 0);
+        Configuration::updateValue('RS_AXIOMUS_REGION_USE_PECOM_CARRY', 1);
             //Settings
-        Configuration::updateValue('RS_AXIOMUS_TOKEN', 1);
-        Configuration::updateValue('RS_AXIOMUS_CACHE_HOURLIFE', 1);
+        Configuration::updateValue('RS_AXIOMUS_UKEY', 'XXcd208495d565ef66e7dff9f98764XX');
+        Configuration::updateValue('RS_AXIOMUS_UID', 92);
+        Configuration::updateValue('RS_AXIOMUS_URL', "http://axiomus.ru/test/api_xml_test.php");
             //Moscow
         Configuration::updateValue('RS_AXIOMUS_MSCW_AXIOMUS_MANUAL', 1);
         Configuration::updateValue('RS_AXIOMUS_MSCW_AXIOMUS_INCREMENT', 0);
 
-        Configuration::updateValue('RS_AXIOMUS_TOKEN', '76793d5test0cf77');
-        Configuration::updateValue('RS_AXIOMUS_CACHE_HOURLIFE', 24);
 
-        Configuration::updateValue('RS_AXIOMUS_USE_AXIOMUS_DELIVERY', 1);
-        Configuration::updateValue('RS_AXIOMUS_USE_TOPDELIVERY_DELIVERY', null);
-        Configuration::updateValue('RS_AXIOMUS_USE_DPD_DELIVERY', null);
-        Configuration::updateValue('RS_AXIOMUS_USE_BOXBERRY_DELIVERY', null);
 
-        Configuration::updateValue('RS_AXIOMUS_USE_AXIOMUS_CARRY', null);
-        Configuration::updateValue('RS_AXIOMUS_USE_TOPDELIVERY_CARRY', null);
-        Configuration::updateValue('RS_AXIOMUS_USE_DPD_CARRY', null);
-        Configuration::updateValue('RS_AXIOMUS_USE_BOXBERRY_CARRY', null);
-        Configuration::updateValue('RS_AXIOMUS_USE_RUSSIANPOST_CARRY', null);
+        Configuration::updateValue('RS_PECOM_NICKNAME', 'zitttz'); //ToDo перед релизом убрать
+        Configuration::updateValue('RS_PECOM_API', '43406356D86720B3AA160DA8C299E2DA035079E0');
+
+        Configuration::updateValue('RS_PECOM_SENDER_CITY', 'Москва');
+        Configuration::updateValue('RS_PECOM_SENDER_TITLE', 'ИП Тестов Тест Тестович');
+        Configuration::updateValue('RS_PECOM_SENDER_PERSON', 'Тестов Тест Тестович');
+        Configuration::updateValue('RS_PECOM_SENDER_PHONE', '(495) 111-12-12');
+        Configuration::updateValue('RS_PECOM_SENDER_EMAIL', 'testov.test@gmail.com');
+        Configuration::updateValue('RS_PECOM_SENDER_ADDRESS_OFFICE', 'г. Москва, Волоколамское шоссе, д.41, корп. 1, стр. 2, офис 16');
+        Configuration::updateValue('RS_PECOM_SENDER_ADDRESS_OFFICE_COOMENT', '');
+        Configuration::updateValue('RS_PECOM_SENDER_ADDRESS_STOCK', 'г. Москва, Волоколамское шоссе, д.41, корп. 1, стр. 2, офис 16');
+        Configuration::updateValue('RS_PECOM_SENDER_ADDRESS_STOCK_COMMENT', '');
+        Configuration::updateValue('RS_PECOM_SENDER_WORK_TIME_FROM', '10:00');
+        Configuration::updateValue('RS_PECOM_SENDER_WORK_TIME_TO', '18:00');
+        Configuration::updateValue('RS_PECOM_SENDER_LUNCH_BREAK_FROM', '14:00');
+        Configuration::updateValue('RS_PECOM_SENDER_LUNCH_BREAK_TO', '15:00');
+        Configuration::updateValue('RS_PECOM_SENDER_IS_AUTH_NEEDED', TRUE);
+        Configuration::updateValue('RS_PECOM_SENDER_IDENTITY_TYPE', 10 );
+        Configuration::updateValue('RS_PECOM_SENDER_IDENTITY_SERIES', 1111);
+        Configuration::updateValue('RS_PECOM_SENDER_NUMBER', 123123);
+        Configuration::updateValue('RS_PECOM_SENDER_DATE', '10.10.07');
+        Configuration::updateValue('RS_PECOM_VOLUME_ONE', 0.016355);
+        Configuration::updateValue('RS_PECOM_IS_FLAGILE', true);
+        Configuration::updateValue('RS_PECOM_IS_GLASS', true);
+        Configuration::updateValue('RS_PECOM_IS_LIQUID', true);
+        Configuration::updateValue('RS_PECOM_IS_OTHERTYPE', false);
+        Configuration::updateValue('RS_PECOM_OTHERTYPE_DESCRIPTION', null);
+        Configuration::updateValue('RS_PECOM_IS_OPENCAR', false);
+        Configuration::updateValue('RS_PECOM_IS_SIDELOAD', false);
+        Configuration::updateValue('RS_PECOM_IS_SPECIAL_EQ', false);
+        Configuration::updateValue('RS_PECOM_IS_DAYBYDAY', false);
+        Configuration::updateValue('RS_PECOM_REGISTER_TYPE', 1);
+        Configuration::updateValue('RS_PECOM_RESPONSIBLE', 'Тестов Тест Тестович , ИП Тестов Тест Тестович, Директор');
+        Configuration::updateValue('RS_PECOM_IS_HP', true);
+        Configuration::updateValue('RS_PECOM_HP_POSITION_COUNT', 1);
+        Configuration::updateValue('RS_PECOM_IS_INSURANCE', false);
+        Configuration::updateValue('RS_PECOM_IS_INSURANCE_PRICE', 0);
+        Configuration::updateValue('RS_PECOM_IS_SEALING', false);
+        Configuration::updateValue('RS_PECOM_SEALING_POSITION_COUNT', null);
+        Configuration::updateValue('RS_PECOM_IS_STRAPPING', false);
+        Configuration::updateValue('RS_PECOM_IS_DOCUMENTS_RETURN', false);
+        Configuration::updateValue('RS_PECOM_IS_LOADING', true);
+/*
+        Configuration::updateValue('RS_PECOM_SENDER_CITY', 'Москва');
+        Configuration::updateValue('RS_PECOM_SENDER_TITLE', 'ИП Павлов Леонид Сергеевич');
+        Configuration::updateValue('RS_PECOM_SENDER_PERSON', 'Павлов Леонид Сергеевич');
+        Configuration::updateValue('RS_PECOM_SENDER_PHONE', '(495) 212-17-30');
+        Configuration::updateValue('RS_PECOM_SENDER_EMAIL', 'leonid.s.pavlov@gmail.com');
+        Configuration::updateValue('RS_PECOM_SENDER_ADDRESS_OFFICE', 'г. Москва, Волоколамское шоссе, д.89, корп. 1, стр. 2, офис 116');
+        Configuration::updateValue('RS_PECOM_SENDER_ADDRESS_OFFICE_COOMENT', '');
+        Configuration::updateValue('RS_PECOM_SENDER_ADDRESS_STOCK', 'г. Москва, Волоколамское шоссе, д.89, корп. 1, стр. 2, офис 116');
+        Configuration::updateValue('RS_PECOM_SENDER_ADDRESS_STOCK_COMMENT', '');
+        Configuration::updateValue('RS_PECOM_SENDER_WORK_TIME_FROM', '10:00');
+        Configuration::updateValue('RS_PECOM_SENDER_WORK_TIME_TO', '18:00');
+        Configuration::updateValue('RS_PECOM_SENDER_LUNCH_BREAK_FROM', '14:00');
+        Configuration::updateValue('RS_PECOM_SENDER_LUNCH_BREAK_TO', '15:00');
+        Configuration::updateValue('RS_PECOM_SENDER_IS_AUTH_NEEDED', TRUE);
+        Configuration::updateValue('RS_PECOM_SENDER_IDENTITY_TYPE', 10 );
+        Configuration::updateValue('RS_PECOM_SENDER_IDENTITY_SERIES', 1111);
+        Configuration::updateValue('RS_PECOM_SENDER_NUMBER', 123123);
+        Configuration::updateValue('RS_PECOM_SENDER_DATE', '10.10.07');
+        Configuration::updateValue('RS_PECOM_VOLUME_ONE', 0.016355);
+        Configuration::updateValue('RS_PECOM_IS_FLAGILE', true);
+        Configuration::updateValue('RS_PECOM_IS_GLASS', true);
+        Configuration::updateValue('RS_PECOM_IS_LIQUID', true);
+        Configuration::updateValue('RS_PECOM_IS_OTHERTYPE', false);
+        Configuration::updateValue('RS_PECOM_OTHERTYPE_DESCRIPTION', null);
+        Configuration::updateValue('RS_PECOM_IS_OPENCAR', false);
+        Configuration::updateValue('RS_PECOM_IS_SIDELOAD', false);
+        Configuration::updateValue('RS_PECOM_IS_SPECIAL_EQ', false);
+        Configuration::updateValue('RS_PECOM_IS_DAYBYDAY', false);
+        Configuration::updateValue('RS_PECOM_REGISTER_TYPE', 1);
+        Configuration::updateValue('RS_PECOM_RESPONSIBLE', 'Павлов Леонид Сергеевич , ИП Павлов Леонид Сергеевич, Директор');
+        Configuration::updateValue('RS_PECOM_IS_HP', true);
+        Configuration::updateValue('RS_PECOM_HP_POSITION_COUNT', 1);
+        Configuration::updateValue('RS_PECOM_IS_INSURANCE', false);
+        Configuration::updateValue('RS_PECOM_IS_INSURANCE_PRICE', 0);
+        Configuration::updateValue('RS_PECOM_IS_SEALING', false);
+        Configuration::updateValue('RS_PECOM_SEALING_POSITION_COUNT', null);
+        Configuration::updateValue('RS_PECOM_IS_STRAPPING', false);
+        Configuration::updateValue('RS_PECOM_IS_DOCUMENTS_RETURN', false);
+        Configuration::updateValue('RS_PECOM_IS_LOADING', true);*/
+
     }
 
     public function uninstall()
@@ -1037,8 +1114,9 @@ class axiomuspostcarrier extends CarrierModule
         Configuration::updateValue('RS_AXIOMUS_POST_TAB_ID', null);
         Configuration::updateValue('RS_AXIOMUS_POST_CARRIER_ID', null);
 
-        Configuration::updateValue('RS_AXIOMUS_TOKEN', null);
-        Configuration::updateValue('RS_AXIOMUS_CACHE_HOURLIFE', null);
+        Configuration::updateValue('RS_AXIOMUS_UKEY', null);
+        Configuration::updateValue('RS_AXIOMUS_UID', null);
+        Configuration::updateValue('RS_AXIOMUS_URL', null);
 
         Configuration::updateValue('RS_AXIOMUS_USE_AXIOMUS_DELIVERY', null);
         Configuration::updateValue('RS_AXIOMUS_USE_TOPDELIVERY_DELIVERY', null);
@@ -1054,16 +1132,77 @@ class axiomuspostcarrier extends CarrierModule
     }
 
     public function hookDisplayAdminOrderTabShip($params = null){
-        return $this->display('axiomuspostcarrier', 'views/templates/admin/tabship.tpl');
+        return $this->display('axiomuspostcarrier', 'views/templates/admin/orders/tab-ship.tpl');
     }
 
     public function hookDisplayAdminOrderContentShip($params = null){
+
+        $order_axiomus = $this->AxiomusPost->getOrderByIdCart($this->context->cart->id);
+        if ($order_axiomus['carry']){
+            $order_axiomus['type'] = 'Самовывоз';
+            $carry_row = $this->AxiomusPost->getCarryAddresses($this->context->cart->id_carrier, null, null, $order_axiomus['carry_code'])[0];
+            $this->context->smarty->assign('carry_row', $carry_row);
+
+            if($this->context->cart->id_carrier == (int)Configuration::get('RS_AXIOMUS_ID_AXIOMUS_CARRY')){
+                $this->context->smarty->assign('deliveries_used', [
+                    'axiomus' => 1,
+                    'dpd' => 0,
+                    'boxberry' => 0,
+                    'russianpost' => 0,
+                    'pecom' => 0
+                ]);
+                $this->context->smarty->assign('mscw_carry_axiomus_daycount', Configuration::get('RS_AXIOMUS_MSCW_DAYCOUNT'));
+
+            }elseif ($this->context->cart->id_carrier == (int)Configuration::get('RS_AXIOMUS_ID_DPD_CARRY')){
+                $this->context->smarty->assign('deliveries_used', [
+                    'axiomus' => 0,
+                    'dpd' => 1,
+                    'boxberry' => 0,
+                    'russianpost' => 0,
+                    'pecom' => 0
+                ]);
+            }elseif ($this->context->cart->id_carrier == (int)Configuration::get('RS_AXIOMUS_ID_BOXBERRY_CARRY')){
+                $this->context->smarty->assign('deliveries_used', [
+                    'axiomus' => 0,
+                    'dpd' => 0,
+                    'boxberry' => 1,
+                    'russianpost' => 0,
+                    'pecom' => 0
+                ]);
+            }elseif ($this->context->cart->id_carrier == (int)Configuration::get('RS_AXIOMUS_ID_RUSSIANPOST_CARRY')){
+                $this->context->smarty->assign('deliveries_used', [
+                    'axiomus' => 0,
+                    'dpd' => 0,
+                    'boxberry' => 0,
+                    'russianpost' => 1,
+                    'pecom' => 0
+                ]);
+            }elseif ($this->context->cart->id_carrier == (int)Configuration::get('RS_AXIOMUS_ID_PECOM_CARRY')){
+                $this->context->smarty->assign('deliveries_used', [
+                    'axiomus' => 0,
+                    'dpd' => 0,
+                    'boxberry' => 0,
+                    'russianpost' => 0,
+                    'pecom' => 1
+                ]);
+            }
+        }else{
+            $order_axiomus['type'] = 'Доставка';
+            $order_axiomus['kadname'] = $this->AxiomusPost->getKadTypeById((int)$order_axiomus['kadtype'])['name'];
+            $order_axiomus['timename'] = $this->AxiomusPost->getTimeTypeById((int)$order_axiomus['timetype'])['name'];
+            $this->context->smarty->assign('deliveries_used', [
+                'axiomus' => Configuration::get('RS_AXIOMUS_MSCW_USE_AXIOMUS'),
+                'strizh'  => Configuration::get('RS_AXIOMUS_MSCW_USE_STRIZH'),
+                'pecom'   => Configuration::get('RS_AXIOMUS_MSCW_USE_PECOM')
+            ]);
+        }
+
         if(!empty($params['order']->shipping_number)){
             $axiomusSucces = true;
             $axiomusSuccesCode = (int)$params['order']->shipping_number;
         }else{
             $axiomusSucces = false;
-            $axiomusSuccesCode = '';
+            $axiomusSuccesCode = 'Не получен';
         }
 
         $link = $this->context->link->getAdminLink('AdminAxiomusSend');
@@ -1071,6 +1210,12 @@ class axiomuspostcarrier extends CarrierModule
         $carrier = new Carrier($this->context->cart->id_carrier);
         $deliveryName = $carrier->name;
 
+
+        $this->context->smarty->assign('order_axiomus_data', $order_axiomus);
+
+
+
+        $this->context->smarty->assign($this->AxiomusPost::getSettingsArray(true)['pecom_default']);
         $this->context->smarty->assign('delivery_name', $deliveryName);
         $this->context->smarty->assign('axiomus_succes', $axiomusSucces);
         $this->context->smarty->assign('axiomus_succes_code', $axiomusSuccesCode);
@@ -1078,8 +1223,12 @@ class axiomuspostcarrier extends CarrierModule
         $this->context->smarty->assign('cart_id', $params['cart']->id);
         $this->context->smarty->assign('_axiomus_module_path', _PS_MODULE_DIR_.$this->name);
         $this->context->smarty->assign('_axiomus_sendto_link', $link);
-        return $this->display('axiomuspostcarrier', 'views/templates/admin/contentship.tpl');
 
+        if ($order_axiomus['carry']) {
+            return $this->display('axiomuspostcarrier', 'views/templates/admin/orders/tab-content-carry.tpl');
+        }else{
+            return $this->display('axiomuspostcarrier', 'views/templates/admin/orders/tab-content-delivery.tpl');
+        }
     }
 
     public function hookActionValidateOrder($params)

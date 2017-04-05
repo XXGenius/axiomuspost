@@ -21,7 +21,7 @@ function getAxiomusResponse($address, $x=0, $y=0, $z=0, $val=0, $weight=1)
     */
 
 // Шаг 1. Создаем объект для обработки данных
-    $axiomus = new AxiomusApi(Configuration::get("RS_AXIOMUS_TOKEN"));
+//    $axiomus = new AxiomusApi(Configuration::get("RS_AXIOMUS_TOKEN")); //ToDo а нужен ли нам этот класс, token отличается от ukey
 
     $result = array();
 // Шаг 2. Получаем данные о месте и координаты через Яндекс.Геокодер

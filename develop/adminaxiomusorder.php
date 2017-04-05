@@ -225,7 +225,7 @@ class AdminAxiomusOrderController extends ModuleAdminController
         if (isset($_GET['send_to_axiomus'])){
             //ToDo здесь отправка в axiomus, присвоение кода отслеживания и изменение статуса
             $sendNewAxiomus = new AxiomusXml();
-            $oid = $sendNewAxiomus->sendTo((int)$_GET['id_order']);
+            $oid = $sendNewAxiomus->sendToAxiomus((int)$_GET['id_order']);
 
 
             $order = new Order((int)$_GET['id_order']);
