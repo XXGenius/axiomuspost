@@ -37,7 +37,7 @@
 {if $nbProducts <= 0}
     <p class="warning">{l s='Your shopping cart is empty.' mod='axiomuspostcarrier'}</p>
 {else}
-    {if $city != 'Москва' && $city != 'Санкт-Петербург' && $AxiomusPost->getActiveCarry($city)|@count != 0}
+    {if $city == 'Москва' || $city == 'Санкт-Петербург' || $AxiomusPost->getActiveCarry($city)|@count != 0}
         <h4>{l s='Выберите спсоб доставки:' mod='axiomuspostcarrier'}</h4>
 
         <form action="{$link->getModuleLink('axiomuspostcarrier', 'validation', [], true)|escape:'html'}" method="post" class="form-inline">
@@ -139,7 +139,7 @@
 
             <p class="cart_navigation clearfix">
                 <input type="hidden" name="step" value="4" />
-                        <a href="{$link->getPageLink('order', true, NULL, "step=4{if $multi_shipping}&multi-shipping={$multi_shipping}{/if}")|escape:'html':'UTF-8'}" title="{l s='Previous' mod='axiomuspostcarrier'}" class="button-exclusive btn btn-default">
+                        <a href="{$link->getPageLink('order', true, NULL, "step=4")|escape:'html':'UTF-8'}" title="{l s='Previous' mod='axiomuspostcarrier'}" class="button-exclusive btn btn-default">
                             <i class="icon-chevron-left"></i>
                             {l s='Вернуться' mod='axiomuspostcarrier'}
                         </a>
@@ -185,6 +185,7 @@
     //            });
 
                 $('.delivery-type').change(function () {
+                    radioInputDelivery = $("input[name='delivery-type']");
                     if(radioInputDelivery.prop('checked')){
                         $('#rowDelivery').show();
                         $('#rowCarry').hide();

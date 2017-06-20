@@ -624,7 +624,8 @@ class AxiomusPost extends ObjectModel {
         }else {
             $weighttype = $this->getWeightTypeId($weight);
             //По весу
-            $sumWeight = $this->getWeightPrice($city, $carry, $weighttype);
+
+            $sumWeight = $this->getWeightPrice($city,$weighttype);
 
             //Надбавка
             $sumCondition = $this->getConditionPrice($city, $price, $kad, $time);
@@ -777,7 +778,7 @@ class AxiomusPost extends ObjectModel {
 
     public function getWeightPrice($city, $weighttype){
         $sql = "SELECT * FROM {$this->tableWeightPriceWithPrefix} WHERE ";
-        $sql .= "(`city` = '{$city}' AND `delivery` = 'axiomus'  AND `type` = {$weighttype})";
+        $sql .= "(`city` = '{$city}' AND `type` = {$weighttype})";
         $res = Db::getInstance()->getRow($sql);
         return $res['sum'];
     }

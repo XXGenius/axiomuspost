@@ -9,7 +9,7 @@ if (!defined('_PS_VERSION_'))
     exit;
 
 require_once(_PS_MODULE_DIR_ . 'axiomuspostcarrier/models/AxiomusPost.php');
-require_once(_PS_MODULE_DIR_ . 'axiomuspostcarrier/axiomusFunctions.php');
+require_once(_PS_MODULE_DIR_ . 'axiomuspostcarrier/develop/axiomusFunctions.php');
 
 class axiomuspostcarrier extends CarrierModule
 {
