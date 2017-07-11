@@ -283,7 +283,7 @@
 
                 function updatePrice(carry) {
 
-                    data = 'carry='+carry+'&city='+'{$city}&weight={$weight}&price={$productprice}';
+                    data = 'cart_id='{$cart_id}+'&carry='+carry+'&city='+'{$city}&weight={$weight}&price={$productprice}';
                     if (carry=='0'){
                         kadtype = $("#kad_type").val();
                         deliveryDate = $("#delivery_date").val();

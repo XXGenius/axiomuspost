@@ -21,9 +21,17 @@ class AxiomusPost extends ObjectModel {
     public $tableCacheCarryAxiomusWithPrefix;
     public $tableCacheCarryDPDWithPrefix;
     public $tableCacheCarryBoxBerryWithPrefix;
-
+    /**
+     * GENIUS EDIT
+     * @var
+     */
+    public $tableUpdatePecom = 'ps_axiomus_update_pecom';
     public static $tableCarryPriceWithPrefix;
     public $tableCacheCarryPecomWithPrefix;
+    /**
+     * @var
+     *
+     */
 
     protected $dbconn;
     public $priceTypes = [1, 2, 3, 4, 5, 6, 7];
@@ -310,6 +318,23 @@ class AxiomusPost extends ObjectModel {
             '`maxDimention` INT(11),' .
             '`work_schedule` VARCHAR(255),' .
 
+            'PRIMARY KEY (`id`)' .
+            ') DEFAULT CHARSET=utf8;';
+
+        if (!Db::getInstance()->execute($sql, false)) {
+            return false;
+        }
+
+        /**
+         * GENIUS EDIT
+         */
+        $sql = "CREATE TABLE IF NOT EXISTS `{$this->tableUpdatePecom}` (".
+            '`id` INT(11) NOT NULL AUTO_INCREMENT,' .
+            '`datetime` DATETIME DEFAULT NOW() ,' .
+            '`is_avia` BOOLEAN,' .  //тип перевозки
+            '`city` VARCHAR(30) NOT NULL,' . //город получатель
+            '`costTotal` INT(11) NOT NULL,' . //общая стоимость перевозки
+            '`receiverCityId` INT(11) NOT NULL,' . //код города получателя
             'PRIMARY KEY (`id`)' .
             ') DEFAULT CHARSET=utf8;';
 
@@ -605,6 +630,15 @@ class AxiomusPost extends ObjectModel {
             return false;
         }
 
+        /**
+         * GENIUS EDIT
+         */
+
+        $sql = "DROP TABLE IF EXISTS `".$this->tableUpdatePecom."`;";
+        if (!Db::getInstance()->execute($sql)) {
+            return false;
+        }
+
         return true;
     }
 
@@ -620,7 +654,7 @@ class AxiomusPost extends ObjectModel {
         //определение типа веса
         if ($carry){
             $delivery = $this->getActiveCarry($city)[$carrytype];
-            return self::getCarryPriceByName($city, $delivery);
+            return self::getCarryPriceByName($city,$delivery,$price);
         }else {
             $weighttype = $this->getWeightTypeId($weight);
             //По весу
@@ -1283,17 +1317,29 @@ class AxiomusPost extends ObjectModel {
 
     //carry
 
-    public static function getCarryPriceByName($city, $name){
+    public static function getCarryPriceByName($city,$name,$price){
         $tab = self::$tableCarryPriceWithPrefix;
-        if ($city != 'Москва' && $city != 'Санкт-Петербург'){
-            $city = 'регионы';
+        $cityForStaticPrice = $city;
+        if ($cityForStaticPrice!= 'Москва' && $cityForStaticPrice!= 'Санкт-Петербург'){
+           $cityForStaticPrice = 'Регионы';}
+        $row = Db::getInstance()->getRow("SELECT * FROM `{$tab}` WHERE `delivery` = '{$name}' AND `city` = '{$cityForStaticPrice}';");
+        $egg = Db::getInstance()->getRow("SELECT * FROM ps_axiomus_update_pecom WHERE `city` = '{$city}';");
+        if (!empty($row) && !empty($egg)) {
+            $Myrow = (int)$row ['sum'];
+            $Myegg = (int)$egg['costTotal'];
+            $sum = $Myrow + $Myegg;
+            return $sum ;
+        }else if(!empty($row)){
+
+            $egg = AxiomusXml::DeliveryGetPrice($city,$price);
+            $Myrow = (int)$row['sum'];
+            $Myegg = (int)$egg;
+            $sum = $Myegg + $Myrow;
+            return $sum;
+
+
         }
-        $row = Db::getInstance()->getRow("SELECT * FROM `{$tab}` WHERE `delivery` = '{$name}' AND `city` = '{$city}';");
-        if (!empty($row)) {
-            return (int)$row['sum'];
-        }else{
-            return false;
-        }
+
     }
 
     public function setCarryPrice($city, $name, $sum){
@@ -1478,5 +1524,7 @@ class AxiomusPost extends ObjectModel {
 //            'mscw_axiomus_weight'          => Configuration::getMultiple('RS_AXIOMUS_MSCW_AXIOMUS_PRICE'),
         ];
     }
+
+
 
 }

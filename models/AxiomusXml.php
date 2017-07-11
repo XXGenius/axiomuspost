@@ -796,6 +796,52 @@ public $pecomDeliveryNeededAddressComment;
             return $errorText;
         }
     }
+
+    public static function DeliveryGetPrice($city,$price){
+        // Создание экземпляра класса
+        $sdk = new PecomKabinet(self::$usernamePecom, self::$apikeyPecom);
+        // Вызов метода
+        $code = Db::getInstance()->getRow("SELECT `code` FROM ps_axiomus_cache_carry_pecom where `city_name` = '{$city}'");
+        $request = array(
+
+            'senderCityId' => 'fff5634a-7644-11e4-b896-00155d9b661b', //код города отправителя
+            'receiverCityId' => $code['code'], //код города получателя
+            'isInsurancePrice' => (float)$price,//оценочная стоимость , руб
+            'isPickUp' => false, //нужен забор
+            'isDelivery' => true,//нужна доставка
+            'cargos'=> array( // Данные о грузах [Array]
+             'length'=> 2.1, // Длина груза, м [Number]
+             'width'=> 2.1, // Ширина груза, м [Number]'height' => 2.3, // Высота груза, м [Number]
+              'volume' => 4.4, // Объем груза, м3 [Number'maxSize'=> 3.2, // Максимальный габарит, м [Number]
+               'isHP' =>false, // Жесткая упаковка [Boolean]
+               'sealingPositionsCount'=> 0, // Количество мест для пломбировки [Number]
+               'weight' =>10, // Вес, кг [Number]
+               'overSize' => false // Негабаритный груз [Boolean]
+        )
+
+                                            //ToDo в Api больше полей
+
+
+        );
+
+        $result = $sdk->call('calculator', 'calculateprice', $request);
+
+        if ( ! isset($result->error)) {
+            $oid = (int)$result->documentId;
+            $okey = $result->cargos[0]->cargoCode;
+
+            $sdk->close();
+            return ['oid' => $oid, 'okey' => $okey];
+        }else{
+            $errorText =  'Ошибка ответа ПЭК. '.$result->error->title.'. ';
+            foreach ($result->error->fields as $fields){
+                $errorText .= 'Ошибка в поле: '.$fields->Key.' . '.$fields->Value[0].'. ';
+            }
+
+            $sdk->close();
+            return false;
+        }
+    }
 }
 
 

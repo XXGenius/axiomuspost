@@ -73,7 +73,7 @@ class axiomuspostcarrierChangeCarrierOptionsModuleFrontController extends Module
 
             'nbProducts' => $cart->nbProducts(),
             'cust_currency' => $cart->id_currency,
-
+            'cart_id' => $cart->id,
             'this_path' => $this->module->getPathUri(),
             'this_path_bw' => $this->module->getPathUri(),
             'this_path_ssl' => Tools::getShopDomainSsl(true, true).__PS_BASE_URI__.'modules/'.$this->module->name.'/'
