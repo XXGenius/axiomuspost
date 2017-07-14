@@ -669,7 +669,7 @@ class AxiomusPost extends ObjectModel {
         return $res;
     }
 
-    public function getPrice($city, $carry, $weight, $price, $carrytype, $kad, $time,$cart_id){
+    public function getPrice($cart_id,$city, $carry, $weight, $price, $carrytype, $kad, $time){
 
         //определение типа веса
         if ($carry){

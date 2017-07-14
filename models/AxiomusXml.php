@@ -800,6 +800,7 @@ public $pecomDeliveryNeededAddressComment;
     public static function GetPricePecom($city,$price,$cart_id){
         // Создание экземпляра класса
         $sdk = new PecomKabinet(Configuration::get('RS_PECOM_NICKNAME'), Configuration::get('RS_PECOM_API'));
+        $cart = new Cart($cart_id);
         // Вызов метода
         $code = Db::getInstance()->getRow("SELECT `bitrixId` FROM ps_axiomus_city_pecom where `title` = '{$city}'");
         $cityData= array('title'=>$city);
