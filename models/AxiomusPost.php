@@ -25,6 +25,7 @@ class AxiomusPost extends ObjectModel {
      * GENIUS EDIT
      * @var
      */
+    public $tableCityPecom = 'ps_axiomus_city_pecom';
     public $tableUpdatePecom = 'ps_axiomus_update_pecom';
     public static $tableCarryPriceWithPrefix;
     public $tableCacheCarryPecomWithPrefix;
@@ -342,6 +343,20 @@ class AxiomusPost extends ObjectModel {
             return false;
         }
 
+        $sql = "CREATE TABLE IF NOT EXISTS `{$this->tableCityPecom}` (".
+            '`id` INT(11) NOT NULL AUTO_INCREMENT,' .
+            '`title` VARCHAR(30) NOT NULL,'.
+            '`bitrixId` VARCHAR(15) NOT NULL,'.
+            '`cityID` VARCHAR(50),'.
+            '`cityStatus` INT(11),'.
+            '`dvisions` VARCHAR(50),'.
+            'PRIMARY KEY (`id`)' .
+            ') DEFAULT CHARSET=utf8;';
+
+        if (!Db::getInstance()->execute($sql, false)) {
+            return false;
+        }
+
         return true;
     }
 
@@ -639,6 +654,11 @@ class AxiomusPost extends ObjectModel {
             return false;
         }
 
+        $sql = "DROP TABLE IF EXISTS `".$this->tableCityPecom."`;";
+        if (!Db::getInstance()->execute($sql)) {
+            return false;
+        }
+
         return true;
     }
 
@@ -649,12 +669,12 @@ class AxiomusPost extends ObjectModel {
         return $res;
     }
 
-    public function getPrice($city, $carry, $weight, $price, $carrytype, $kad, $time){
+    public function getPrice($city, $carry, $weight, $price, $carrytype, $kad, $time,$cart_id){
 
         //определение типа веса
         if ($carry){
             $delivery = $this->getActiveCarry($city)[$carrytype];
-            return self::getCarryPriceByName($city,$delivery,$price);
+            return self::getCarryPriceByName($city,$delivery,$price,$cart_id);
         }else {
             $weighttype = $this->getWeightTypeId($weight);
             //По весу
@@ -1228,8 +1248,9 @@ class AxiomusPost extends ObjectModel {
         $error = [];
         $results = AxiomusXml::getCarryAddressesPecom()->branches;
         if(!empty($results)){
-            $data = Db::getInstance()->execute("TRUNCATE TABLE `{$this->tableCacheCarryPecomWithPrefix}`");
-            if ($data) {
+            $resTruncute = Db::getInstance()->execute("TRUNCATE TABLE `{$this->tableCacheCarryPecomWithPrefix}`");
+            $resTruncute1 = Db::getInstance()->execute("TRUNCATE TABLE `{$this->tableCityPecom}`");
+            if ($resTruncute && $resTruncute1 ) {
                 foreach ($results as $key => $filial) { //ToDo тут все не верно
                     foreach ($filial->divisions as $keyDivision => $division) {
                         foreach ($division->warehouses as $keyWarehouse => $warehouse) {
@@ -1279,10 +1300,28 @@ class AxiomusPost extends ObjectModel {
                             }
                         }
                     }
-                }
+                    foreach ($filial->cities as $keyCity => $city) {
+
+                        $res = Db::getInstance()->autoExecuteWithNullValues($this->tableCityPecom, [
+
+                            'title' => (string)$city->title,
+                            'bitrixId' => (string)$city->bitrixId,
+                            'cityID' =>(string)$city->cityId,
+                            'cityStatus' =>$city->cityStatus,
+                            'dvisions' => $city->divisions
+
+                        ], 'INSERT');
+                        if ($res) {
+                            continue;
+                        } else {
+                            $error[] = $key;
+                        }
+
+                    }
             }
             return $error;
         }
+    }
     }
 
     public function issetCarryAddressCachepecomByWarehouseId($warehouseId){
@@ -1317,24 +1356,24 @@ class AxiomusPost extends ObjectModel {
 
     //carry
 
-    public static function getCarryPriceByName($city,$name,$price){
+    public static function getCarryPriceByName($city,$name,$price,$cart_id){
         $tab = self::$tableCarryPriceWithPrefix;
         $cityForStaticPrice = $city;
         if ($cityForStaticPrice!= 'Москва' && $cityForStaticPrice!= 'Санкт-Петербург'){
            $cityForStaticPrice = 'Регионы';}
         $row = Db::getInstance()->getRow("SELECT * FROM `{$tab}` WHERE `delivery` = '{$name}' AND `city` = '{$cityForStaticPrice}';");
-        $egg = Db::getInstance()->getRow("SELECT * FROM ps_axiomus_update_pecom WHERE `city` = '{$city}';");
+        $pecomprice = Db::getInstance()->getRow("SELECT * FROM ps_axiomus_update_pecom WHERE `city` = '{$city}';");
         if (!empty($row) && !empty($egg)) {
-            $Myrow = (int)$row ['sum'];
-            $Myegg = (int)$egg['costTotal'];
-            $sum = $Myrow + $Myegg;
-            return $sum ;
-        }else if(!empty($row)){
-
-            $egg = AxiomusXml::DeliveryGetPrice($city,$price);
             $Myrow = (int)$row['sum'];
-            $Myegg = (int)$egg;
-            $sum = $Myegg + $Myrow;
+            $Mypecomprice = (int)$pecomprice['costTotal'];
+            $sum = $Myrow + $Mypecomprice;
+            return $sum ;
+        }else if(empty($pecomprice)){
+
+            $pecomprice = AxiomusXml::GetPricePecom($city,$price,$cart_id);
+            $Myrow = (int)$row['sum'];
+            $Mypecomprice = $pecomprice;
+            $sum = $Mypecomprice + $Myrow;
             return $sum;
 
 

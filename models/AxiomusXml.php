@@ -797,32 +797,42 @@ public $pecomDeliveryNeededAddressComment;
         }
     }
 
-    public static function DeliveryGetPrice($city,$price){
+    public static function GetPricePecom($city,$price,$cart_id){
         // Создание экземпляра класса
-        $sdk = new PecomKabinet(self::$usernamePecom, self::$apikeyPecom);
+        $sdk = new PecomKabinet(Configuration::get('RS_PECOM_NICKNAME'), Configuration::get('RS_PECOM_API'));
         // Вызов метода
-        $code = Db::getInstance()->getRow("SELECT `code` FROM ps_axiomus_cache_carry_pecom where `city_name` = '{$city}'");
+        $code = Db::getInstance()->getRow("SELECT `bitrixId` FROM ps_axiomus_city_pecom where `title` = '{$city}'");
+        $cityData= array('title'=>$city);
+         if(empty ($code)) {
+             $bitrixId = $sdk->call('branches', 'findbytitle',$cityData );
+             if (isset($bitrixId->succes)) {
+                 $code = $bitrixId->items[0]->cityId;
+                 $sdk->close();
+
+             }else{
+                 return false;
+             }
+         }
         $request = array(
-
-            'senderCityId' => 'fff5634a-7644-11e4-b896-00155d9b661b', //код города отправителя
-            'receiverCityId' => $code['code'], //код города получателя
+            'senderCityId' => 446, //код города отправителя
+            'receiverCityId' => (int)$code['bitrixId'], //код города получателя
             'isInsurancePrice' => (float)$price,//оценочная стоимость , руб
-            'isPickUp' => false, //нужен забор
-            'isDelivery' => true,//нужна доставка
-            'cargos'=> array( // Данные о грузах [Array]
-             'length'=> 2.1, // Длина груза, м [Number]
-             'width'=> 2.1, // Ширина груза, м [Number]'height' => 2.3, // Высота груза, м [Number]
-              'volume' => 4.4, // Объем груза, м3 [Number'maxSize'=> 3.2, // Максимальный габарит, м [Number]
-               'isHP' =>false, // Жесткая упаковка [Boolean]
-               'sealingPositionsCount'=> 0, // Количество мест для пломбировки [Number]
-               'weight' =>10, // Вес, кг [Number]
-               'overSize' => false // Негабаритный груз [Boolean]
-        )
+            'isPickUp' => 1, //нужен забор
+            'isDelivery' => 0,//нужна доставка
+            'Cargos' => [[ // Данные о грузах [Array]
+                    'length'=> 1, // Длина груза, м [Number]
+                    'maxSize'=> 3.2,
+                    'height' => 2.3,
+                    'width'=> 2.1, // Ширина груза, м
+                    'volume' => 1.1, // Объем груза, м3
+                    'isHP' =>0, // Жесткая упаковка [Boolean]
+                    'sealingPositionsCount'=> 3, // Количество мест для пломбировки [Number]
+                    'weight' =>10, // Вес, кг [Number]
+                    'overSize' => 1 // Негабаритный груз [Boolean]
+            ]]
+            );
 
-                                            //ToDo в Api больше полей
-
-
-        );
+                                            //ToDo в Api больше полей;
 
         $result = $sdk->call('calculator', 'calculateprice', $request);
 
