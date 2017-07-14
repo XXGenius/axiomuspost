@@ -1372,7 +1372,7 @@ class AxiomusPost extends ObjectModel {
 
             $pecomprice = AxiomusXml::GetPricePecom($city,$price,$cart_id);
             $Myrow = (int)$row['sum'];
-            $Mypecomprice = $pecomprice;
+            $Mypecomprice = (int)$pecomprice['pecomprice'];
             $sum = $Mypecomprice + $Myrow;
             return $sum;
 

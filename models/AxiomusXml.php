@@ -821,15 +821,15 @@ public $pecomDeliveryNeededAddressComment;
             'isPickUp' => 1, //нужен забор
             'isDelivery' => 0,//нужна доставка
             'Cargos' => [[ // Данные о грузах [Array]
-                    'length'=> 1, // Длина груза, м [Number]
-                    'maxSize'=> 3.2,
-                    'height' => 2.3,
-                    'width'=> 2.1, // Ширина груза, м
-                    'volume' => 1.1, // Объем груза, м3
+                    'length'=> 0, // Длина груза, м [Number]
+                    'maxSize'=> 0,
+                    'height' => 0,
+                    'width'=> 0, // Ширина груза, м
+                    'volume' => 0.04, // Объем груза, м3
                     'isHP' =>0, // Жесткая упаковка [Boolean]
-                    'sealingPositionsCount'=> 3, // Количество мест для пломбировки [Number]
-                    'weight' =>10, // Вес, кг [Number]
-                    'overSize' => 1 // Негабаритный груз [Boolean]
+                    'sealingPositionsCount'=> 0, // Количество мест для пломбировки [Number]
+                    'weight' =>0.03, // Вес, кг [Number]
+                    'overSize' => 0 // Негабаритный груз [Boolean]
             ]]
             );
 
@@ -838,11 +838,11 @@ public $pecomDeliveryNeededAddressComment;
         $result = $sdk->call('calculator', 'calculateprice', $request);
 
         if ( ! isset($result->error)) {
-            $oid = (int)$result->documentId;
-            $okey = $result->cargos[0]->cargoCode;
+
+            $pecomprice = $result->transfers[0]->costTotal;
 
             $sdk->close();
-            return ['oid' => $oid, 'okey' => $okey];
+            return ['pecomprice' => $pecomprice];
         }else{
             $errorText =  'Ошибка ответа ПЭК. '.$result->error->title.'. ';
             foreach ($result->error->fields as $fields){
