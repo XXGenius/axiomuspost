@@ -48,7 +48,7 @@
                             <div class="required form-group">
                                 <label class="radio-inline delivery-type" id="opt-delivery-parent"><input type="radio" name="delivery-type" value="0" id="opt-delivery" )>Доставка до двери</label>
                                 <label class="radio-inline delivery-type"><input type="radio" name="delivery-type" value="1" id="opt-carry">Самовывоз</label>
-                                <label class="radio-inline pecom-type"><input type="radio" name="carry-pecom" value="2" id="opt-pecom">Доставка в регионы</label>
+                                <label class="radio-inline delivery-type" id="pecom-button" ><input type="radio" name="pecom-type" value="2" id="opt-pecom">Доставка в регионы</label>
                             </div>
                         </div>
                     </div>
@@ -166,6 +166,7 @@
 
                      $('#opt-delivery').prop('checked', true);
                      $('#carry_address_block').hide();
+                     $('#pecom-button').hide();
                      updatePrice(0);
                  }else{
 
@@ -183,9 +184,18 @@
                     updatePrice(1);
                 });
 
-    //            $('.delivery-type').click(function () {
-    //                updatePrice();
-    //            });
+                $('.delivery-type').click(function () {
+                    updatePrice();
+                });
+
+                $('.delivery-type').change(function () {
+                    radioInputDelivery = $("input[name='pecom-type]");
+                    if(radioInputDelivery.prop('checked')) {
+                        $('#rowDelivery').hide();
+                        $('#rowCarry').hide();
+                    }
+                });
+
 
                 $('.delivery-type').change(function () {
                     radioInputDelivery = $("input[name='delivery-type']");
@@ -195,15 +205,6 @@
                     }else{
                         $('#rowDelivery').hide();
                         $('#rowCarry').show();
-                    }
-                });
-
-
-                $('.pecom-type').change(function () {
-                    radioInputDelivery = $("input[name='carry-pecom']");
-                    if(radioInputDelivery.prop('checked')) {
-                        $('#rowDelivery').hide();
-                        $('#rowCarry').hide();
                     }
                 });
 

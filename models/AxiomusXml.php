@@ -818,7 +818,7 @@ public $pecomDeliveryNeededAddressComment;
             'senderCityId' => 446, //код города отправителя
             'receiverCityId' => (int)$code['bitrixId'], //код города получателя
             'isInsurancePrice' => (float)$price,//оценочная стоимость , руб
-            'isPickUp' => 1, //нужен забор
+            'isPickUp' => 0, //нужен забор
             'isDelivery' => 0,//нужна доставка
             'Cargos' => [[ // Данные о грузах [Array]
                     'length'=> 0, // Длина груза, м [Number]
