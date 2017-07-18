@@ -669,7 +669,7 @@ class AxiomusPost extends ObjectModel {
         return $res;
     }
 
-    public function getPrice($cart_id,$city, $carry, $weight, $price, $carrytype, $kad, $time){
+    public function getPrice($cart_id, $city, $carry, $weight, $price, $carrytype, $kad, $time){
 
         //определение типа веса
         if ($carry){
@@ -1356,29 +1356,21 @@ class AxiomusPost extends ObjectModel {
 
     //carry
 
-    public static function getCarryPriceByName($city,$name,$price,$cart_id){
+    public static function getCarryPriceByName($city, $name, $price = null, $cart_id = null){
         $tab = self::$tableCarryPriceWithPrefix;
         $cityForStaticPrice = $city;
         if ($cityForStaticPrice!= 'Москва' && $cityForStaticPrice!= 'Санкт-Петербург'){
            $cityForStaticPrice = 'Регионы';}
-        $row = Db::getInstance()->getRow("SELECT * FROM `{$tab}` WHERE `delivery` = '{$name}' AND `city` = '{$cityForStaticPrice}';");
-        $pecomprice = Db::getInstance()->getRow("SELECT * FROM ps_axiomus_update_pecom WHERE `city` = '{$city}';");
-        if (!empty($row) && !empty($egg)) {
-            $Myrow = (int)$row['sum'];
-            $Mypecomprice = (int)$pecomprice['costTotal'];
-            $sum = $Myrow + $Mypecomprice;
-            return $sum ;
-        }else if(empty($pecomprice)){
+        $static_price_row = Db::getInstance()->getRow("SELECT * FROM `{$tab}` WHERE `delivery` = '{$name}' AND `city` = '{$cityForStaticPrice}';");
+        $pecom_price_row = Db::getInstance()->getRow("SELECT * FROM ps_axiomus_update_pecom WHERE `city` = '{$city}';");
 
-            $pecomprice = AxiomusXml::GetPricePecom($city,$price,$cart_id);
-            $Myrow = (int)$row['sum'];
-            $Mypecomprice = (int)$pecomprice['pecomprice'];
-            $sum = $Mypecomprice + $Myrow;
-            return $sum;
-
-
+        $static_price = $static_price_row['sum'] ?? 0;
+        $pecom_price = $pecom_price_row['pecomprice'] ?? 0;
+        if(empty($pecom_price_row) && (!empty($price) && !empty($cart_id))){
+            $pecom_price = AxiomusXml::GetPricePecom($city,$price,$cart_id);
         }
 
+        return $pecom_price + $static_price;
     }
 
     public function setCarryPrice($city, $name, $sum){
