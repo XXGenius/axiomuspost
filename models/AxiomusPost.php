@@ -330,7 +330,7 @@ class AxiomusPost extends ObjectModel {
          * GENIUS EDIT
          */
         $sql = "CREATE TABLE IF NOT EXISTS `{$this->tableUpdatePecom}` (".
-            '`id` INT(11) NOT NULL AUTO_INCREMENT,' .
+            '`id` INT(11) AUTO_INCREMENT,' .
             '`datetime` DATETIME DEFAULT NOW() ,' .
             '`is_avia` BOOLEAN,' .  //тип перевозки
             '`city` VARCHAR(30) NOT NULL,' . //город получатель
@@ -344,7 +344,7 @@ class AxiomusPost extends ObjectModel {
         }
 
         $sql = "CREATE TABLE IF NOT EXISTS `{$this->tableCityPecom}` (".
-            '`id` INT(11) NOT NULL AUTO_INCREMENT,' .
+            '`id` INT(11) AUTO_INCREMENT,' .
             '`title` VARCHAR(30) NOT NULL,'.
             '`bitrixId` VARCHAR(15) NOT NULL,'.
             '`cityID` VARCHAR(50),'.

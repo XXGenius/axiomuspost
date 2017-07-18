@@ -845,10 +845,15 @@ public $pecomDeliveryNeededAddressComment;
             $pecomprice = $result->transfers[0]->costTotal;
             $pecomprice1 = $result->transfers[1]->costTotal;
             $sum = $pecomprice + $pecomprice1;
-            $sdk->close();
-            //ToDo тут инсерт в таблицу с кешем!!!
+
+            $res = Db::getInstance()->autoExecuteWithNullValue('ps_axiomus_update_pecom', [
+                'city' => (string)$result->commonTerms[0]->branchReceiver,
+                'costTotal' => (int)$sum,
+                'receiverCityId'=> (int)$code['bitrixId'],
+            ], 'INSERT');   //ToDo тут инсерт в таблицу с кешем!!!
+
             return $sum; //Херня, должен вернуть просто сумму, не массив, выше до возврата должен сделать инсерт в таблицу
-        }else{
+            }else{
             $errorText =  'Ошибка ответа ПЭК. '.$result->error->title.'. ';
             foreach ($result->error->fields as $fields){
                 $errorText .= 'Ошибка в поле: '.$fields->Key.' . '.$fields->Value[0].'. ';
