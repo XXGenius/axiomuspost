@@ -801,6 +801,9 @@ public $pecomDeliveryNeededAddressComment;
         // Создание экземпляра класса
         $sdk = new PecomKabinet(Configuration::get('RS_PECOM_NICKNAME'), Configuration::get('RS_PECOM_API'));
         $cart = new Cart($cart_id);
+        $totalWeight = $cart->getTotalWeight();
+        $products = (float)$cart->nbProducts();
+        $valume = 0.016355 * $products;
         // Вызов метода
         $code = Db::getInstance()->getRow("SELECT `bitrixId` FROM ps_axiomus_city_pecom where `title` = '{$city}'");
         $cityData= array('title'=>$city);
@@ -825,10 +828,10 @@ public $pecomDeliveryNeededAddressComment;
                     'maxSize'=> 0,
                     'height' => 0,
                     'width'=> 0, // Ширина груза, м
-                    'volume' => 0.04, // Объем груза, м3
+                    'volume' => $valume, // Объем груза, м3
                     'isHP' =>0, // Жесткая упаковка [Boolean]
                     'sealingPositionsCount'=> 0, // Количество мест для пломбировки [Number]
-                    'weight' =>0.03, // Вес, кг [Number]
+                    'weight' =>$totalWeight, // Вес, кг [Number]
                     'overSize' => 0 // Негабаритный груз [Boolean]
             ]]
             );
@@ -840,9 +843,10 @@ public $pecomDeliveryNeededAddressComment;
         if ( ! isset($result->error)) {
 
             $pecomprice = $result->transfers[0]->costTotal;
-
+            $pecomprice1 = $result->transfers[1]->costTotal;
+            $sum = $pecomprice + $pecomprice1;
             $sdk->close();
-            return ['pecomprice' => $pecomprice];
+            return ['pecomprice' => $sum];
         }else{
             $errorText =  'Ошибка ответа ПЭК. '.$result->error->title.'. ';
             foreach ($result->error->fields as $fields){

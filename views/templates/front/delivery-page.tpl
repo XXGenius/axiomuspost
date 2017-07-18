@@ -48,7 +48,7 @@
                             <div class="required form-group">
                                 <label class="radio-inline delivery-type" id="opt-delivery-parent"><input type="radio" name="delivery-type" value="0" id="opt-delivery" )>Доставка до двери</label>
                                 <label class="radio-inline delivery-type"><input type="radio" name="delivery-type" value="1" id="opt-carry">Самовывоз</label>
-                                <label class="radio-inline delivery-type" id="pecom-button" ><input type="radio" name="pecom-type" value="2" id="opt-pecom">Доставка в регионы</label>
+                                <label class="radio-inline delivery-type" id="pecom-button" ><input type="radio" name="delivery-type" value="2" id="opt-pecom">Доставка в регионы</label>
                             </div>
                         </div>
                     </div>
@@ -188,13 +188,6 @@
                     updatePrice();
                 });
 
-                $('.delivery-type').change(function () {
-                    radioInputDelivery = $("input[name='pecom-type]");
-                    if(radioInputDelivery.prop('checked')) {
-                        $('#rowDelivery').hide();
-                        $('#rowCarry').hide();
-                    }
-                });
 
 
                 $('.delivery-type').change(function () {
