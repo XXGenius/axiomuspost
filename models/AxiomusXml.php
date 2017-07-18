@@ -846,7 +846,8 @@ public $pecomDeliveryNeededAddressComment;
             $pecomprice1 = $result->transfers[1]->costTotal;
             $sum = $pecomprice + $pecomprice1;
 
-            $res = Db::getInstance()->autoExecuteWithNullValue('ps_axiomus_update_pecom', [
+            $res = Db::getInstance()->autoExecuteWithNullValues('ps_axiomus_update_pecom', [
+                'is_avia'=>false,
                 'city' => (string)$result->commonTerms[0]->branchReceiver,
                 'costTotal' => (int)$sum,
                 'receiverCityId'=> (int)$code['bitrixId'],

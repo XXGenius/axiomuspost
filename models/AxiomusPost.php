@@ -1362,8 +1362,9 @@ class AxiomusPost extends ObjectModel {
         if ($cityForStaticPrice!= 'Москва' && $cityForStaticPrice!= 'Санкт-Петербург'){
            $cityForStaticPrice = 'Регионы';}
         $static_price_row = Db::getInstance()->getRow("SELECT * FROM `{$tab}` WHERE `delivery` = '{$name}' AND `city` = '{$cityForStaticPrice}';");
-        $pecom_price_row = Db::getInstance()->getRow("SELECT * FROM ps_axiomus_update_pecom WHERE `city` = '{$city}';");
-
+        $pecom_price_row = Db::getInstance()->getRow("SELECT * FROM ps_axiomus_update_pecom WHERE `city` = '{$city} ' AND `datetime`> (now()-INTERVAL 1 DAY);");
+        $delete_old_cache =  "DELETE FROM ps_axiomus_update_pecom WHERE `datetime` < (now() - INTERVAL 1 DAY)";
+        $sql = Db::getInstance()->execute($delete_old_cache);
         $static_price = $static_price_row['sum'] ?? 0;
         $pecom_price = $pecom_price_row['pecomprice'] ?? 0;
         if(empty($pecom_price_row) && (!empty($price) && !empty($cart_id))){
