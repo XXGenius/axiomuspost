@@ -1366,7 +1366,7 @@ class AxiomusPost extends ObjectModel {
         $delete_old_cache =  "DELETE FROM ps_axiomus_update_pecom WHERE `datetime` < (now() - INTERVAL 1 DAY)";
         $sql = Db::getInstance()->execute($delete_old_cache);
         $static_price = $static_price_row['sum'] ?? 0;
-        $pecom_price = $pecom_price_row['pecomprice'] ?? 0;
+        $pecom_price = $pecom_price_row['costTotal'] ?? 0;
         if(empty($pecom_price_row) && (!empty($price) && !empty($cart_id))){
             $pecom_price = AxiomusXml::GetPricePecom($city,$price,$cart_id);
         }

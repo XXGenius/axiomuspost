@@ -80,6 +80,7 @@ class axiomuspostcarrierChangeCarrierOptionsModuleFrontController extends Module
         ));
 
         $this->setTemplate('delivery-page.tpl'); //ToDo добавить вывод мест carry
+        $this->setTemplate('test.tpl');
     }
 
     public function postProcess()
