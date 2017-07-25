@@ -79,7 +79,7 @@ class axiomuspostcarrierChangeCarrierOptionsModuleFrontController extends Module
             'this_path_ssl' => Tools::getShopDomainSsl(true, true).__PS_BASE_URI__.'modules/'.$this->module->name.'/'
         ));
 
-        $this->setTemplate('delivery-page.tpl'); //ToDo добавить вывод мест carry
+//        $this->setTemplate('delivery-page.tpl'); //ToDo добавить вывод мест carry
         $this->setTemplate('delivery_v_2.tpl');
     }
 

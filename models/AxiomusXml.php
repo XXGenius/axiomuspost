@@ -800,7 +800,7 @@ public $pecomDeliveryNeededAddressComment;
         }
     }
 
-    public static function GetPricePecom($city,$price,$cart_id)
+    public static function GetPricePecom($city, $cart_id)
     {
         // Создание экземпляра класса
         $sdk = new PecomKabinet(Configuration::get('RS_PECOM_NICKNAME'), Configuration::get('RS_PECOM_API'));
@@ -811,6 +811,8 @@ public $pecomDeliveryNeededAddressComment;
         // Вызов метода
         $code = Db::getInstance()->getRow("SELECT `bitrixId` FROM ps_axiomus_city_pecom where `title` = '{$city}'");
         $cityData= array('title'=>$city);
+        //ToDo сумму взять из cart
+        $price = 100;
          if(empty ($code)) {
              $bitrixId = $sdk->call('branches', 'findbytitle',$cityData );
              if (isset($bitrixId->succes)) {
