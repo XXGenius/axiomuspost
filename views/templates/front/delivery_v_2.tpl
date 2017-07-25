@@ -205,7 +205,7 @@
 <script>
 $(document).ready(function (){
 
-    $('.delivery-type').change(function () {
+    $('.delivery-type').change(function () { //выбор доставки или самовывоза
         radioInputDelivery = $("input[name='delivery-type']");
         if(radioInputDelivery.prop('checked')) {
             $('.opt-carry').show();
@@ -217,7 +217,7 @@ $(document).ready(function (){
         }
     });
 
-    $('#SelectCity').change(function(){
+    $('#SelectCity').change(function(){ // выбор места самовывоза + ajax запрос CarryPoint
         city = $('#SelectCity option:selected').attr("value");
         console.log(city);
         CarryPoint();
@@ -230,11 +230,11 @@ $(document).ready(function (){
         }
     });
 
-    $('#selectcountryid').change(function () {
+    $('#selectcountryid').change(function () { //вызывает ajax запрос для точек вывоза в регионах
         Carry();
     });
 
-    $('#SelectCityDelivery').change(function(){
+    $('#SelectCityDelivery').change(function(){ //выбор места ДОСТАВКИ
         city = $('#SelectCityDelivery option:selected').attr("value");
         console.log(city);
         if(city === "0" || city==="1" ){
@@ -248,32 +248,19 @@ $(document).ready(function (){
 
 
 
-//    $('.delivery-type').click(function () {
-//        Carry();
-//    });
-
-
-//    var cities = ['Волгоград', 'Самара', 'Волгодонск'];
-//    $("#carry-country").empty();
-//    $.each(cities ,function(index,value){
-//        $("#carry-country").append( $('<option value="'+ index +'">'+ value +'</option>'));
-//        console.log('Индекс: ' + index.toString() + '; Значение: ' + value.toString());
-//    });
-
-
-    function CarryPoint() {
+    function CarryPoint() {                            //ajax запрос для Точек Москвы и Питера ИЛИ Городов-регионов
         $("select[name='selectpoint']").empty();
         city = $('#SelectCity option:selected').attr("value");
         data = 'city='+city;
-//        console.log(data);
+        console.log(data);
         $.ajax({
             type: 'POST',
             url: '/index.php?fc=module&module=axiomuspostcarrier&controller=carrypoint',
             data: data,
             success: function(data) {
-//                console.log(data);
+                console.log(data);
                 data = JSON.parse(data);
-//                console.log(data);
+                console.log(data);
                 for (var id in data) {
                     $("select[name='selectpoint']").append($('<option value="' + data[id] + '">' + data[id]['city'] + '</option>'));
                 }
@@ -281,7 +268,7 @@ $(document).ready(function (){
         })
     }
 
-    function Carry() {
+    function Carry() { // ajax запрос для точек доставки в регионы
         $("select[name='selectpointcountry']").empty();
         home = $('#selectcountryid option:selected').text();
         data = 'home='+home;

@@ -15,7 +15,7 @@ class axiomuspostcarrierGetPointCountryModuleFrontController extends ModuleFront
 {
     public function init()
     {
-        $city= $_POST['home'];
+        $city= $_POST['home'];// home - выбранный город ИЗ РЕГИОНОВ в данный момент
         $sql = ("SELECT  address AS 'city' FROM ps_axiomus_cache_carry_pecom WHERE `city_name`='{$city}'");
         $city= Db::getInstance()->executeS($sql);
         echo json_encode($city);

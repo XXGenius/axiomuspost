@@ -16,7 +16,7 @@ class axiomuspostcarrierCarryPointModuleFrontController extends ModuleFrontContr
     public function init()
     {
         parent::init();
-        if($_POST['city'] == 0) {
+        if($_POST['city'] == 0) { //city[0]-Москва, [1]-Питер,[2]- Регионы
             $sql = ("SELECT address AS 'city' FROM ps_axiomus_cache_carry_pecom WHERE city_name='Москва'");
             $city = Db::getInstance()->executeS($sql);
             echo json_encode($city);
