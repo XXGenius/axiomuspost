@@ -59,10 +59,8 @@
             <div class="col-md-3 col-lg-6 col-sm-4 col-xs-6" >
                 <div class="delivery-pecom form-group " style="display:none">
                     <label for="exampleSelect">Уточните Город</label>
-                    <select class="form-control " id="exampleSelect"">
-                    <option>город 1</option>
-                    <option>город 2</option>
-                    <option>город 3</option>
+                    <select class="form-control" name="selectpoint">
+                    <option></option>
                     </select>
                 </div>
             </div>
@@ -79,21 +77,27 @@
                         <option value="2">Россия</option>
                     </select>
                 </div>
+    <div class="col-md-3 col-lg-6 col-sm-4 col-xs-6">
+        <div class="carry-pecom form-group" style="display:none">
+            <label for="exampleSelect">Уточните</label>
+            <select class="form-control " name="selectpointcountry" >
+                <option></option>
+            </select>
+        </div>
+    </div>
             <div class="col-md-3 col-lg-6 col-sm-4 col-xs-6">
                     <div class="carry-moscow form-group">
                         <label for="exampleSelect">Уточните</label>
-                        <select class="form-control carry-moscow" id="exampleSelect"">
-                        <option>точка 1</option>
-                        <option>точка 2</option>
-                        <option>точка 3</option>
+                        <select class="form-control carry-moscow" name="selectpoint">
+                        <option></option>
                         </select>
                     </div>
             </div>
                 <div class="col-md-3 col-lg-6 col-sm-4 col-xs-6" >
                     <div class="carry-pecom form-group" style="display:none">
                         <label for="exampleSelect">Уточните Город</label>
-                        <select class="form-control " id="carry-country"">
-                        <option value="0"></option>
+                        <select class="form-control" name="selectpoint" id="selectcountryid">
+                        <option></option>
                         </select>
                     </div>
                 </div>
@@ -216,15 +220,18 @@ $(document).ready(function (){
     $('#SelectCity').change(function(){
         city = $('#SelectCity option:selected').attr("value");
         console.log(city);
+        CarryPoint();
         if(city === "0" || city==="1" ){
             $('.carry-moscow').show();
             $('.carry-pecom').hide();
-            Carry();
-        }else{
+        }else {
             $('.carry-moscow').hide();
             $('.carry-pecom').show();
-            Carry();
         }
+    });
+
+    $('#selectcountryid').change(function () {
+        Carry();
     });
 
     $('#SelectCityDelivery').change(function(){
@@ -238,9 +245,12 @@ $(document).ready(function (){
             $('.delivery-pecom').show();
         }
     });
-    $('.delivery-type').click(function () {
-        Carry();
-    });
+
+
+
+//    $('.delivery-type').click(function () {
+//        Carry();
+//    });
 
 
 //    var cities = ['Волгоград', 'Самара', 'Волгодонск'];
@@ -251,23 +261,45 @@ $(document).ready(function (){
 //    });
 
 
-
-    function Carry() {
+    function CarryPoint() {
+        $("select[name='selectpoint']").empty();
         city = $('#SelectCity option:selected').attr("value");
-        data = city
-        console.log(data);
+        data = 'city='+city;
+//        console.log(data);
         $.ajax({
             type: 'POST',
-            url: '/index.php?fc=module&module=axiomuspostcarrier&controller=test',
+            url: '/index.php?fc=module&module=axiomuspostcarrier&controller=carrypoint',
             data: data,
-            success: function(data){
+            success: function(data) {
+//                console.log(data);
                 data = JSON.parse(data);
-                console.log(data);
+//                console.log(data);
                 for (var id in data) {
-                    $('#carry-country').append($('<option value="' + id + '">' + data[id] + '</option>'));
+                    $("select[name='selectpoint']").append($('<option value="' + data[id] + '">' + data[id]['city'] + '</option>'));
                 }
             }
         })
     }
+
+    function Carry() {
+        $("select[name='selectpointcountry']").empty();
+        home = $('#selectcountryid option:selected').text();
+        data = 'home='+home;
+        console.log(data);
+        $.ajax({
+            type: 'POST',
+            url: '/index.php?fc=module&module=axiomuspostcarrier&controller=getpointcountry',
+            data: data,
+            success: function(data) {
+                console.log(data);
+                data = JSON.parse(data);
+                console.log(data);
+                for (var id in data) {
+                    $("select[name='selectpointcountry']").append($('<option value="' + data[id] + '">' + data[id]['city'] + '</option>'));
+                }
+            }
+        })
+    }
+
 });
 </script>

@@ -1132,7 +1132,7 @@ class axiomuspostcarrier extends CarrierModule
     }
 
     public function hookDisplayAdminOrderTabShip($params = null){
-        return $this->display('axiomuspostcarrier', 'views/templates/admin/orders/tab-ship.tpl');
+        return $this->display('axiomuspostcarrier', 'views/templates/admin/orders/tab-ship.f');
     }
 
     public function hookDisplayAdminOrderContentShip($params = null){
