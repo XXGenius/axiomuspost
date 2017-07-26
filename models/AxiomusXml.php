@@ -811,8 +811,7 @@ public $pecomDeliveryNeededAddressComment;
         // Вызов метода
         $code = Db::getInstance()->getRow("SELECT `bitrixId` FROM ps_axiomus_city_pecom where `title` = '{$city}'");
         $cityData= array('title'=>$city);
-        //ToDo сумму взять из cart
-        $price = 100;
+        $price = $cart->getordertotal(); //ToDo сумму взять из cart
          if(empty ($code)) {
              $bitrixId = $sdk->call('branches', 'findbytitle',$cityData );
              if (isset($bitrixId->succes)) {
