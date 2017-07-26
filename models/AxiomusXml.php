@@ -843,9 +843,7 @@ public $pecomDeliveryNeededAddressComment;
         $result = $sdk->call('calculator', 'calculateprice', $request);
 
         if (!isset($result->error)) {
-            $pecomprice = $result->transfers[0]->costTotal;
-            $pecomprice1 = $result->transfers[1]->costTotal;
-            $sum = $pecomprice + $pecomprice1;
+            $sum = $result->transfers[0]->costTotal;
 
             $res = Db::getInstance()->autoExecuteWithNullValues('ps_axiomus_update_pecom', [
                 'is_avia'=>false,
