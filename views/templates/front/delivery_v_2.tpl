@@ -13,15 +13,14 @@
     <h3>Данные заказа</h3>
      <h4>Сумма заказа: {$productprice}р.</h4>
 
-     <h4 id="delivery-price-block" style=" display:none">Сумма доставки: <img src="/img/loader.gif" id="delivery-price-loader"><span id="delivery-price"></span>р.</h4>
+     <h4 id="delivery-price-block" style=" display:none">Сумма доставки: <img src="/img/loader.gif" id="delivery-price-loader"><span id="delivery-price"></span></h4>
     <div class="row">
         <div class="delivery-checkout">
             <div class="col-md-12">
                 <fieldset class="form-group" > <h3>Выберите тип перевозки</h3>
                     <label for="exampleSelect1"></label>
-                    <div class="form-check" >
+                    <div class="form-check">
                         <label class="form-check-label delivery-type" id="opt-delivery-parent"><input type="radio" name="delivery-type" value="0" id="opt-carry" checked>Самовывоз</label>
-                        </label>
                     </div>
                     <div class="form-check">
                         <label class="form-check-label delivery-type"><input type="radio" name="delivery-type" value="1" id="opt-delivery">Доставка до двери</label>
@@ -219,10 +218,12 @@ $(document).ready(function (){
         if(radioInputDelivery.prop('checked')) {
             $('.opt-carry').show();
             $('.opt-delivery').hide();
+            $("#select-region").change();
 
         }else{
             $('.opt-carry').hide();
             $('.opt-delivery').show();
+            $("#select-delivery-region").change();
             $('#select-delivery-region-block div.selector').css("width", '100%');
             $('#select-delivery-region-block span').css("width", '100%');
             $('#select-delivery-kad-block div.selector').css("width", '100%');
@@ -257,7 +258,15 @@ $(document).ready(function (){
         getPriceCarry();
     });
 
-    $('#select-point').change(function(){
+    $('#select-delivery-city').change(function(){
+        getPriceDeliveryRegion();
+    });
+
+    $('#select-delivery-kad').change(function(){
+        getPriceDelivery();
+    });
+
+    $('#select-delivery-time').change(function(){
         getPriceDelivery();
     });
 
@@ -287,7 +296,6 @@ $(document).ready(function (){
             url: '/index.php?fc=module&module=axiomuspostcarrier&controller='+controller,
             data: data,
             success: function(data) {
-                console.log('success! controller:'+controller);
                 if (data != '') {
                     data = JSON.parse(data);
                     if (data.length > 0) {
@@ -307,7 +315,7 @@ $(document).ready(function (){
                         $('#' + select_name + '-block span').css("width", '100%');
 
                         $('#' + select_name + '-loader').hide(); //ToDo Спрятать индикатор загрузки
-                        if (need_update_price) getPriceCarry();
+//                        if (need_update_price) getPriceCarry();
                     }
                 }
             }
@@ -321,17 +329,24 @@ $(document).ready(function (){
         let data = 'region='+region+'&point_id='+point+'&cart_id='+{$cart_id};
 
         $('#delivery-price-block').show();  //показать блок с ценой
+        $('#delivery-price').text('');
+        $('#delivery-price-loader').show();
+
         $.ajax({
             type: 'POST',
             url: '/index.php?fc=module&module=axiomuspostcarrier&controller=getpricecarry',
             data: data,
             success: function(data) {
-                if (data != '') {
+                data = JSON.parse(data);
+                if (data.error) {
+                    $('#delivery-price').text('будет доступна после оформления заказа');
+                    $('#delivery-price-loader').hide(); //ToDo Спрятать индикатор загрузки
+                }else{
                     console.log(data);
 
-                    if (data.length > 0) {
+                    if (data.value !== undefined) {
 
-                        $('#delivery-price').text(data);
+                        $('#delivery-price').text(data.value+'р.');
                         $('#delivery-price-loader').hide(); //ToDo Спрятать индикатор загрузки
                     }
                 }
@@ -339,31 +354,66 @@ $(document).ready(function (){
         })
     }
 
-    function getPriceDelivery() {
-        region = $('#select-region option:selected').attr("value");
-        point = $('#select-point option:selected').attr("value");
+    function getPriceDeliveryRegion() {
+        let region = $('#select-delivery-region option:selected').attr("value");
+        let city = $('#select-delivery-city option:selected').attr("value");
 
-        let data = 'region='+region+'&point_id='+point+'&cart_id='+{$cart_id};
 
+        let data = 'region='+region+'&city_id='+city+'&cart_id='+{$cart_id};
+        $('#delivery-price').text('');
+        $('#delivery-price-loader').show();
         $('#delivery-price-block').show();  //показать блок с ценой
         $.ajax({
             type: 'POST',
-            url: '/index.php?fc=module&module=axiomuspostcarrier&controller=getpricecarry',
+            url: '/index.php?fc=module&module=axiomuspostcarrier&controller=getpricedeliveryregion',
             data: data,
             success: function(data) {
-                if (data != '') {
+                data = JSON.parse(data);
+                if (data.error) {
+                    $('#delivery-price').text('будет доступна после оформления заказа');
+                    $('#delivery-price-loader').hide(); //ToDo Спрятать индикатор загрузки
+                }else{
                     console.log(data);
 
-                    if (data.length > 0) {
+                    if (data.value !== undefined) {
 
-                        $('#delivery-price').text(data);
+                        $('#delivery-price').text(data.value+'р.');
                         $('#delivery-price-loader').hide(); //ToDo Спрятать индикатор загрузки
                     }
                 }
             }
         })
     }
+    function getPriceDelivery() {
+        let region = $('#select-delivery-region option:selected').attr("value");
+        let kad = $('#select-delivery-kad option:selected').attr("value");
+        let time = $('#select-delivery-time option:selected').attr("value");
 
+        let data = 'region='+region+'&kad_id='+kad+'&time_id='+time+'&cart_id='+{$cart_id};
+        $('#delivery-price').text('');
+        $('#delivery-price-loader').show();
+        $('#delivery-price-block').show();  //показать блок с ценой
+        $.ajax({
+            type: 'POST',
+            url: '/index.php?fc=module&module=axiomuspostcarrier&controller=getpricedelivery',
+            data: data,
+            success: function(data) {
+                data = JSON.parse(data);
+                if (data.error) {
+                    $('#delivery-price').text('будет доступна после оформления заказа');
+                    $('#delivery-price-loader').hide(); //ToDo Спрятать индикатор загрузки
+                }else{
+                    console.log(data);
+
+                    if (data.value !== undefined) {
+
+                        $('#delivery-price').text(data.value+'р.');
+                        $('#delivery-price-loader').hide(); //ToDo Спрятать индикатор загрузки
+                    }
+                }
+            }
+        })
+    }
 
     $("#select-region").change();
 });

@@ -26,7 +26,8 @@ class AxiomusPost extends ObjectModel {
      * @var
      */
     public $tableCityPecom = 'ps_axiomus_city_pecom';
-    public $tableUpdatePecom = 'ps_axiomus_update_pecom';
+    public $tableUpdatePecom = 'ps_axiomus_pecom_carry';
+    public $tableUpdatePecomDelivery = 'ps_axiomus_pecom_delivery';
     public static $tableCarryPriceWithPrefix;
     public $tableCacheCarryPecomWithPrefix;
     /**
@@ -330,6 +331,20 @@ class AxiomusPost extends ObjectModel {
          * GENIUS EDIT
          */
         $sql = "CREATE TABLE IF NOT EXISTS `{$this->tableUpdatePecom}` (".
+            '`id` INT(11) AUTO_INCREMENT,' .
+            '`datetime` DATETIME DEFAULT NOW() ,' .
+            '`is_avia` BOOLEAN,' .  //тип перевозки
+            '`city` VARCHAR(30) NOT NULL,' . //город получатель
+            '`costTotal` INT(11) NOT NULL,' . //общая стоимость перевозки
+            '`receiverCityId` INT(11) NOT NULL,' . //код города получателя
+            'PRIMARY KEY (`id`)' .
+            ') DEFAULT CHARSET=utf8;';
+
+        if (!Db::getInstance()->execute($sql, false)) {
+            return false;
+        }
+
+        $sql = "CREATE TABLE IF NOT EXISTS `{$this->tableUpdatePecomDelivery}` (".
             '`id` INT(11) AUTO_INCREMENT,' .
             '`datetime` DATETIME DEFAULT NOW() ,' .
             '`is_avia` BOOLEAN,' .  //тип перевозки
@@ -654,6 +669,11 @@ class AxiomusPost extends ObjectModel {
             return false;
         }
 
+        $sql = "DROP TABLE IF EXISTS `".$this->tableUpdatePecomDelivery."`;";
+        if (!Db::getInstance()->execute($sql)) {
+            return false;
+        }
+
         $sql = "DROP TABLE IF EXISTS `".$this->tableCityPecom."`;";
         if (!Db::getInstance()->execute($sql)) {
             return false;
@@ -694,9 +714,10 @@ class AxiomusPost extends ObjectModel {
         return $data;
     }
 
-    public function getWeightTypeId($weight){
+    public function getWeightTypeId($city, $weight){
         $sql = "SELECT * FROM {$this->tableWeightTypeWithPrefix} WHERE ";
         $sql .= "(`weightfrom` <= '{$weight}' AND `weightto` > '{$weight}')";
+        $sql .= " AND `city` = '{$city}'";
         $res = Db::getInstance()->getRow($sql);
         return (int)$res['id'];
     }
@@ -1354,6 +1375,64 @@ class AxiomusPost extends ObjectModel {
         }
     }
 
+    public static function getDeliveryPrice($region, $cart_id, $kad_id, $time_id)
+    {
+        if ($region == 0){ //Москва
+            $city = 'Москва';
+
+        }elseif($region == 1){ //Питер
+            $city = 'Санкт-Петербург';
+        }else{ //неизвестно что
+            return false;
+        }
+
+        $axiomusPost = new AxiomusPost(); //Костыль чтобы не делать все методы статиками как полагается
+        $cart = new Cart($cart_id);
+        $weight = ($cart->getTotalWeight() == 0) ? 0.5 : 0;
+        $price = $cart->getordertotal();
+
+        $weighttype = $axiomusPost->getWeightTypeId($city ,$weight);
+        //По весу
+
+        $sumWeight = $axiomusPost->getWeightPrice($city,$weighttype);
+
+        //Надбавка
+        $sumCondition = $axiomusPost->getConditionPrice($city, $price, $kad_id, $time_id);
+
+        return round($sumWeight + $sumCondition);
+    }
+
+    public static function getDeliveryPriceRegion($region, $cart_id, $city_id)
+    {
+        $tab = self::$tableCarryPriceWithPrefix;
+        $cities = Db::getInstance()->getRow("SELECT city_name FROM ps_axiomus_cache_carry_pecom WHERE id = '{$city_id}'");
+        if (!$cities) return false;
+
+        $city = $cities['city_name'];
+
+        $regionForRow = $region;
+        if ($region != 0 && $region != 1){
+
+            $static_price_row = Db::getInstance()->getRow("SELECT * FROM `{$tab}` WHERE `delivery` = 'pecom' AND `city` = '{$city}';");
+            $pecom_price_row = Db::getInstance()->getRow("SELECT * FROM ps_axiomus_pecom_delivery WHERE `city` = '{$region} ' AND `datetime`> (now()-INTERVAL 1 DAY);");
+            $delete_old_cache = "DELETE FROM ps_axiomus_pecom_delivery WHERE `datetime` < (now() - INTERVAL 1 DAY)";
+            $sql = Db::getInstance()->execute($delete_old_cache);
+
+            $pecom_price = $pecom_price_row['costTotal'] ?? 0;
+
+            if (empty($pecom_price_row) && !empty($cart_id)) {
+                $pecom_price = AxiomusXml::GetPricePecom($city, $cart_id, false);
+                if (!$pecom_price) return false;
+            }
+        }else{
+            $static_price_row = Db::getInstance()->getRow("SELECT * FROM `{$tab}` WHERE `delivery` = 'pecom' AND `city` = '{$regionForRow}';");
+            $pecom_price = 0;
+        }
+        $static_price = $static_price_row['sum'] ?? 0;
+
+        return round($pecom_price + $static_price);
+    }
+
     //carry
 
     public static function getCarryPrice($region, $cart_id, $point_id){
@@ -1363,17 +1442,23 @@ class AxiomusPost extends ObjectModel {
         $regionForRow=$region;
         if ($regionForRow!= 'Москва' && $regionForRow!= 'Санкт-Петербург'){
             $regionForRow = 'Регионы';
-        }
-        $static_price_row = Db::getInstance()->getRow("SELECT * FROM `{$tab}` WHERE `delivery` = 'pecom' AND `city` = '{$regionForRow}';");
-        $pecom_price_row = Db::getInstance()->getRow("SELECT * FROM ps_axiomus_update_pecom WHERE `city` = '{$region} ' AND `datetime`> (now()-INTERVAL 1 DAY);");
-        $delete_old_cache =  "DELETE FROM ps_axiomus_update_pecom WHERE `datetime` < (now() - INTERVAL 1 DAY)";
-        $sql = Db::getInstance()->execute($delete_old_cache);
 
-        $static_price = $static_price_row['sum'] ?? 0;
-        $pecom_price = $pecom_price_row['costTotal'] ?? 0;
-        if(empty($pecom_price_row) && !empty($cart_id)){
-            $pecom_price = AxiomusXml::GetPricePecom($region,$cart_id);
+            $static_price_row = Db::getInstance()->getRow("SELECT * FROM `{$tab}` WHERE `delivery` = 'pecom' AND `city` = '{$regionForRow}';");
+            $pecom_price_row = Db::getInstance()->getRow("SELECT * FROM ps_axiomus_pecom_carry WHERE `city` = '{$region} ' AND `datetime`> (now()-INTERVAL 1 DAY);");
+            $delete_old_cache = "DELETE FROM ps_axiomus_pecom_carry WHERE `datetime` < (now() - INTERVAL 1 DAY)";
+            $sql = Db::getInstance()->execute($delete_old_cache);
+
+            $pecom_price = $pecom_price_row['costTotal'] ?? 0;
+
+            if (empty($pecom_price_row) && !empty($cart_id)) {
+                $pecom_price = AxiomusXml::GetPricePecom($region, $cart_id, true);
+                if (!$pecom_price) return false;
+            }
+        }else{
+            $static_price_row = Db::getInstance()->getRow("SELECT * FROM `{$tab}` WHERE `delivery` = 'pecom' AND `city` = '{$regionForRow}';");
         }
+        $static_price = $static_price_row['sum'] ?? 0;
+
 
         return round($pecom_price + $static_price);
     }
@@ -1385,8 +1470,8 @@ class AxiomusPost extends ObjectModel {
         if ($cityForStaticPrice!= 'Москва' && $cityForStaticPrice!= 'Санкт-Петербург'){
             $cityForStaticPrice = 'Регионы';}
             $static_price_row = Db::getInstance()->getRow("SELECT * FROM `{$tab}` WHERE `delivery` = '{$name}' AND `city` = '{$cityForStaticPrice}';");
-            $pecom_price_row = Db::getInstance()->getRow("SELECT * FROM ps_axiomus_update_pecom WHERE `city` = '{$city} ' AND `datetime`> (now()-INTERVAL 1 DAY);");
-            $delete_old_cache =  "DELETE FROM ps_axiomus_update_pecom WHERE `datetime` < (now() - INTERVAL 1 DAY)";
+            $pecom_price_row = Db::getInstance()->getRow("SELECT * FROM ps_axiomus_pecom_carry WHERE `city` = '{$city} ' AND `datetime`> (now()-INTERVAL 1 DAY);");
+            $delete_old_cache =  "DELETE FROM ps_axiomus_pecom_carry WHERE `datetime` < (now() - INTERVAL 1 DAY)";
             $sql = Db::getInstance()->execute($delete_old_cache);
             $static_price = $static_price_row['sum'] ?? 0;
             $pecom_price = $pecom_price_row['costTotal'] ?? 0;

@@ -4,7 +4,7 @@
  */
 require_once(_PS_MODULE_DIR_ . 'axiomuspostcarrier/models/AxiomusPost.php');
 
-class axiomuspostcarrierGetPriceCarryModuleFrontController extends ModuleFrontController
+class axiomuspostcarrierGetPriceDeliveryRegionModuleFrontController extends ModuleFrontController
 {
     public function init()
     {
@@ -28,11 +28,11 @@ class axiomuspostcarrierGetPriceCarryModuleFrontController extends ModuleFrontCo
                 exit;
             }
         }
-        if (!isset($_POST['point_id'])) {
+        if (!isset($_POST['city_id'])) {
             exit;
         } else {
-            $point = htmlspecialchars($_POST['point_id']);
-            if (preg_match("#[{$pattern}]#", $_POST['point_id'])) {
+            $city_id = htmlspecialchars($_POST['city_id']);
+            if (preg_match("#[{$pattern}]#", $_POST['city_id'])) {
                 exit;
             }
         }
@@ -45,7 +45,7 @@ class axiomuspostcarrierGetPriceCarryModuleFrontController extends ModuleFrontCo
             }
         }
 
-        $res = AxiomusPost::getCarryPrice($region, $cart_id, $point);
+        $res = AxiomusPost::getDeliveryPriceRegion($region, $cart_id, $city_id);
 
 //            $AxiomusPost = new AxiomusPost();
 //            $price = $AxiomusPost->getPrice($_POST['cart_id'], $_POST['city'], (boolean)$_POST['carry'], $_POST['weight'], $_POST['price'],(isset($_POST['carrytype'])?(int)$_POST['carrytype']:null), (isset($_POST['kad'])?(int)$_POST['kad']:null), (isset($_POST['time'])?(int)$_POST['time']:null));
