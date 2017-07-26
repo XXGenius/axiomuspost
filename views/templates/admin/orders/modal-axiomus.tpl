@@ -21,7 +21,7 @@
                 <div class="row">
                     <label class="control-label col-lg-3">Количество дней хранения</label>
                     <div class="col-lg-9">
-                        <input type="text" id="mscw-carry-axiomus-daycount" class="" name="mscw-carry-axiomus-daycount" value="{$mscw_carry_axiomus_daycount}">
+                        <input type="text" id="mscw-carry-axiomus-daycount" class="" name="mscw-carry-axiomus-daycount" value="{*$mscw_carry_axiomus.daycount*}">
                     </div>
                 </div>
             </div>

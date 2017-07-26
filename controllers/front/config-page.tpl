@@ -1211,7 +1211,7 @@
                                         </form>
                                         </tfoot>
                                         <tbody>
-                                        {foreach from=$AxiomusPost->getAllKadType('Санкт-Петербург') item=line}
+                                        {foreach from=$AxiomusPost->getKadType('Санкт-Петербург') item=line}
                                             <tr>
                                                 <form action="{$smarty.server.REQUEST_URI|escape:'html':'UTF-8'}&amp;" method="post"">
                                                 <td><input type="hidden" name="ptr-axiomus-kadtype-id" value="{$line.id}">{$line.id}</td>
@@ -2398,7 +2398,6 @@
                                 <button type="submit" id="submitRefreshCacheCarryAddressesPecom" class="btn btn-success pull-right" name="submitRefreshCacheCarryAddressesPecom">
                                     {l s='Обновить кэш ПЭК'}
                                 </button>
-
                             </div>
                         </div>
                         </form>

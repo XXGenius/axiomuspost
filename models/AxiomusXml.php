@@ -610,7 +610,8 @@ public $pecomDeliveryNeededAddressComment;
 
     }
 
-    public function sendToPecom($params){
+    public function sendToPecom($params)
+    {
 
         if(isset($params['position_count'])){
             $this->positionsCount = (int)$params['position_count'];
@@ -738,7 +739,8 @@ public $pecomDeliveryNeededAddressComment;
         }
     }
 
-    public function deleteToPecom(){
+    public function deleteToPecom()
+    {
         // Создание экземпляра класса
         $sdk = new PecomKabinet(self::$usernamePecom, self::$apikeyPecom);
         // Вызов метода
@@ -773,7 +775,8 @@ public $pecomDeliveryNeededAddressComment;
         }
     }
 
-    public static function getCarryAddressesPecom(){
+    public static function getCarryAddressesPecom()
+    {
 
 
         // Создание экземпляра класса
@@ -794,6 +797,72 @@ public $pecomDeliveryNeededAddressComment;
             }
             $sdk->close();
             return $errorText;
+        }
+    }
+
+    public static function GetPricePecom($city, $cart_id)
+    {
+        // Создание экземпляра класса
+        $sdk = new PecomKabinet(Configuration::get('RS_PECOM_NICKNAME'), Configuration::get('RS_PECOM_API'));
+        $cart = new Cart($cart_id);
+        $totalWeight = $cart->getTotalWeight();
+        $products = (float)$cart->nbProducts();
+        $volume = 0.016355 * $products;
+        // Вызов метода
+        $code = Db::getInstance()->getRow("SELECT `bitrixId` FROM ps_axiomus_city_pecom where `title` = '{$city}'");
+        $cityData= array('title'=>$city);
+        $price = $cart->getordertotal(); //ToDo сумму взять из cart
+         if(empty ($code)) {
+             $bitrixId = $sdk->call('branches', 'findbytitle',$cityData );
+             if (isset($bitrixId->succes)) {
+                 $code = $bitrixId->items[0]->cityId;
+                 $sdk->close();
+             }else{
+                 return false;
+             }
+         }
+        $request = [
+            'senderCityId' => 446, //код города отправителя
+            'receiverCityId' => (int)$code['bitrixId'], //код города получателя
+            'isInsurancePrice' => (float)$price,//оценочная стоимость , руб
+            'isPickUp' => 0, //нужен забор
+            'isDelivery' => 0,//нужна доставка
+            'Cargos' => [[ // Данные о грузах [Array]
+                'length'=> 0, // Длина груза, м [Number]
+                'maxSize'=> 0,
+                'height' => 0,
+                'width'=> 0, // Ширина груза, м
+                'volume' => $volume, // Объем груза, м3
+                'isHP' =>0, // Жесткая упаковка [Boolean]
+                'sealingPositionsCount'=> 0, // Количество мест для пломбировки [Number]
+                'weight' => $totalWeight, // Вес, кг [Number]
+                'overSize' => 0 // Негабаритный груз [Boolean]
+            ]]
+        ];
+
+        $result = $sdk->call('calculator', 'calculateprice', $request);
+
+        if (!isset($result->error)) {
+            $pecomprice = $result->transfers[0]->costTotal;
+            $pecomprice1 = $result->transfers[1]->costTotal;
+            $sum = $pecomprice + $pecomprice1;
+
+            $res = Db::getInstance()->autoExecuteWithNullValues('ps_axiomus_update_pecom', [
+                'is_avia'=>false,
+                'city' => (string)$result->commonTerms[0]->branchReceiver,
+                'costTotal' => (int)$sum,
+                'receiverCityId'=> (int)$code['bitrixId'],
+            ], 'INSERT');   //ToDo тут инсерт в таблицу с кешем!!!
+
+            return $sum; //Херня, должен вернуть просто сумму, не массив, выше до возврата должен сделать инсерт в таблицу
+            }else{
+            $errorText =  'Ошибка ответа ПЭК. '.$result->error->title.'. ';
+            foreach ($result->error->fields as $fields){
+                $errorText .= 'Ошибка в поле: '.$fields->Key.' . '.$fields->Value[0].'. ';
+            }
+
+            $sdk->close();
+            return 0;
         }
     }
 }

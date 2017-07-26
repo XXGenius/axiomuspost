@@ -9,7 +9,7 @@ if (!defined('_PS_VERSION_'))
     exit;
 
 require_once(_PS_MODULE_DIR_ . 'axiomuspostcarrier/models/AxiomusPost.php');
-require_once(_PS_MODULE_DIR_ . 'axiomuspostcarrier/axiomusFunctions.php');
+require_once(_PS_MODULE_DIR_ . 'axiomuspostcarrier/develop/axiomusFunctions.php');
 
 class axiomuspostcarrier extends CarrierModule
 {
@@ -26,7 +26,7 @@ class axiomuspostcarrier extends CarrierModule
     {
         $this->name = 'axiomuspostcarrier';
         $this->tab = 'shipping_logistics';
-        $this->version = '1.1.0';
+        $this->version = '1.10.1';
         $this->author = 'Robert Spectrum';
         $this->controllers = array('changecarrieroptions'); //ToDo зачем это и может добавить все контроллеры?
         $this->displayName = $this->l('Axiomus Post');
@@ -1132,7 +1132,7 @@ class axiomuspostcarrier extends CarrierModule
     }
 
     public function hookDisplayAdminOrderTabShip($params = null){
-        return $this->display('axiomuspostcarrier', 'views/templates/admin/orders/tab-ship.tpl');
+        return $this->display('axiomuspostcarrier', 'views/templates/admin/orders/tab-ship.f');
     }
 
     public function hookDisplayAdminOrderContentShip($params = null){

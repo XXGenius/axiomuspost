@@ -37,7 +37,7 @@
 {if $nbProducts <= 0}
     <p class="warning">{l s='Your shopping cart is empty.' mod='axiomuspostcarrier'}</p>
 {else}
-    {if $city != 'Москва' && $city != 'Санкт-Петербург' && $AxiomusPost->getActiveCarry($city)|@count != 0}
+    {if $city == 'Москва' || $city == 'Санкт-Петербург' || $AxiomusPost->getActiveCarry($city)|@count != 0}
         <h4>{l s='Выберите спсоб доставки:' mod='axiomuspostcarrier'}</h4>
 
         <form action="{$link->getModuleLink('axiomuspostcarrier', 'validation', [], true)|escape:'html'}" method="post" class="form-inline">
@@ -48,6 +48,7 @@
                             <div class="required form-group">
                                 <label class="radio-inline delivery-type" id="opt-delivery-parent"><input type="radio" name="delivery-type" value="0" id="opt-delivery" )>Доставка до двери</label>
                                 <label class="radio-inline delivery-type"><input type="radio" name="delivery-type" value="1" id="opt-carry">Самовывоз</label>
+                                <label class="radio-inline delivery-type" id="pecom-button" ><input type="radio" name="delivery-type" value="2" id="opt-pecom">Доставка в регионы</label>
                             </div>
                         </div>
                     </div>
@@ -139,7 +140,7 @@
 
             <p class="cart_navigation clearfix">
                 <input type="hidden" name="step" value="4" />
-                        <a href="{$link->getPageLink('order', true, NULL, "step=4{if $multi_shipping}&multi-shipping={$multi_shipping}{/if}")|escape:'html':'UTF-8'}" title="{l s='Previous' mod='axiomuspostcarrier'}" class="button-exclusive btn btn-default">
+                        <a href="{$link->getPageLink('order', true, NULL, "step=4")|escape:'html':'UTF-8'}" title="{l s='Previous' mod='axiomuspostcarrier'}" class="button-exclusive btn btn-default">
                             <i class="icon-chevron-left"></i>
                             {l s='Вернуться' mod='axiomuspostcarrier'}
                         </a>
@@ -162,10 +163,13 @@
 
                 city = '{$city}';
                  if (city == 'Москва' || city == 'Санкт-Петербург') {
+
                      $('#opt-delivery').prop('checked', true);
                      $('#carry_address_block').hide();
+                     $('#pecom-button').hide();
                      updatePrice(0);
                  }else{
+
                      $('#opt-delivery-parent').hide();
                      $('#opt-carry').prop('checked', true);
                      $('#rowDelivery').hide();
@@ -180,12 +184,15 @@
                     updatePrice(1);
                 });
 
-    //            $('.delivery-type').click(function () {
-    //                updatePrice();
-    //            });
+                $('.delivery-type').click(function () {
+                    updatePrice();
+                });
+
+
 
                 $('.delivery-type').change(function () {
-                    if(radioInputDelivery.prop('checked')){
+                    radioInputDelivery = $("input[name='delivery-type']");
+                    if(radioInputDelivery.prop('checked')) {
                         $('#rowDelivery').show();
                         $('#rowCarry').hide();
                     }else{
@@ -282,7 +289,7 @@
 
                 function updatePrice(carry) {
 
-                    data = 'carry='+carry+'&city='+'{$city}&weight={$weight}&price={$productprice}';
+                    data = 'cart_id='+'{$cart_id}'+'&carry='+carry+'&city='+'{$city}&weight={$weight}&price={$productprice}';
                     if (carry=='0'){
                         kadtype = $("#kad_type").val();
                         deliveryDate = $("#delivery_date").val();
