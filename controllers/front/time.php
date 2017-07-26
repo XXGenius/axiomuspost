@@ -11,25 +11,22 @@
  */
 require_once(_PS_MODULE_DIR_ . 'axiomuspostcarrier/models/AxiomusPost.php');
 
-class axiomuspostcarrierCarryPointModuleFrontController extends ModuleFrontController
+class axiomuspostcarrierTimeModuleFrontController extends ModuleFrontController
 {
     public function init()
     {
         parent::init();
         if($_POST['data_id'] == 0) { //city[0]-Москва, [1]-Питер,[2]- Регионы
-            $sql = ("SELECT id, address AS 'name' FROM ps_axiomus_cache_carry_pecom WHERE city_name='Москва'");
+            $sql = ("SELECT `id`, `name` FROM ps_axiomus_time_type WHERE city='Москва'");
             $city = Db::getInstance()->executeS($sql);
             echo json_encode($city);
             exit;
         }else if($_POST['data_id'] == 1){
-            $sql = ("SELECT id, address AS 'name' FROM ps_axiomus_cache_carry_pecom WHERE city_name='Санкт-петербург'");
+            $sql = ("SELECT `id`, `name` FROM ps_axiomus_time_type WHERE city='Санкт-Петербург'");
             $city = Db::getInstance()->executeS($sql);
             echo json_encode($city);
             exit;
-        }else if($_POST['data_id'] == 2){
-            $sql = ("SELECT  id, city_name as 'name' FROM ps_axiomus_cache_carry_pecom GROUP BY city_name");
-            $city= Db::getInstance()->executeS($sql);
-            echo json_encode($city);
+        }else if($_POST['data_id'] == 3){
             exit;
         }
     }

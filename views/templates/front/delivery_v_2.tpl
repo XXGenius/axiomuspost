@@ -24,51 +24,61 @@
                         </label>
                     </div>
                     <div class="form-check">
-                        <label class="form-check-label delivery-type"><input type="radio" name="delivery-type" value="1" id="opt-delivery">Доставка до дери</label>
+                        <label class="form-check-label delivery-type"><input type="radio" name="delivery-type" value="1" id="opt-delivery">Доставка до двери</label>
                     </div>
                 </fieldset>
             </div>
         </div>
     </div>
     <div class="row opt-delivery" style="display:none">
-        <div class="col-md-3 col-lg-3 col-sm-3 col-xs-6">
-            <div class="form-group ">
-                <label for="select-regionDelivery">Выберите место доставки</label>
-                <select class="form-control" id="select-regionDelivery">
+        <div class="col-md-4 col-lg-4 col-sm-4 col-xs-6" id="select-delivery-region-block">
+            <div class="form-group">
+                <label for="select-delivery-region">Выберите место доставки</label>
+                <select class="form-control" id="select-delivery-region">
                     <option value="0" selected>Москва</option>
                     <option value="1">Санкт-Петербург</option>
                     <option value="2">Россия</option>
                 </select>
             </div>
         </div>
-        <div class="col-md-3 col-lg-3 col-sm-3 col-xs-6">
+        <div class="col-md-4 col-lg-4 col-sm-4 col-xs-6" id="select-delivery-city-loader" style="display:none">
+            <img src="/img/loader.gif" style="margin-top: 20px">
+        </div>
+        <div class="col-md-4 col-lg-4 col-sm-4 col-xs-6" id="select-delivery-city-block" style="display:none">
+            <div class="delivery-pecom form-group">
+                <label for="select-delivery-city">Уточните Город</label>
+                <select class="form-control" name="select-delivery-city"  id="select-delivery-city">
+                    <option></option>
+                </select>
+            </div>
+        </div>
+        <div class="col-md-4 col-lg-4 col-sm-4 col-xs-6" id="select-delivery-kad-loader" style="display:none">
+            <img src="/img/loader.gif" style="margin-top: 20px">
+        </div>
+        <div class="col-md-4 col-lg-4 col-sm-4 col-xs-6" id="select-delivery-kad-block" style="display:none">
             <div class="delivery-moscow form-group">
-                <label for="exampleSelect">удалённость от МКАДа</label>
-                <select class="form-control carry-moscow" id="carrymoscow">
+                <label for="select-delivery-kad">удалённость от МКАДа</label>
+                <select class="form-control carry-moscow" id="select-delivery-kad">
                     <option>в пределах МКАД</option>
                     <option>до 5 км от МКАД</option>
                     <option>от 5м до 10 км от МКАД</option>
                 </select>
             </div>
         </div>
-        <div class="col-md-3 col-lg-3 col-sm-3 col-xs-6" >
+        <div class="col-md-4 col-lg-4 col-sm-4 col-xs-6" id="select-delivery-time-loader" style="display:none">
+            <img src="/img/loader.gif" style="margin-top: 20px">
+        </div>
+        <div class="col-md-4 col-lg-4 col-sm-4 col-xs-6" id="select-delivery-time-block" style="display:none">
             <div class="delivery-moscow form-group">
-                <label for="exampleSelect">Время доставки</label>
-                <select class="form-control " id="exampleSelect">
+                <label for="select-delivery-time">Время доставки</label>
+                <select class="form-control " id="select-delivery-time">
                     <option>от 10 до 14</option>
                     <option>от 14 до 18</option>
                     <option>от 18 до 22</option>
                 </select>
             </div>
         </div>
-        <div class="col-md-3 col-lg-3 col-sm-3 col-xs-6" >
-            <div class="delivery-pecom form-group" style="display:none">
-                <label for="exampleSelect">Уточните Город</label>
-                <select class="form-control" name="select-point">
-                <option></option>
-                </select>
-            </div>
-        </div>
+
     </div>
 
     <div class="row opt-carry">
@@ -209,10 +219,17 @@ $(document).ready(function (){
         if(radioInputDelivery.prop('checked')) {
             $('.opt-carry').show();
             $('.opt-delivery').hide();
-            $('')
+
         }else{
             $('.opt-carry').hide();
             $('.opt-delivery').show();
+            $('#select-delivery-region-block div.selector').css("width", '100%');
+            $('#select-delivery-region-block span').css("width", '100%');
+            $('#select-delivery-kad-block div.selector').css("width", '100%');
+            $('#select-delivery-kad-block span').css("width", '100%');
+            $('#select-delivery-time-block div.selector').css("width", '100%');
+            $('#select-delivery-time-block span').css("width", '100%');
+
         }
     });
 
@@ -221,34 +238,46 @@ $(document).ready(function (){
 
         if(region === "0" || region==="1" ){
             $('#select-city-block').hide();
-            setOptionToSelect('select-point', 'carrypoint',region);
+            setOptionToSelect('select-point', 'carrypoint', region, false);
         }else {
             $('#select-point-block').hide();
             $('#select-city-block').show();
-            setOptionToSelect('select-city', 'carrypoint', region);
+            setOptionToSelect('select-city', 'carrypoint', region, false);
         }
 
     });
 
     $('#select-city').change(function(){
         $('#select-point-block').show();
-        city = $('#select-city option:selected').attr("value");
-        setOptionToSelect('select-point', 'getpointcountry', city);
+        city_id = $('#select-city option:selected').attr("value");
+        setOptionToSelect('select-point', 'getpointcountry', city_id, false);
     });
 
-//    $('#select-regionDelivery').change(function(){ //выбор места ДОСТАВКИ
-//        city = $('#select-regionDelivery option:selected').attr("value");
-//        console.log(city);
-//        if(city === "0" || city==="1" ){
-//            $('.delivery-moscow').show();
-//            $('.delivery-pecom').hide();
-//        }else{
-//            $('.delivery-moscow').hide();
-//            $('.delivery-pecom').show();
-//        }
-//    });
+    $('#select-point').change(function(){
+        getPriceCarry();
+    });
 
-    function setOptionToSelect(select_name, controller, data_id) {
+    $('#select-point').change(function(){
+        getPriceDelivery();
+    });
+
+    $('#select-delivery-region').change(function(){ // выбор места самовывоза + ajax запрос CarryPoint
+        let region_delivery = $('#select-delivery-region option:selected').attr("value");
+
+        console.log('region_delivery:'+region_delivery);
+        if(region_delivery === "0" || region_delivery==="1" ){
+            $('#select-delivery-city-block').hide();
+            setOptionToSelect('select-delivery-kad', 'kad', region_delivery, false);
+            setOptionToSelect('select-delivery-time', 'time', region_delivery, false);
+        }else {
+            $('#select-delivery-kad-block').hide();
+            $('#select-delivery-time-block').hide();
+            setOptionToSelect('select-delivery-city', 'carrypoint', region_delivery, false);
+        }
+
+    });
+
+    function setOptionToSelect(select_name, controller, data_id, need_update_price = true) {
         let data = 'data_id='+data_id;
 
         $('#'+select_name+'-block').hide();
@@ -258,6 +287,7 @@ $(document).ready(function (){
             url: '/index.php?fc=module&module=axiomuspostcarrier&controller='+controller,
             data: data,
             success: function(data) {
+                console.log('success! controller:'+controller);
                 if (data != '') {
                     data = JSON.parse(data);
                     if (data.length > 0) {
@@ -266,7 +296,7 @@ $(document).ready(function (){
                         for (var id in data) {
                             select_param = (first) ? 'selected' : '';
                             $("#" + select_name).append(
-                                '<option value="' + data[id]['id'] + '" ' + select_param + '>' + data[id]['city'] + '</option>'
+                                '<option value="' + data[id]['id'] + '" ' + select_param + '>' + data[id]['name'] + '</option>'
                             );
 
                             first = false;
@@ -277,14 +307,14 @@ $(document).ready(function (){
                         $('#' + select_name + '-block span').css("width", '100%');
 
                         $('#' + select_name + '-loader').hide(); //ToDo Спрятать индикатор загрузки
-                        getPrice();
+                        if (need_update_price) getPriceCarry();
                     }
                 }
             }
         })
     }
     
-    function getPrice() {
+    function getPriceCarry() {
         region = $('#select-region option:selected').attr("value");
         point = $('#select-point option:selected').attr("value");
 
@@ -308,6 +338,32 @@ $(document).ready(function (){
             }
         })
     }
+
+    function getPriceDelivery() {
+        region = $('#select-region option:selected').attr("value");
+        point = $('#select-point option:selected').attr("value");
+
+        let data = 'region='+region+'&point_id='+point+'&cart_id='+{$cart_id};
+
+        $('#delivery-price-block').show();  //показать блок с ценой
+        $.ajax({
+            type: 'POST',
+            url: '/index.php?fc=module&module=axiomuspostcarrier&controller=getpricecarry',
+            data: data,
+            success: function(data) {
+                if (data != '') {
+                    console.log(data);
+
+                    if (data.length > 0) {
+
+                        $('#delivery-price').text(data);
+                        $('#delivery-price-loader').hide(); //ToDo Спрятать индикатор загрузки
+                    }
+                }
+            }
+        })
+    }
+
 
     $("#select-region").change();
 });
