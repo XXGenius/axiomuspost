@@ -4,7 +4,7 @@
     <title>1 step purchase</title>
     {*<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">*}
     {*<script rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>*}
-    {*<script type="text/javascript" src="//ajax.googleapis.com/ajax/libs/jquery/3.1.0/jquery.min.js"></script>*}
+    <script type="text/javascript" src="https://cdn.jsdelivr.net/jquery.validation/1.15.1/jquery.validate.min.js"></script>
 </head>
 
 
@@ -116,24 +116,24 @@
         </div>
     </div>
 
-    <div class="row">
+    <form class="row" id="deliveryform">
         <h3>Заполните данные для доставки</h3>
         <p>* - поля, обязательные для заполнения</p>
-
+        <form id="deliveryform">
         <div class="form-group opt-delivery" style="display:none">
             <!-- PERSONAL info row  NAME -->
             <div class="row">
                 <div class="col-md-4 col-sm-4 col-lg-4 col-xs-12">
                     <label class="sr-only" for="lastname">Фамилия</label>
-                    <input type="text" class="form-control col-md-4 col-sm-4 col-xs-12" id="lastname" placeholder="Фамилия">
+                    <input type="text" class="form-control col-md-4 col-sm-4 col-xs-12" name="lastname" placeholder="Фамилия">
                 </div>
                 <div class="col-md-4 col-sm-4 col-lg-4 col-xs-12">
                     <label class="sr-only" for="firstname">Имя</label>
-                    <input type="text" class="form-control col-md-4 col-sm-4 col-xs-12" id="firstname" placeholder="Имя">
+                    <input type="text" class="form-control col-md-4 col-sm-4 col-xs-12" name="firstname" placeholder="Имя">
                 </div>
                 <div class="col-md-4 col-sm-4 col-lg-4 col-xs-12">
                     <label class="sr-only" for="patronymic">Отчество</label>
-                    <input type="text" class="form-control col-md-4 col-sm-4 col-xs-12" id="patronymic" placeholder="Отчество">
+                    <input type="text" class="form-control col-md-4 col-sm-4 col-xs-12" name="patronymic" placeholder="Отчество">
                 </div>
             </div>
             <!-- PERSONAL info row  CITY -->
@@ -144,70 +144,80 @@
                 </div>
                 <div class="col-md-4 col-sm-4 col-lg-4 col-xs-12">
                     <label class="sr-only" for="email">Email</label>
-                    <input type="text" class="form-control col-md-4 col-sm-4 col-xs-12" id="email" placeholder="Email">
+                    <input type="text" class="form-control col-md-4 col-sm-4 col-xs-12" name="email" placeholder="Email">
                 </div>
                 <div class="col-md-4 col-sm-4 col-lg-4 col-xs-12">
                     <label class="sr-only" for="phone">Телефон</label>
-                    <input type="text" class="form-control col-md-4 col-sm-4 col-xs-12" id="phone" placeholder="Телефон">
+                    <input type="text" class="form-control col-md-4 col-sm-4 col-xs-12" name="phone" placeholder="Телефон">
                 </div>
             </div>
             <!-- PERSONAL info row  CITY -->
             <div class="row">
                 <div class="col-md-4 col-sm-4 col-lg-4 col-xs-12">
                     <label class="sr-only" for="street">Улица</label>
-                    <input type="text" class="form-control col-md-4 col-sm-4 col-xs-12" id="street" placeholder="Улица">
+                    <input type="text" class="form-control col-md-4 col-sm-4 col-xs-12" name="street" placeholder="Улица">
                 </div>
                 <div class="col-md-2 col-sm-2 col-lg-2 col-xs-12">
                     <label class="sr-only" for="home">Дом</label>
-                    <input type="text" class="form-control col-md-4 col-sm-4 col-xs-12" id="home" placeholder="Дом">
+                    <input type="text" class="form-control col-md-4 col-sm-4 col-xs-12" name="home" placeholder="Дом">
                 </div>
                 <div class="col-md-2 col-sm-2 col-lg-2 col-xs-12">
                     <label class="sr-only" for="housing">Корпус</label>
-                    <input type="text" class="form-control col-md-4 col-sm-4 col-xs-12" id="housing" placeholder="Корпус">
+                    <input type="text" class="form-control col-md-4 col-sm-4 col-xs-12" name="housing" placeholder="Корпус">
                 </div>
                 <div class="col-md-2 col-sm-2 col-lg-2 col-xs-12">
                     <label class="sr-only" for="entrance">Домофон</label>
-                    <input type="text" class="form-control col-md-4 col-sm-4 col-xs-12" id="entrance" placeholder="Домофон">
+                    <input type="text" class="form-control col-md-4 col-sm-4 col-xs-12" name="entrance" placeholder="Домофон">
                 </div>
                 <div class="col-md-2 col-sm-2 col-lg-2 col-xs-12">
                     <label class="sr-only" for="apartament">Квартира</label>
-                    <input type="text" class="form-control col-md-4 col-sm-4 col-xs-12" id="apartament" placeholder="Квартира">
+                    <input type="text" class="form-control col-md-4 col-sm-4 col-xs-12" name="apartament" placeholder="Квартира">
                 </div>
             </div>
+            <button type="submit" name="processCarrier" class="button btn btn-default standard-checkout button-medium">
+            <span>
+                {l s='Продолжить' mod='axiomuspostcarrier'}
+                <i class="icon-chevron-right right"></i>
+            </span>
+            </button>
         </div>
+    </form>
+        <form id="carryform">
         <div class="form-group opt-carry">
             <div class="row">
                 <div class="col-md-4 col-sm-4 col-lg-4 col-xs-12">
                     <label class="sr-only" for="lastname">Фамилия</label>
-                    <input type="text" class="form-control col-md-4 col-sm-4 col-xs-12" id="lastname" placeholder="Фамилия">
+                    <input type="text" class="form-control col-md-4 col-sm-4 col-xs-12"  name="lastname" placeholder="Фамилия">
                 </div>
                 <div class="col-md-4 col-sm-4 col-lg-4 col-xs-12">
                     <label class="sr-only" for="firstname">Имя</label>
-                    <input type="text" class="form-control col-md-4 col-sm-4 col-xs-12" id="firstname" placeholder="Имя">
+                    <input type="text" class="form-control col-md-4 col-sm-4 col-xs-12" name="firstname" placeholder="Имя">
                 </div>
                 <div class="col-md-4 col-sm-4 col-lg-4 col-xs-12">
                     <label class="sr-only" for="patronymic">Отчество</label>
-                    <input type="text" class="form-control col-md-4 col-sm-4 col-xs-12" id="patronymic" placeholder="Отчество">
+                    <input type="text" class="form-control col-md-4 col-sm-4 col-xs-12" name="patronymic" placeholder="Отчество">
                 </div>
             </div>
             <!-- PERSONAL info row  CITY -->
             <div class="row">
                 <div class="col-md-4 col-sm-4 col-lg-4 col-xs-12">
                     <label class="sr-only" for="email">Email</label>
-                    <input type="text" class="form-control col-md-4 col-sm-4 col-xs-12" id="email" placeholder="Email">
+                    <input type="text" class="form-control col-md-4 col-sm-4 col-xs-12" name="email" placeholder="Email">
                 </div>
                 <div class="col-md-4 col-sm-4 col-lg-4 col-xs-12">
                     <label class="sr-only" for="phone">Телефон</label>
-                    <input type="text" class="form-control col-md-4 col-sm-4 col-xs-12" id="phone" placeholder="Телефон">
+                    <input type="text" class="form-control col-md-4 col-sm-4 col-xs-12" name="phone" placeholder="Телефон">
                 </div>
             </div>
-        </div>
-        <button type="submit" name="processCarrier" class="button btn btn-default standard-checkout button-medium">
+            <button type="submit" name="processCarrier" class="button btn btn-default standard-checkout button-medium">
             <span>
                 {l s='Продолжить' mod='axiomuspostcarrier'}
                 <i class="icon-chevron-right right"></i>
             </span>
-        </button>
+            </button>
+        </div>
+        </form>
+
     </div>
 </div>
 <script>
@@ -415,6 +425,137 @@ $(document).ready(function (){
         })
     }
 
+
     $("#select-region").change();
+
+
+    $("#carryform").validate({
+        rules:{
+            lastname:{
+                required: true,
+            },
+            firstname:{
+                required: true,
+            },
+            patronymic:{
+                required: true,
+            },
+            email:{
+                required: true,
+                email: true
+            },
+            phone:{
+                required: true,
+                number: true,
+                max_length: 10,
+                min_length: 9
+            },
+        },
+        messages:{
+            lastname:{
+                required: "Это поле обязательно для заполнения",
+            },
+            firstname:{
+                required: "Это поле обязательно для заполнения",
+            },
+            patronymic:{
+                required: "Это поле обязательно для заполнения",
+            },
+            email:{
+                required: "Это поле обязательно для заполнения",
+            },
+            phone:{
+                required: "Это поле обязательно для заполнения",
+                minlength: "Введите номер без восьмёрки",
+                maxlength: "Введите номер без восьмёрки",
+            },
+
+
+        }
+
+    });
+
+    $("#deliveryform").validate({
+        rules:{
+            lastname:{
+                required: true,
+            },
+            firstname:{
+                required: true,
+            },
+            patronymic:{
+                required: true,
+            },
+            email:{
+                required: true,
+                email: true
+            },
+            phone:{
+                required: true,
+                number: true,
+                max_length: 10,
+                min_length: 9
+            },
+            city:{
+                required: true,
+            },
+            house:{
+                required: true,
+            },
+            apartament:{
+                required: true,
+            },
+            street:{
+                required: true,
+            },
+            housing:{
+                required: true,
+            },
+            entrance:{
+                required: true,
+            },
+        },
+        messages:{
+            lastname:{
+                required: "Это поле обязательно для заполнения",
+            },
+            firstname:{
+                required: "Это поле обязательно для заполнения",
+            },
+            patronymic:{
+                required: "Это поле обязательно для заполнения",
+            },
+            email:{
+                required: "Это поле обязательно для заполнения",
+            },
+            phone:{
+                required: "Это поле обязательно для заполнения",
+                minlength: "Введите номер без восьмёрки",
+                maxlength: "Введите номер без восьмёрки",
+            },
+            city:{
+                required: "Это поле обязательно для заполнения",
+            },
+            house:{
+                required: "Это поле обязательно для заполнения",
+            },
+            apatament:{
+                required: "Это поле обязательно для заполнения",
+            },
+            street:{
+                required: "Это поле обязательно для заполнения",
+            },
+             housing:{
+                required: "Это поле обязательно для заполнения",
+            },
+            entrance:{
+                required: "Это поле обязательно для заполнения",
+            },
+
+
+        }
+
+    });
+
 });
 </script>
