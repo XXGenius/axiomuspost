@@ -265,7 +265,7 @@ class axiomuspostcarrier extends CarrierModule
             return false;
         }
         $this->_registerHooks();
-        $this->registerHook('displayBeforeCarrier');
+
         $this->registerHook('displayCarrierList');
         $this->registerHook('actionCarrierProcess');
 
@@ -275,7 +275,56 @@ class axiomuspostcarrier extends CarrierModule
 
         $this->registerHook('displayAdminOrderTabShip');
         $this->registerHook('displayAdminOrderContentShip');
+
+        $this->registerHook('displayCarrierExtraContent');
+        $this->registerHook('actionValidateStepComplete');
+
+        $this->registerHook('extraCarrier');
+        $this->registerHook('actionCarrierProcess');
+
+        $this->registerHook('displayBeforeCarrier');
+        $this->registerHook('displayAfterCarrier');
         return true;
+    }
+
+
+    public function hookDisplayAfterCarrier($params)
+    {
+        $a = 1;
+        return '<input type="checkbox" name="my_module_collection_point" value="1" /> Click here to use the collection point';
+    }
+
+    public function hookExtraCarrier($params)
+    {
+        $a = 1;
+        return '<input type="checkbox" name="my_module_collection_point" value="1" /> Click here to use the collection point';
+    }
+
+    /**
+     * Display additionnal options under the carrier
+     * @param array $params Contains data related to the carrier
+     * @return string
+     */
+    public function hookDisplayCarrierExtraContent($params)
+    {
+        return '<input type="checkbox" name="my_module_collection_point" value="1" /> Click here to use the collection point';
+    }
+
+    /**
+     * Ask for the module to validate the checkout process step with 'completed' params attribute
+     * @param array $params
+     * @return void
+     */
+    public function hookActionValidateStepComplete($params)
+    {
+        if ($params['step_name'] != 'delivery') {
+            return;
+        }
+
+        // If the collection point is not sent, send back to the delivery step
+        if (!isset($params['request_params']['my_module_collection_point'])) {
+            $params['completed'] = false;
+        }
     }
 
     private function _installCarriers(){
@@ -1252,15 +1301,20 @@ class axiomuspostcarrier extends CarrierModule
      * @param $params
      */
     public function hookDisplayBeforeCarrier($params){
-
+        $a = 1;
+//        return '<input type="checkbox" name="my_module_collection_point" value="1" /> Click here to use the collection point';
+        $cart = $this->context->cart;
         $this->smarty->assign(array(//ToDo надо ли это
             'this_path' => $this->_path,
             'this_path_bw' => $this->_path,
+
+            'cart_id' => $cart->id,
             'this_path_ssl' => Tools::getShopDomainSsl(true, true).__PS_BASE_URI__.'modules/'.$this->name.'/'
         ));
-        $sendparams = [];
-        $link = $this->context->link->getModuleLink('axiomuspostcarrier', 'changecarrieroptions', $sendparams);
-        Tools::redirectAdmin($link);
+        return $this->display(__FILE__,'delivery_v_2.tpl');
+
+//        $link = $this->context->link->getModuleLink('axiomuspostcarrier', 'changecarrieroptions', $sendparams);
+//        Tools::redirectAdmin($link);
     }
 
     /**
@@ -1269,7 +1323,8 @@ class axiomuspostcarrier extends CarrierModule
      */
     public function hookActionCarrierProcess($params){
 
-
+        $b = 1;
+        return '<h1>TEST</h1>';
     }
 
     /**
@@ -1277,7 +1332,8 @@ class axiomuspostcarrier extends CarrierModule
      * @param $arr
      */
     public function hookDisplayCarrierList($arr){
-
+        $b = 1;
+        return '<h1>TEST</h1>';
     }
 
 //    public function hookActionOrderStatusPostUpdate($params)
