@@ -12,115 +12,115 @@
     <h2>Оформление заказа</h2>
     <h3>Данные заказа</h3>
      <h4>Сумма заказа: {$productprice}р.</h4>
+    <form id="carryform" action="{$link->getModuleLink('axiomuspostcarrier', 'validationoneclick', [], true)|escape:'html'}" method="post">
+        <h4 id="delivery-price-block" style=" display:none">Сумма доставки: <img src="/img/loader.gif" id="delivery-price-loader"><span id="delivery-price"></span></h4>
+        <div class="row">
+            <div class="delivery-checkout">
+                <div class="col-md-12">
+                    <fieldset class="form-group" > <h3>Выберите тип перевозки</h3>
+                        <label for="exampleSelect1"></label>
+                        <div class="form-check">
+                            <label class="form-check-label delivery-type" id="opt-delivery-parent"><input type="radio" name="delivery-type" value="0" id="opt-carry" checked>Самовывоз</label>
+                        </div>
+                        <div class="form-check">
+                            <label class="form-check-label delivery-type"><input type="radio" name="delivery-type" value="1" id="opt-delivery">Доставка до двери</label>
+                        </div>
+                    </fieldset>
+                </div>
+            </div>
+        </div>
+        <div class="row opt-delivery" style="display:none">
+            <div class="col-md-4 col-lg-4 col-sm-4 col-xs-6" id="select-delivery-region-block">
+                <div class="form-group">
+                    <label for="select-delivery-region">Выберите место доставки</label>
+                    <select class="form-control" id="select-delivery-region">
+                        <option value="0" selected>Москва</option>
+                        <option value="1">Санкт-Петербург</option>
+                        <option value="2">Россия</option>
+                    </select>
+                </div>
+            </div>
+            <div class="col-md-4 col-lg-4 col-sm-4 col-xs-6" id="select-delivery-city-loader" style="display:none">
+                <img src="/img/loader.gif" style="margin-top: 20px">
+            </div>
+            <div class="col-md-4 col-lg-4 col-sm-4 col-xs-6" id="select-delivery-city-block" style="display:none">
+                <div class="delivery-pecom form-group">
+                    <label for="select-delivery-city">Уточните Город</label>
+                    <select class="form-control" name="select-delivery-city"  id="select-delivery-city">
+                        <option></option>
+                    </select>
+                </div>
+            </div>
+            <div class="col-md-4 col-lg-4 col-sm-4 col-xs-6" id="select-delivery-kad-loader" style="display:none">
+                <img src="/img/loader.gif" style="margin-top: 20px">
+            </div>
+            <div class="col-md-4 col-lg-4 col-sm-4 col-xs-6" id="select-delivery-kad-block" style="display:none">
+                <div class="delivery-moscow form-group">
+                    <label for="select-delivery-kad">удалённость от МКАДа</label>
+                    <select class="form-control carry-moscow" id="select-delivery-kad">
+                        <option>в пределах МКАД</option>
+                        <option>до 5 км от МКАД</option>
+                        <option>от 5м до 10 км от МКАД</option>
+                    </select>
+                </div>
+            </div>
+            <div class="col-md-4 col-lg-4 col-sm-4 col-xs-6" id="select-delivery-time-loader" style="display:none">
+                <img src="/img/loader.gif" style="margin-top: 20px">
+            </div>
+            <div class="col-md-4 col-lg-4 col-sm-4 col-xs-6" id="select-delivery-time-block" style="display:none">
+                <div class="delivery-moscow form-group">
+                    <label for="select-delivery-time">Время доставки</label>
+                    <select class="form-control " id="select-delivery-time">
+                        <option>от 10 до 14</option>
+                        <option>от 14 до 18</option>
+                        <option>от 18 до 22</option>
+                    </select>
+                </div>
+            </div>
 
-     <h4 id="delivery-price-block" style=" display:none">Сумма доставки: <img src="/img/loader.gif" id="delivery-price-loader"><span id="delivery-price"></span></h4>
-    <div class="row">
-        <div class="delivery-checkout">
-            <div class="col-md-12">
-                <fieldset class="form-group" > <h3>Выберите тип перевозки</h3>
-                    <label for="exampleSelect1"></label>
-                    <div class="form-check">
-                        <label class="form-check-label delivery-type" id="opt-delivery-parent"><input type="radio" name="delivery-type" value="0" id="opt-carry" checked>Самовывоз</label>
-                    </div>
-                    <div class="form-check">
-                        <label class="form-check-label delivery-type"><input type="radio" name="delivery-type" value="1" id="opt-delivery">Доставка до двери</label>
-                    </div>
-                </fieldset>
+        </div>
+
+        <div class="row opt-carry">
+            <div class="col-md-4 col-lg-4 col-sm-4 col-xs-6">
+                <div class="form-group">
+                    <label for="select-region">Выберите место доставки</label>
+                    <select class="form-control" name="select-region" id="select-region">
+                        <option value="0" selected>Москва и Область</option>
+                        <option value="1">Санкт-Петербург и область</option>
+                        <option value="2">Россия</option>
+                    </select>
+                </div>
             </div>
-        </div>
-    </div>
-    <div class="row opt-delivery" style="display:none">
-        <div class="col-md-4 col-lg-4 col-sm-4 col-xs-6" id="select-delivery-region-block">
-            <div class="form-group">
-                <label for="select-delivery-region">Выберите место доставки</label>
-                <select class="form-control" id="select-delivery-region">
-                    <option value="0" selected>Москва</option>
-                    <option value="1">Санкт-Петербург</option>
-                    <option value="2">Россия</option>
-                </select>
+            <div class="col-md-4 col-lg-4 col-sm-4 col-xs-6" id="select-city-loader" style="display:none">
+                <img src="/img/loader.gif" style="margin-top: 20px">
             </div>
-        </div>
-        <div class="col-md-4 col-lg-4 col-sm-4 col-xs-6" id="select-delivery-city-loader" style="display:none">
-            <img src="/img/loader.gif" style="margin-top: 20px">
-        </div>
-        <div class="col-md-4 col-lg-4 col-sm-4 col-xs-6" id="select-delivery-city-block" style="display:none">
-            <div class="delivery-pecom form-group">
-                <label for="select-delivery-city">Уточните Город</label>
-                <select class="form-control" name="select-delivery-city"  id="select-delivery-city">
-                    <option></option>
-                </select>
+            <div class="col-md-4 col-lg-4 col-sm-4 col-xs-6" id="select-city-block" style="display:none">
+                <div class="form-group">
+                    <label for="select-city">Укажите город:</label>
+                    <select class="form-control" name="select-city" id="select-city">
+                        <option></option>
+                    </select>
+                </div>
             </div>
-        </div>
-        <div class="col-md-4 col-lg-4 col-sm-4 col-xs-6" id="select-delivery-kad-loader" style="display:none">
-            <img src="/img/loader.gif" style="margin-top: 20px">
-        </div>
-        <div class="col-md-4 col-lg-4 col-sm-4 col-xs-6" id="select-delivery-kad-block" style="display:none">
-            <div class="delivery-moscow form-group">
-                <label for="select-delivery-kad">удалённость от МКАДа</label>
-                <select class="form-control carry-moscow" id="select-delivery-kad">
-                    <option>в пределах МКАД</option>
-                    <option>до 5 км от МКАД</option>
-                    <option>от 5м до 10 км от МКАД</option>
-                </select>
+            <div class="col-md-4 col-lg-4 col-sm-4 col-xs-6" id="select-point-loader" style="display:none">
+                <img src="/img/loader.gif" style="margin-top: 20px">
             </div>
-        </div>
-        <div class="col-md-4 col-lg-4 col-sm-4 col-xs-6" id="select-delivery-time-loader" style="display:none">
-            <img src="/img/loader.gif" style="margin-top: 20px">
-        </div>
-        <div class="col-md-4 col-lg-4 col-sm-4 col-xs-6" id="select-delivery-time-block" style="display:none">
-            <div class="delivery-moscow form-group">
-                <label for="select-delivery-time">Время доставки</label>
-                <select class="form-control " id="select-delivery-time">
-                    <option>от 10 до 14</option>
-                    <option>от 14 до 18</option>
-                    <option>от 18 до 22</option>
-                </select>
+            <div class="col-md-4 col-lg-4 col-sm-4 col-xs-6" id="select-point-block" style="display:none">
+
+                <div class="form-group">
+                    <label for="select-point">Укажите точку самовывоза:</label>
+                    <select class="form-control" name="select-point" id="select-point">
+                        <option></option>
+                    </select>
+                </div>
             </div>
         </div>
 
-    </div>
 
-    <div class="row opt-carry">
-        <div class="col-md-4 col-lg-4 col-sm-4 col-xs-6">
-            <div class="form-group"><!--сиски-->
-                <label for="select-region">Выберите место доставки</label>
-                <select class="form-control" name="select-region" id="select-region">
-                    <option value="0" selected>Москва и Область</option>
-                    <option value="1">Санкт-Петербург и область</option>
-                    <option value="2">Россия</option>
-                </select>
-            </div>
-        </div>
-        <div class="col-md-4 col-lg-4 col-sm-4 col-xs-6" id="select-city-loader" style="display:none">
-            <img src="/img/loader.gif" style="margin-top: 20px">
-        </div>
-        <div class="col-md-4 col-lg-4 col-sm-4 col-xs-6" id="select-city-block" style="display:none">
-            <div class="form-group">
-                <label for="select-city">Укажите город:</label>
-                <select class="form-control" name="select-city" id="select-city">
-                    <option></option>
-                </select>
-            </div>
-        </div>
-        <div class="col-md-4 col-lg-4 col-sm-4 col-xs-6" id="select-point-loader" style="display:none">
-            <img src="/img/loader.gif" style="margin-top: 20px">
-        </div>
-        <div class="col-md-4 col-lg-4 col-sm-4 col-xs-6" id="select-point-block" style="display:none">
-
-            <div class="form-group">
-                <label for="select-point">Укажите точку самовывоза:</label>
-                <select class="form-control" name="select-point" id="select-point">
-                    <option></option>
-                </select>
-            </div>
-        </div>
-    </div>
-
-    <form class="row" id="deliveryform">
         <h3>Заполните данные для доставки</h3>
         <p>* - поля, обязательные для заполнения</p>
-        <form id="deliveryform">
-        <div class="form-group opt-delivery" style="display:none">
+
+        <div class="opt-delivery" style="display:none">
             <!-- PERSONAL info row  NAME -->
             <div class="row">
                 <div class="col-md-4 col-sm-4 col-lg-4 col-xs-12">
@@ -174,6 +174,36 @@
                     <input type="text" class="form-control col-md-4 col-sm-4 col-xs-12" name="apartament" placeholder="Квартира">
                 </div>
             </div>
+
+        </div>
+
+
+        <div class="form-group opt-carry">
+            <div class="row">
+                <div class="col-md-4 col-sm-4 col-lg-4 col-xs-12">
+                    <label class="sr-only" for="lastname">Фамилия</label>
+                    <input type="text" class="form-control col-md-4 col-sm-4 col-xs-12"  name="lastname-carry" placeholder="Фамилия">
+                </div>
+                <div class="col-md-4 col-sm-4 col-lg-4 col-xs-12">
+                    <label class="sr-only" for="firstname">Имя</label>
+                    <input type="text" class="form-control col-md-4 col-sm-4 col-xs-12" name="firstname-carry" placeholder="Имя">
+                </div>
+                <div class="col-md-4 col-sm-4 col-lg-4 col-xs-12">
+                    <label class="sr-only" for="patronymic">Отчество</label>
+                    <input type="text" class="form-control col-md-4 col-sm-4 col-xs-12" name="patronymic-carry" placeholder="Отчество">
+                </div>
+            </div>
+            <!-- PERSONAL info row  CITY -->
+            <div class="row">
+                <div class="col-md-4 col-sm-4 col-lg-4 col-xs-12">
+                    <label class="sr-only" for="email">Email</label>
+                    <input type="text" class="form-control col-md-4 col-sm-4 col-xs-12" name="email-carry" placeholder="Email">
+                </div>
+                <div class="col-md-4 col-sm-4 col-lg-4 col-xs-12">
+                    <label class="sr-only" for="phone">Телефон</label>
+                    <input type="text" class="form-control col-md-4 col-sm-4 col-xs-12" name="phone-carry" placeholder="Телефон">
+                </div>
+            </div>
             <button type="submit" name="processCarrier" class="button btn btn-default standard-checkout button-medium">
             <span>
                 {l s='Продолжить' mod='axiomuspostcarrier'}
@@ -182,44 +212,9 @@
             </button>
         </div>
     </form>
-        <form id="carryform">
-        <div class="form-group opt-carry">
-            <div class="row">
-                <div class="col-md-4 col-sm-4 col-lg-4 col-xs-12">
-                    <label class="sr-only" for="lastname">Фамилия</label>
-                    <input type="text" class="form-control col-md-4 col-sm-4 col-xs-12"  name="lastname" placeholder="Фамилия">
-                </div>
-                <div class="col-md-4 col-sm-4 col-lg-4 col-xs-12">
-                    <label class="sr-only" for="firstname">Имя</label>
-                    <input type="text" class="form-control col-md-4 col-sm-4 col-xs-12" name="firstname" placeholder="Имя">
-                </div>
-                <div class="col-md-4 col-sm-4 col-lg-4 col-xs-12">
-                    <label class="sr-only" for="patronymic">Отчество</label>
-                    <input type="text" class="form-control col-md-4 col-sm-4 col-xs-12" name="patronymic" placeholder="Отчество">
-                </div>
-            </div>
-            <!-- PERSONAL info row  CITY -->
-            <div class="row">
-                <div class="col-md-4 col-sm-4 col-lg-4 col-xs-12">
-                    <label class="sr-only" for="email">Email</label>
-                    <input type="text" class="form-control col-md-4 col-sm-4 col-xs-12" name="email" placeholder="Email">
-                </div>
-                <div class="col-md-4 col-sm-4 col-lg-4 col-xs-12">
-                    <label class="sr-only" for="phone">Телефон</label>
-                    <input type="text" class="form-control col-md-4 col-sm-4 col-xs-12" name="phone" placeholder="Телефон">
-                </div>
-            </div>
-            <button type="submit" name="processCarrier" class="button btn btn-default standard-checkout button-medium">
-            <span>
-                {l s='Продолжить' mod='axiomuspostcarrier'}
-                <i class="icon-chevron-right right"></i>
-            </span>
-            </button>
-        </div>
-        </form>
 
-    </div>
 </div>
+
 <script>
 $(document).ready(function (){
 
@@ -447,8 +442,8 @@ $(document).ready(function (){
             phone:{
                 required: true,
                 number: true,
-                max_length: 10,
-                min_length: 9
+//                max_length: 12,
+//                min_length: 9
             },
         },
         messages:{
