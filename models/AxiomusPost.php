@@ -1088,6 +1088,9 @@ class AxiomusPost extends ObjectModel {
     }
 
     public function getCarryAddresses($carry_id, $city = null, $id = null, $code = null){
+
+        $carry_id = (int)Configuration::get('RS_AXIOMUS_ID_PECOM_CARRY'); //Костыль, потому что всегда самовывоз пеком
+
         if ($carry_id == (int)Configuration::get('RS_AXIOMUS_ID_AXIOMUS_CARRY')) { //axiomus
             $activeTable = $this->tableCacheCarryAxiomusWithPrefix;
             $sql = "SELECT * FROM `{$activeTable}`";

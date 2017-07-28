@@ -21,7 +21,6 @@ class axiomuspostcarrierValidationOneClickModuleFrontController extends ModuleFr
 
         $this->AxiomusPost = new AxiomusPost();
 
-        $res = $this->AxiomusPost->setOrder($cart->id, $delivery_id, $_POST);
 
             if ($_POST['delivery-type'] == '1'){ //Самовывоз
                 if($_POST['select-region'] == '0'){//Москва
@@ -37,13 +36,15 @@ class axiomuspostcarrierValidationOneClickModuleFrontController extends ModuleFr
             }elseif($_POST['delivery-type'] == '0'){ //Доставка
                 $delivery_date = new DateTime($_POST['delivery_date']);
                 $date_now = new DateTime();
-                if ($delivery_date<$date_now){
+                if ($delivery_date < $date_now){
                     echo json_encode(['error' => 'date_delivery<date_now']);
                 }
             }else{
                 echo json_encode(['success' => false]);
                 exit;
             }
+
+            $res = $this->AxiomusPost->setOrder($cart->id, $delivery_id, $_POST);
 
             if ($res) {
                 $this->context->cart->update(); //ToDo Почему carry-name а не carry-id

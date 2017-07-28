@@ -650,7 +650,7 @@ public $pecomDeliveryNeededAddressComment;
                 'type' => 3,
                 'applicationDate' => $this->delivery_date->format('Y-m-d'),
                 'description' => "Заказ #".$this->order->id,
-                'weight' => $this->weight,
+                'weight' => $this->weight==0?0.02:$this->weight,
                 'volume' => $this->volume,
                 'positionsCount' => $this->positionsCount,
                 'width' => $this->width,

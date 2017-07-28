@@ -1182,7 +1182,7 @@ class axiomuspostcarrier extends CarrierModule
     }
 
     public function hookDisplayAdminOrderTabShip($params = null){
-        return $this->display('axiomuspostcarrier', 'views/templates/admin/orders/tab-ship.f');
+        return $this->display('axiomuspostcarrier', 'views/templates/admin/orders/tab-ship.tpl');
     }
 
     public function hookDisplayAdminOrderContentShip($params = null){
@@ -1190,9 +1190,10 @@ class axiomuspostcarrier extends CarrierModule
         $order_axiomus = $this->AxiomusPost->getOrderByIdCart($this->context->cart->id);
         if ($order_axiomus['carry']){
             $order_axiomus['type'] = 'Самовывоз';
-            $carry_row = $this->AxiomusPost->getCarryAddresses($this->context->cart->id_carrier, null, null, $order_axiomus['carry_code'])[0];
+            $carry_row = $this->AxiomusPost->getCarryAddresses($this->context->cart->id_carrier, null, $order_axiomus['carry_code'], null);
             $this->context->smarty->assign('carry_row', $carry_row);
 
+            $this->context->cart->id_carrier = (int)Configuration::get('RS_AXIOMUS_ID_PECOM_CARRY'); //Костыль, самовывоз всегда пек
             if($this->context->cart->id_carrier == (int)Configuration::get('RS_AXIOMUS_ID_AXIOMUS_CARRY')){
                 $this->context->smarty->assign('deliveries_used', [
                     'axiomus' => 1,
