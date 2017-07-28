@@ -370,6 +370,9 @@ class AdminAxiomusConfigController extends ModuleAdminController
             if ((boolean)$_POST['use-region-pecom-carry'] != $this->settingsArray['use_region_pecom_carry']) {
                 Configuration::updateValue('RS_AXIOMUS_REGION_USE_PECOM_CARRY', $_POST['use-region-pecom-carry']);
             }
+            if ((boolean)$_POST['use-region-pecom-carry'] != $this->settingsArray['use_region_pecom_carry']) {
+                Configuration::updateValue('RS_AXIOMUS_REGION_USE_PECOM_DELIVERY', $_POST['use-region-pecom-delivery']);
+            }
         }
 
         if (Tools::isSubmit('submitRegionAxiomusPrice')){

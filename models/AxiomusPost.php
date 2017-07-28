@@ -159,6 +159,9 @@ class AxiomusPost extends ObjectModel {
             '`timetype` INT(11) NULL,'.
             '`price_weight` INT(11),' .
             '`price_condition` INT(11),' .
+            '`price_delivery` INT(11),' .
+            '`delivery_type` INT(2),' .
+            '`carry_type` INT(2),' .
             '`carry_code` VARCHAR(255),' .
             '`position_count` INT(11),' .
             '`oid` INT(11),' .
@@ -696,7 +699,7 @@ class AxiomusPost extends ObjectModel {
             $delivery = $this->getActiveCarry($city)[$carrytype];
             return self::getCarryPriceByName($city,$delivery,$price,$cart_id);
         }else {
-            $weighttype = $this->getWeightTypeId($weight);
+            $weighttype = $this->getWeightTypeId($city, $weight);
             //По весу
 
             $sumWeight = $this->getWeightPrice($city,$weighttype);
@@ -973,15 +976,18 @@ class AxiomusPost extends ObjectModel {
 
 //        $carryCode = $this->getCarryAddresses((int)$carrier_id, null, $carry_address_id)['code'];
 
+        $price_delivery = $_POST['price_delivery'] ?? 50;
+        $delivery_type = $posts['select-region']; //Регион доставки
+        $carry_type = $posts['select-region']; //Регион самовывоза
         if ($this->issetOrder($cart->id)){
-            $res = Db::getInstance()->update(AxiomusPost::$definition['tableOrder'], ['delivery_id' => $carrier_id,'date' => $date, 'carry' => (boolean)$carry, 'kadtype' => $kad, 'timetype' => $time, 'price_weight' => (int)$price_weight, 'price_condition' => (int)$price_condition, 'carry_code' => $carryCode],"`id_cart` = {$id_cart}");
+            $res = Db::getInstance()->update(AxiomusPost::$definition['tableOrder'], ['delivery_id' => $carrier_id,'date' => $date, 'carry' => (boolean)$carry, 'kadtype' => $kad, 'timetype' => $time, 'price_weight' => (int)$price_weight, 'price_condition' => (int)$price_condition, 'carry_code' => $carryCode, 'price_delivery' => $price_delivery, 'delivery_type' => $delivery_type, 'carry_type' =>$carry_type],"`id_cart` = {$id_cart}");
             if (!$res){
                 return false;
             }else{
                 return true;
             }
         }else {
-            $res = Db::getInstance()->autoExecuteWithNullValues($this->tableOrderWithPrefix, ['id_cart' => $id_cart, 'delivery_id' => $carrier_id,'date' => $date, 'carry' => $carry, 'kadtype' => $kad, 'timetype' => $time, 'price_weight' => $price_weight, 'price_condition' => $price_condition, 'carry_code' => $carryCode], 'INSERT');
+            $res = Db::getInstance()->autoExecuteWithNullValues($this->tableOrderWithPrefix, ['id_cart' => $id_cart, 'delivery_id' => $carrier_id,'date' => $date, 'carry' => $carry, 'kadtype' => $kad, 'timetype' => $time, 'price_weight' => $price_weight, 'price_condition' => $price_condition, 'carry_code' => $carryCode, 'price_delivery' => $price_delivery, 'delivery_type' => $delivery_type, 'carry_type' =>$carry_type], 'INSERT');
             if ($res) {
                 return true;
             } else {

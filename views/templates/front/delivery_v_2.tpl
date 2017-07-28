@@ -133,6 +133,8 @@
 <script>
 $(document).ready(function (){
 
+    var price_delivery = 0;
+
     $('.delivery-type').change(function () { //выбор доставки или самовывоза
         radioInputDelivery = $("input[name='delivery-type']");
         if(radioInputDelivery.prop('checked')) {
@@ -265,7 +267,7 @@ $(document).ready(function (){
                     console.log(data);
 
                     if (data.value !== undefined) {
-
+                        price_delivery = data.value;
                         $('#delivery-price').text(data.value+'р.');
                         $('#delivery-price-loader').hide(); //ToDo Спрятать индикатор загрузки
                     }
@@ -326,7 +328,7 @@ $(document).ready(function (){
                     console.log(data);
 
                     if (data.value !== undefined) {
-
+                        price_delivery = data.value;
                         $('#delivery-price').text(data.value+'р.');
                         $('#delivery-price-loader').hide(); //ToDo Спрятать индикатор загрузки
                     }
@@ -361,9 +363,9 @@ $(document).ready(function (){
         let time = $('#select-delivery-time option:selected').attr("value");
         let city = $('#select-delivery-city option:selected').attr("value");
         let deliveryDate = $("#delivery_date").val();
+        let price = price_delivery;
 
-
-        let data = 'select-region='+region+'&kad_id='+kad+'&time_id='+time+'&point_id='+point+'&city_id='+city+'&delivery_date='+deliveryDate+'&delivery-type='+deliverytype+'&cart_id='+{$cart_id};
+        let data = 'select-region='+region+'&kad_id='+kad+'&time_id='+time+'&point_id='+point+'&city_id='+city+'&delivery_date='+deliveryDate+'&delivery-type='+deliverytype+'&price_delivery='+price_delivery+'&cart_id='+{$cart_id};
 
         $.ajax({
             type: 'POST',

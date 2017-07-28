@@ -32,7 +32,8 @@ class AdminAxiomussendController extends ModuleAdminController
                         $Response = $sendNewAxiomus->sendToAxiomus('new_strizh', $_POST);
                         $carrier_id = (int)Configuration::get('RS_AXIOMUS_ID_STRIZH_DELIVERY');
                     } elseif ($_POST['delivery'] == 'pecom') {
-//                        $carrier_id = (int)Configuration::get('RS_AXIOMUS_ID_PECOM_CARRY');
+                        $Response = $sendNewAxiomus->sendToPecom($_POST, true);
+                        $carrier_id = (int)Configuration::get('RS_AXIOMUS_ID_PECOM_CARRY');
                     } else {
                         return;
                     }
@@ -46,7 +47,6 @@ class AdminAxiomussendController extends ModuleAdminController
                     } elseif ($_POST['delivery'] == 'russianpost') {
                     } elseif ($_POST['delivery'] == 'pecom') {
                         $Response = $sendNewAxiomus->sendToPecom($_POST);
-
                     }
                 }
                 if ($Response != false) {
@@ -67,10 +67,14 @@ class AdminAxiomussendController extends ModuleAdminController
                     }
                     $order->setWsShippingNumber($Response['oid']);
                     $order->shipping_number = $Response['oid'];
-                    $order->setCurrentState((int)Configuration::get('RS_AXIOMUS_200_SEND_ORDER_STATUS_ID')); //ToDo для ПЭК сделать свой статус
-
+                    if ($_POST['delivery'] == 'pecom') {
+                        $order->setCurrentState((int)Configuration::get('RS_AXIOMUS_200_SEND_PECOM_STATUS_ID'));
+                    }else{
+                        $order->setCurrentState((int)Configuration::get('RS_AXIOMUS_200_SEND_ORDER_STATUS_ID'));
+                    }
                     $AxiomusPost->setOrderResponse($order->id_cart, $Response['oid'], $Response['okey'], $_POST['position_count']);
 
+                    $order->save();
                     echo true;
                     exit;
                 } else {

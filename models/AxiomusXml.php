@@ -148,6 +148,7 @@ public $pecomDeliveryNeededAddressComment;
 
         $this->customer_fullName = $this->customer->firstname . ' ' . $this->customer->lastname;
 
+
         $this->pecomDeliveryNeeded = false; //Переделать, дать пользователю выбирать нужна ли ему доставка до двери в регионе
         $this->pecomDeliveryNeededAddress = null;
         $this->pecomDeliveryNeededAddressComment = null;
@@ -610,8 +611,9 @@ public $pecomDeliveryNeededAddressComment;
 
     }
 
-    public function sendToPecom($params)
+    public function sendToPecom($params, $cart_id = null)
     {
+
 
         if(isset($params['position_count'])){
             $this->positionsCount = (int)$params['position_count'];
@@ -640,7 +642,14 @@ public $pecomDeliveryNeededAddressComment;
         if(isset($params['pecom_is_documents_return']))$this->isDocumentsReturn=(boolean)$params['pecom_is_documents_return'];
         if(isset($params['pecom_is_loading']))$this->isLoading=(boolean)$params['pecom_is_loading'];
 
-
+        if (isset($cart_id)) {
+            $cart = new Cart($cart_id);
+            $address = new Address($cart->id_address_delivery);
+            $address_string = (!empty($address->address1))?$address->address1:''.', '.(!empty($address->address1))?$address->address2:'';
+            $this->pecomDeliveryNeeded = true; //Переделать, дать пользователю выбирать нужна ли ему доставка до двери в регионе
+            $this->pecomDeliveryNeededAddress = $address_string;
+            $this->pecomDeliveryNeededAddressComment = null;
+        }
         // Создание экземпляра класса
         $sdk = new PecomKabinet(self::$usernamePecom, self::$apikeyPecom);
         // Вызов метода

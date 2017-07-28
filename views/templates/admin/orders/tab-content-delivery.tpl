@@ -15,18 +15,31 @@
                 <td>Тип доставки:</td>
                 <td>{$order_axiomus_data.type}</td>
             </tr>
-            <tr>
-                <td>Заказ на дату:</td>
-                <td>{$order_axiomus_data.date}</td>
-            </tr>
-            <tr>
-                <td>Тип до кад:</td>
-                <td>{$order_axiomus_data.kadname}</td>
-            </tr>
-            <tr>
-                <td>Заказ на время:</td>
-                <td>{$order_axiomus_data.timename}</td>
-            </tr>
+            {if isset($order_axiomus_data.date)}
+                <tr>
+                    <td>Заказ на дату:</td>
+                    <td>{$order_axiomus_data.date}</td>
+                </tr>
+            {/if}
+            {if isset($order_axiomus_data.kadname)}
+                <tr>
+                    <td>Тип до кад:</td>
+                    <td>{$order_axiomus_data.kadname}</td>
+                </tr>
+            {/if}
+            {if isset($order_axiomus_data.kadname)}
+                <tr>
+                    <td>Заказ на время:</td>
+                    <td>{$order_axiomus_data.timename}</td>
+                </tr>
+            {/if}
+            {if isset($pecom_point)}
+
+                <tr>
+                    <td>Город:</td>
+                    <td>{$pecom_point.id}</td>
+                </tr>
+            {/if}
             <tr>
                 <td>Отправлено через:</td>
                 <td>{$delivery_name}</td>

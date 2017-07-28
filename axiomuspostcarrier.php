@@ -86,11 +86,16 @@ class axiomuspostcarrier extends CarrierModule
                 return 'RussianPost carry';
             }
         }
+        if (Configuration::get('RS_AXIOMUS_ID_UNDEFINED_DELIVERY')) {
+            if ($this->id_carrier == (int)Configuration::get('RS_AXIOMUS_ID_UNDEFINED_DELIVERY')) {
+                return 'UNDEFINED carry';
+            }
+        }
         return '';
     }
 
     public function getOrderShippingCost($cart, $shipping_cost)
-    { //В $params лежит  объект типа Cart.
+    {
 
 //        $axiomus = new AxiomusApi(Configuration::get("RS_AXIOMUS_TOKEN"));
 //        $axiomus->sendXML();
@@ -103,7 +108,17 @@ class axiomuspostcarrier extends CarrierModule
          * Если такая запись находится то берем данные оттуда, если нет, то ищем новые данные
          * Срок жизни записи в такой таблице меняется в админке
          */
-        return 100;
+
+        if (empty($this->getCarrierName())) {
+            return 100;
+        }else{
+            $row = Db::getInstance()->getRow("SELECT * FROM ps_axiomus_order WHERE `id_cart` = '{$cart->id}'");
+            if(!empty($row)){
+                return $row['price_delivery'];
+            }else{
+                return 100;
+            }
+        }
         $carrierName = $this->getCarrierName();
         $totalsum = 0;
         $totalPrice = 0;
@@ -411,6 +426,23 @@ class axiomuspostcarrier extends CarrierModule
         {
             $orderState = new OrderState();
             $orderState->name =  array_fill(0,10,'Отправлено в Axiomus');
+            $orderState->send_email = false;
+            $orderState->color = '#0cd6ff';
+            $orderState->shipped = true;
+            $orderState->moduleName = 'axiomuspostcarrier';
+            $orderState->hidden = false;
+            $orderState->delivery = true;
+            $orderState->logable = false;
+            $orderState->invoice = false;
+            if ($orderState->add())//save new order status
+            {
+                Configuration::updateValue('RS_AXIOMUS_200_SEND_ORDER_STATUS_ID', (int)$orderState->id);
+            }
+        }
+        if (!Configuration::get('RS_AXIOMUS_200_SEND_PECOM_STATUS_ID'))//if status does not exist
+        {
+            $orderState = new OrderState();
+            $orderState->name =  array_fill(0,10,'Отправлено в Pecom');
             $orderState->send_email = false;
             $orderState->color = '#0cd6ff';
             $orderState->shipped = true;
@@ -832,26 +864,27 @@ class axiomuspostcarrier extends CarrierModule
     private function _setSettingsValues(){
 
         Configuration::updateValue('RS_AXIOMUS_MSCW_USE_AXIOMUS', 1);
-        Configuration::updateValue('RS_AXIOMUS_MSCW_USE_STRIZH', 1);
+        Configuration::updateValue('RS_AXIOMUS_MSCW_USE_STRIZH', 0);
         Configuration::updateValue('RS_AXIOMUS_MSCW_USE_PECOM', 0);
-        Configuration::updateValue('RS_AXIOMUS_MSCW_USE_AXIOMUS_CARRY', 1);
-        Configuration::updateValue('RS_AXIOMUS_MSCW_USE_DPD_CARRY', 1);
-        Configuration::updateValue('RS_AXIOMUS_MSCW_USE_BOXBERRY_CARRY', 1);
+        Configuration::updateValue('RS_AXIOMUS_MSCW_USE_AXIOMUS_CARRY', 0);
+        Configuration::updateValue('RS_AXIOMUS_MSCW_USE_DPD_CARRY', 0);
+        Configuration::updateValue('RS_AXIOMUS_MSCW_USE_BOXBERRY_CARRY', 0);
         Configuration::updateValue('RS_AXIOMUS_MSCW_USE_RUSSIANPOST_CARRY', 0);
         Configuration::updateValue('RS_AXIOMUS_MSCW_USE_PECOM_CARRY', 1);
             //Piter
         Configuration::updateValue('RS_AXIOMUS_PTR_USE_AXIOMUS', 1);
-        Configuration::updateValue('RS_AXIOMUS_PTR_USE_STRIZH', 1);
-        Configuration::updateValue('RS_AXIOMUS_PTR_USE_PECOM', 1);
-        Configuration::updateValue('RS_AXIOMUS_PTR_USE_AXIOMUS_CARRY', 1);
-        Configuration::updateValue('RS_AXIOMUS_PTR_USE_DPD_CARRY', 1);
-        Configuration::updateValue('RS_AXIOMUS_PTR_USE_BOXBERRY_CARRY', 1);
-        Configuration::updateValue('RS_AXIOMUS_PTR_USE_RUSSIANPOST_CARRY', 1);
+        Configuration::updateValue('RS_AXIOMUS_PTR_USE_STRIZH', 0);
+        Configuration::updateValue('RS_AXIOMUS_PTR_USE_PECOM', 0);
+        Configuration::updateValue('RS_AXIOMUS_PTR_USE_AXIOMUS_CARRY', 0);
+        Configuration::updateValue('RS_AXIOMUS_PTR_USE_DPD_CARRY', 0);
+        Configuration::updateValue('RS_AXIOMUS_PTR_USE_BOXBERRY_CARRY', 0);
+        Configuration::updateValue('RS_AXIOMUS_PTR_USE_RUSSIANPOST_CARRY', 0);
         Configuration::updateValue('RS_AXIOMUS_PTR_USE_PECOM_CARRY', 1);
             //region
-        Configuration::updateValue('RS_AXIOMUS_REGION_USE_AXIOMUS_CARRY', 1);
-        Configuration::updateValue('RS_AXIOMUS_REGION_USE_DPD_CARRY', 1);
-        Configuration::updateValue('RS_AXIOMUS_REGION_USE_BOXBERRY_CARRY', 1);
+        Configuration::updateValue('RS_AXIOMUS_REGION_USE_PECOM', 1);
+        Configuration::updateValue('RS_AXIOMUS_REGION_USE_AXIOMUS_CARRY', 0);
+        Configuration::updateValue('RS_AXIOMUS_REGION_USE_DPD_CARRY', 0);
+        Configuration::updateValue('RS_AXIOMUS_REGION_USE_BOXBERRY_CARRY', 0);
         Configuration::updateValue('RS_AXIOMUS_REGION_USE_RUSSIANPOST_CARRY', 0);
         Configuration::updateValue('RS_AXIOMUS_REGION_USE_PECOM_CARRY', 1);
             //Settings
@@ -861,8 +894,6 @@ class axiomuspostcarrier extends CarrierModule
             //Moscow
         Configuration::updateValue('RS_AXIOMUS_MSCW_AXIOMUS_MANUAL', 1);
         Configuration::updateValue('RS_AXIOMUS_MSCW_AXIOMUS_INCREMENT', 0);
-
-
 
         Configuration::updateValue('RS_PECOM_NICKNAME', 'zitttz'); //ToDo перед релизом убрать
         Configuration::updateValue('RS_PECOM_API', '43406356D86720B3AA160DA8C299E2DA035079E0');
@@ -906,47 +937,6 @@ class axiomuspostcarrier extends CarrierModule
         Configuration::updateValue('RS_PECOM_IS_STRAPPING', false);
         Configuration::updateValue('RS_PECOM_IS_DOCUMENTS_RETURN', false);
         Configuration::updateValue('RS_PECOM_IS_LOADING', true);
-/*
-        Configuration::updateValue('RS_PECOM_SENDER_CITY', 'Москва');
-        Configuration::updateValue('RS_PECOM_SENDER_TITLE', 'ИП Павлов Леонид Сергеевич');
-        Configuration::updateValue('RS_PECOM_SENDER_PERSON', 'Павлов Леонид Сергеевич');
-        Configuration::updateValue('RS_PECOM_SENDER_PHONE', '(495) 212-17-30');
-        Configuration::updateValue('RS_PECOM_SENDER_EMAIL', 'leonid.s.pavlov@gmail.com');
-        Configuration::updateValue('RS_PECOM_SENDER_ADDRESS_OFFICE', 'г. Москва, Волоколамское шоссе, д.89, корп. 1, стр. 2, офис 116');
-        Configuration::updateValue('RS_PECOM_SENDER_ADDRESS_OFFICE_COOMENT', '');
-        Configuration::updateValue('RS_PECOM_SENDER_ADDRESS_STOCK', 'г. Москва, Волоколамское шоссе, д.89, корп. 1, стр. 2, офис 116');
-        Configuration::updateValue('RS_PECOM_SENDER_ADDRESS_STOCK_COMMENT', '');
-        Configuration::updateValue('RS_PECOM_SENDER_WORK_TIME_FROM', '10:00');
-        Configuration::updateValue('RS_PECOM_SENDER_WORK_TIME_TO', '18:00');
-        Configuration::updateValue('RS_PECOM_SENDER_LUNCH_BREAK_FROM', '14:00');
-        Configuration::updateValue('RS_PECOM_SENDER_LUNCH_BREAK_TO', '15:00');
-        Configuration::updateValue('RS_PECOM_SENDER_IS_AUTH_NEEDED', TRUE);
-        Configuration::updateValue('RS_PECOM_SENDER_IDENTITY_TYPE', 10 );
-        Configuration::updateValue('RS_PECOM_SENDER_IDENTITY_SERIES', 1111);
-        Configuration::updateValue('RS_PECOM_SENDER_NUMBER', 123123);
-        Configuration::updateValue('RS_PECOM_SENDER_DATE', '10.10.07');
-        Configuration::updateValue('RS_PECOM_VOLUME_ONE', 0.016355);
-        Configuration::updateValue('RS_PECOM_IS_FLAGILE', true);
-        Configuration::updateValue('RS_PECOM_IS_GLASS', true);
-        Configuration::updateValue('RS_PECOM_IS_LIQUID', true);
-        Configuration::updateValue('RS_PECOM_IS_OTHERTYPE', false);
-        Configuration::updateValue('RS_PECOM_OTHERTYPE_DESCRIPTION', null);
-        Configuration::updateValue('RS_PECOM_IS_OPENCAR', false);
-        Configuration::updateValue('RS_PECOM_IS_SIDELOAD', false);
-        Configuration::updateValue('RS_PECOM_IS_SPECIAL_EQ', false);
-        Configuration::updateValue('RS_PECOM_IS_DAYBYDAY', false);
-        Configuration::updateValue('RS_PECOM_REGISTER_TYPE', 1);
-        Configuration::updateValue('RS_PECOM_RESPONSIBLE', 'Павлов Леонид Сергеевич , ИП Павлов Леонид Сергеевич, Директор');
-        Configuration::updateValue('RS_PECOM_IS_HP', true);
-        Configuration::updateValue('RS_PECOM_HP_POSITION_COUNT', 1);
-        Configuration::updateValue('RS_PECOM_IS_INSURANCE', false);
-        Configuration::updateValue('RS_PECOM_IS_INSURANCE_PRICE', 0);
-        Configuration::updateValue('RS_PECOM_IS_SEALING', false);
-        Configuration::updateValue('RS_PECOM_SEALING_POSITION_COUNT', null);
-        Configuration::updateValue('RS_PECOM_IS_STRAPPING', false);
-        Configuration::updateValue('RS_PECOM_IS_DOCUMENTS_RETURN', false);
-        Configuration::updateValue('RS_PECOM_IS_LOADING', true);*/
-
     }
 
     public function uninstall()
@@ -1061,6 +1051,11 @@ class axiomuspostcarrier extends CarrierModule
             $orderState = new OrderState((int)Configuration::get('RS_AXIOMUS_200_SEND_ORDER_STATUS_ID'));
             $orderState->delete();
             Configuration::updateValue('RS_AXIOMUS_200_SEND_ORDER_STATUS_ID', '');
+        }
+        if(!Configuration::get('RS_AXIOMUS_200_SEND_PECOM_STATUS_ID')) {
+            $orderState = new OrderState((int)Configuration::get('RS_AXIOMUS_200_SEND_PECOM_STATUS_ID'));
+            $orderState->delete();
+            Configuration::updateValue('RS_AXIOMUS_200_SEND_PECOM_STATUS_ID', '');
         }
         if(!Configuration::get('RS_AXIOMUS_10_RETURN_ORDER_STATUS_ID')) {
             $orderState = new OrderState((int)Configuration::get('RS_AXIOMUS_10_RETURN_ORDER_STATUS_ID'));
@@ -1239,13 +1234,22 @@ class axiomuspostcarrier extends CarrierModule
             }
         }else{
             $order_axiomus['type'] = 'Доставка';
-            $order_axiomus['kadname'] = $this->AxiomusPost->getKadTypeById((int)$order_axiomus['kadtype'])['name'];
-            $order_axiomus['timename'] = $this->AxiomusPost->getTimeTypeById((int)$order_axiomus['timetype'])['name'];
-            $this->context->smarty->assign('deliveries_used', [
-                'axiomus' => Configuration::get('RS_AXIOMUS_MSCW_USE_AXIOMUS'),
-                'strizh'  => Configuration::get('RS_AXIOMUS_MSCW_USE_STRIZH'),
-                'pecom'   => Configuration::get('RS_AXIOMUS_MSCW_USE_PECOM')
-            ]);
+            if($order_axiomus['carry_type'] == 2){
+                $row = Db::getInstance()->getRow("SELECT * FROM `ps_axiomus_cache_carry_pecom` WHERE `id` = {$order_axiomus['carry_code']}");
+                $this->context->smarty->assign('deliveries_used', [
+                    'pecom' => 1, //Configuration::get('RS_AXIOMUS_MSCW_USE_PECOM') //Костыль чтобы включить пек
+                    'pecom_point' => $row,
+                ]);
+
+            }else {
+                $order_axiomus['kadname'] = $this->AxiomusPost->getKadTypeById((int)$order_axiomus['kadtype'])['name'];
+                $order_axiomus['timename'] = $this->AxiomusPost->getTimeTypeById((int)$order_axiomus['timetype'])['name'];
+                $this->context->smarty->assign('deliveries_used', [
+                    'axiomus' => Configuration::get('RS_AXIOMUS_MSCW_USE_AXIOMUS'),
+                    'strizh' => Configuration::get('RS_AXIOMUS_MSCW_USE_STRIZH'),
+                    'pecom' => Configuration::get('RS_AXIOMUS_MSCW_USE_PECOM')
+                ]);
+            }
         }
 
         if(!empty($params['order']->shipping_number)){
@@ -1285,8 +1289,7 @@ class axiomuspostcarrier extends CarrierModule
     public function hookActionValidateOrder($params)
     {
         $carrier_id = $params['cart']->id_carrier;
-        //ToDo реализовать добавление записи в таблицу axiomus_order?
-        //do whatever with the carrier
+
     }
 
     // Хук на обновление информации о перевозчике

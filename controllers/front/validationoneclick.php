@@ -47,9 +47,9 @@ class axiomuspostcarrierValidationOneClickModuleFrontController extends ModuleFr
             $res = $this->AxiomusPost->setOrder($cart->id, $delivery_id, $_POST);
 
             if ($res) {
-                $this->context->cart->update(); //ToDo Почему carry-name а не carry-id
+                $this->context->cart->update();
                 $carrier_id = (int)Configuration::get('RS_AXIOMUS_ID_UNDEFINED_DELIVERY'); //ToDo добавить такой же обработчик для кнопки "отправить в Axiomus"
-                $cart->id_carrier = $carrier_id;
+                $this->context->cart->id_carrier = $carrier_id;
                 $delivery_option = $this->context->cart->getDeliveryOption();
                 $delivery_option[(int)$this->context->cart->id_address_delivery] = $carrier_id . ',';
                 $this->context->cart->setDeliveryOption($delivery_option);
