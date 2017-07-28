@@ -947,7 +947,7 @@ class AxiomusPost extends ObjectModel {
         }
 
         $carry = (int)$posts['delivery-type'];
-        if ($posts['delivery-type'] == '0'){ //Самовывоз
+        if ($posts['delivery-type'] == '1'){ //Самовывоз
             if($posts['select-region'] == '0'){//Москва
                 $city = 'Москва';
             }elseif($posts['select-region'] == '1') {//Питер
@@ -957,7 +957,7 @@ class AxiomusPost extends ObjectModel {
             }else{
                 //ToDo редирект на главную
             }
-        }elseif($posts['delivery-type'] == '1'){ //Доставка
+        }elseif($posts['delivery-type'] == '0'){ //Доставка
             $date = new DateTime($posts['delivery_date']);
             $date = $date->format('Y-m-d');
             $price_condition = $this->getConditionPrice($city, $price,  $posts['kad_id'], $posts['time_id']);

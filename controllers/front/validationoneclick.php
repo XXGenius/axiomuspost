@@ -23,7 +23,7 @@ class axiomuspostcarrierValidationOneClickModuleFrontController extends ModuleFr
 
         $res = $this->AxiomusPost->setOrder($cart->id, $delivery_id, $_POST);
 
-            if ($_POST['delivery-type'] == '0'){ //Самовывоз
+            if ($_POST['delivery-type'] == '1'){ //Самовывоз
                 if($_POST['select-region'] == '0'){//Москва
 
                 }elseif($_POST['select-region'] == '1') {//Питер
@@ -34,8 +34,8 @@ class axiomuspostcarrierValidationOneClickModuleFrontController extends ModuleFr
                     echo json_encode(['success' => false]);
                     exit;
                 }
-            }elseif($_POST['delivery-type'] == '1'){ //Доставка
-                $delivery_date = new DateTime($_POST['delivery-date']);
+            }elseif($_POST['delivery-type'] == '0'){ //Доставка
+                $delivery_date = new DateTime($_POST['delivery_date']);
                 $date_now = new DateTime();
                 if ($delivery_date<$date_now){
                     echo json_encode(['error' => 'date_delivery<date_now']);
