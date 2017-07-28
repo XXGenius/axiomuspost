@@ -12,7 +12,7 @@
     <h2>Оформление заказа</h2>
     <h3>Данные заказа</h3>
      <h4>Сумма заказа: {$productprice}р.</h4>
-    <form id="carryform" action="{$link->getModuleLink('axiomuspostcarrier', 'validationoneclick', [], true)|escape:'html'}" method="post">
+    {*<form id="carryform" action="{$link->getModuleLink('axiomuspostcarrier', 'validationoneclick', [], true)|escape:'html'}" method="post">*}
         <h4 id="delivery-price-block" style=" display:none">Сумма доставки: <img src="/img/loader.gif" id="delivery-price-loader"><span id="delivery-price"></span></h4>
         <div class="row">
             <div class="delivery-checkout">
@@ -338,14 +338,54 @@ $(document).ready(function (){
 
     $("#select-region").change();
 
-    $('.delivery_options_address').hide();
-    $('#message').hide();
-    $('.carrier_title').hide();
-    $('.order_carrier_content div:last p').hide();
-    $('#HOOK_PAYMENT p:first').hide();
+//    $('.delivery_options_address').hide();
+//    $('#message').hide();
+//    $('.carrier_title').hide();
+//    $('.order_carrier_content div:last p').hide();
+//    $('#HOOK_PAYMENT p:first').hide();
 
 
     $('#delivery_date').datepicker({ minDate: 0});
+
+    {*$("button[name = 'processCarrier']").click(function(){*}
+        {*SelectPost()*}
+    {*});*}
+
+
+
+    {*function SelectPost() {*}
+        {*let deliverytype = $('input[name=delivery-type]:checked').val();*}
+        {*let region =  $('#select-delivery-region option:selected').attr("value");*}
+        {*let point = $('#select-point option:selected').attr("value");*}
+        {*let kad = $('#select-delivery-kad option:selected').attr("value");*}
+        {*let time = $('#select-delivery-time option:selected').attr("value");*}
+        {*let city = $('#select-delivery-city option:selected').attr("value");*}
+        {*let deliveryDate = $("#delivery_date").val();*}
+
+
+        {*let data = 'select-region='+region+'&kad_id='+kad+'&time_id='+time+'&point_id='+point+'&city_id='+city+'&delivery_date='+deliveryDate+'&delivery-type='+deliverytype+'&cart_id='+{$cart_id};*}
+
+        {*$.ajax({*}
+            {*type: 'POST',*}
+            {*url: '/index.php?fc=module&module=axiomuspostcarrier&controller=validationoneclick',*}
+            {*data: data,*}
+            {*success: function(data) {*}
+                {*data = JSON.parse(data);*}
+
+            {*}*}
+        {*})*}
+    {*}*}
+
+    $("button[name = 'processCarrier']").click(function(){
+//        let region_delivery = $('#select-delivery-region option:selected').attr("value");
+//        if(region_delivery === "0" || region_delivery==="1" ) {
+//        $("input[name='delivery_option[13]']").val('13');
+        radios = $("input[name='delivery_option[13]']");
+            if(radios.is(':checked') === false) {
+            radios.filter('[value=507]').prop('checked', true);
+            }
+    });
+
 
 });
 </script>
