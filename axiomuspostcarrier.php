@@ -103,6 +103,7 @@ class axiomuspostcarrier extends CarrierModule
          * Если такая запись находится то берем данные оттуда, если нет, то ищем новые данные
          * Срок жизни записи в такой таблице меняется в админке
          */
+        return 100;
         $carrierName = $this->getCarrierName();
         $totalsum = 0;
         $totalPrice = 0;
@@ -1306,6 +1307,7 @@ class axiomuspostcarrier extends CarrierModule
 //        return '<input type="checkbox" name="my_module_collection_point" value="1" /> Click here to use the collection point';
         $cart = $this->context->cart;
         $this->smarty->assign(array(//ToDo надо ли это
+            'tomorrow' => strtotime('+1 day'),
             'this_path' => $this->_path,
             'this_path_bw' => $this->_path,
 
@@ -1323,6 +1325,10 @@ class axiomuspostcarrier extends CarrierModule
      * @param $params
      */
     public function hookActionCarrierProcess($params){
+
+
+
+
 
         $b = 1;
         return '<h1>TEST</h1>';

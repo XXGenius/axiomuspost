@@ -929,36 +929,49 @@ class AxiomusPost extends ObjectModel {
     }
 
     //Order
-    public function setOrder($id_cart, $carrier_id, $date = null, $kad = null, $time = null, $carry, $carry_address_id = null){
+    public function setOrder($id_cart, $carrier_id, $posts){
 
-
-        if ($carry == 0) {
-            $date = new DateTime($date);
-            $date = $date->format('Y-m-d');
-        }elseif($carry == 1){
-
-        }else{
-            return false;
-        }
+        $kad = $posts['kad_id'];
+        $time = $posts['time_id'];
 
         $cart = new Cart($id_cart);
         $totalWeight = $cart->getTotalWeight();
-        $weighttype = $this->getWeightTypeId($totalWeight);
         $addr = new Address($cart->id_address_delivery);
         if (!Validate::isLoadedObject($addr))
             return false;
         $city = $addr->city;
-
-        $price = 0;
         $products = $cart->getProducts();
+        $price = 0;
         foreach ($products as $product) {
             $price += (float)$product['total_wt']; //ToDo а точно ли не total?
         }
 
-        $price_weight = $this->getWeightPrice($city, $carry, $weighttype);
-        $price_condition = $this->getConditionPrice($city, $price, $kad, $time);
+        $carry = (int)$posts['delivery-type'];
+        if ($posts['delivery-type'] == '0'){ //Самовывоз
+            if($posts['select-region'] == '0'){//Москва
+                $city = 'Москва';
+            }elseif($posts['select-region'] == '1') {//Питер
+                $city = 'Санкт-Петербург';
+            }elseif ($posts['select-region'] == '2'){ //Регион
+                $city = 'Регионы';
+            }else{
+                //ToDo редирект на главную
+            }
+        }elseif($posts['delivery-type'] == '1'){ //Доставка
+            $date = new DateTime($posts['delivery_date']);
+            $date = $date->format('Y-m-d');
+            $price_condition = $this->getConditionPrice($city, $price,  $posts['kad_id'], $posts['time_id']);
+            $carryCode = $posts['point_id'];
+        }else{
+            //ToDo редирект на главную
+        }
 
-        $carryCode = $this->getCarryAddresses((int)$carrier_id, null, $carry_address_id)['code'];
+
+        $weighttype = $this->getWeightTypeId($city, $totalWeight);
+        $price_weight = $this->getWeightPrice($city, $weighttype);
+
+
+//        $carryCode = $this->getCarryAddresses((int)$carrier_id, null, $carry_address_id)['code'];
 
         if ($this->issetOrder($cart->id)){
             $res = Db::getInstance()->update(AxiomusPost::$definition['tableOrder'], ['delivery_id' => $carrier_id,'date' => $date, 'carry' => (boolean)$carry, 'kadtype' => $kad, 'timetype' => $time, 'price_weight' => (int)$price_weight, 'price_condition' => (int)$price_condition, 'carry_code' => $carryCode],"`id_cart` = {$id_cart}");
