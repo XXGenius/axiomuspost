@@ -15,10 +15,13 @@ class axiomuspostcarrierValidationOneClickModuleFrontController extends ModuleFr
     public $AxiomusPost;
 
     public function postProcess(){
-        if(Tools::isSubmit('processCarrier')){
 
-            $cart = $this->context->cart;
+        $cart = $this->context->cart;
+        $delivery_id = (int)Configuration::get('RS_AXIOMUS_ID_UNDEFINED_DELIVERY');
 
+        $this->AxiomusPost = new AxiomusPost();
+
+        $res = $this->AxiomusPost->setOrder($cart->id, $delivery_id, $_POST);
 
             if ($_POST['delivery-type'] == '0'){ //Самовывоз
                 if($_POST['select-region'] == '0'){//Москва
@@ -28,70 +31,35 @@ class axiomuspostcarrierValidationOneClickModuleFrontController extends ModuleFr
                 }elseif ($_POST['select-region'] == '2'){ //Регион
 
                 }else{
-                    //ToDo редирект на главную
+                    echo json_encode(['success' => false]);
+                    exit;
                 }
             }elseif($_POST['delivery-type'] == '1'){ //Доставка
-
-            }else{
-                //ToDo редирект на главную
-            }
-
-
-            $delivery_date = new DateTime($_POST['delivery-date']);
-            $date_now = new DateTime();
-            if ($delivery_date<$date_now){
-                Tools::redirect("index.php?controller=order&step=2");
-            }
-
-
-            $customer = new CustomerCore();
-            $customer->firstname = 'name';
-            $customer->lastname = 'lastname';
-            $customer->email = 'mail@mail.com';
-            $customer->passwd = md5(time());
-            $customer->is_guest = 1;
-
-            $customer->add();
-            $cart->id_customer = $customer->id;
-            $cart->save();
-
-
-
-            $this->AxiomusPost = new AxiomusPost();
-            $delivery_id = ((int)$_POST['delivery-type']==0)?(int)Configuration::get('RS_AXIOMUS_ID_UNDEFINED_DELIVERY'):$_POST['carry-name'];
-            $res = $this->AxiomusPost->setOrder($cart->id, $delivery_id, $_POST['delivery-date'], (int)$_POST['kad-type'], (int)$_POST['time-type'], (int)$_POST['delivery-type'], (int)$_POST['carry-address']);
-            if ($res) {
-                if ($_POST['delivery-type'] == 1){
-                    $this->context->cart->update(); //ToDo Почему carry-name а не carry-id
-                    $carrier_id = (int)$_POST['carry-name']; //ToDo добавить такой же обработчик для кнопки "отправить в Axiomus"
-                    $cart->id_carrier = $carrier_id;
-                    $delivery_option = $this->context->cart->getDeliveryOption();
-                    $delivery_option[(int)$this->context->cart->id_address_delivery] = $carrier_id . ',';
-                    $this->context->cart->setDeliveryOption($delivery_option);
-                    $this->context->cart->save();
-
-                    //ToDo добавить валидацию
-                    Tools::redirect('index.php?controller=order&step=3&cgv=1');
-                }elseif($_POST['delivery-type'] == 0){
-
-                    $this->context->cart->update(); //ToDo Почему carry-name а не carry-id
-                    $carrier_id = (int)Configuration::get('RS_AXIOMUS_ID_UNDEFINED_DELIVERY'); //ToDo добавить такой же обработчик для кнопки "отправить в Axiomus"
-                    $cart->id_carrier = $carrier_id;
-                    $delivery_option = $this->context->cart->getDeliveryOption();
-                    $delivery_option[(int)$this->context->cart->id_address_delivery] = $carrier_id . ',';
-                    $this->context->cart->setDeliveryOption($delivery_option);
-                    $this->context->cart->save();
-
-                    Tools::redirect('index.php?controller=order&step=3&cgv=1');
-                }else{
-                    return;
+                $delivery_date = new DateTime($_POST['delivery-date']);
+                $date_now = new DateTime();
+                if ($delivery_date<$date_now){
+                    echo json_encode(['error' => 'date_delivery<date_now']);
                 }
             }else{
-                return;
+                echo json_encode(['success' => false]);
+                exit;
             }
-        }else{
-            Tools::redirect('index.php');
-        }
+
+            if ($res) {
+                $this->context->cart->update(); //ToDo Почему carry-name а не carry-id
+                $carrier_id = (int)Configuration::get('RS_AXIOMUS_ID_UNDEFINED_DELIVERY'); //ToDo добавить такой же обработчик для кнопки "отправить в Axiomus"
+                $cart->id_carrier = $carrier_id;
+                $delivery_option = $this->context->cart->getDeliveryOption();
+                $delivery_option[(int)$this->context->cart->id_address_delivery] = $carrier_id . ',';
+                $this->context->cart->setDeliveryOption($delivery_option);
+                $this->context->cart->save();
+
+                echo json_encode(['success' => true]);
+                exit;
+            }else{
+                echo json_encode(['success' => false]);
+                exit;
+            }
 
     }
 }

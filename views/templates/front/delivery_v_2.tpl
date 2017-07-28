@@ -347,44 +347,43 @@ $(document).ready(function (){
 
     $('#delivery_date').datepicker({ minDate: 0});
 
-    {*$("button[name = 'processCarrier']").click(function(){*}
-        {*SelectPost()*}
-    {*});*}
-
-
-
-    {*function SelectPost() {*}
-        {*let deliverytype = $('input[name=delivery-type]:checked').val();*}
-        {*let region =  $('#select-delivery-region option:selected').attr("value");*}
-        {*let point = $('#select-point option:selected').attr("value");*}
-        {*let kad = $('#select-delivery-kad option:selected').attr("value");*}
-        {*let time = $('#select-delivery-time option:selected').attr("value");*}
-        {*let city = $('#select-delivery-city option:selected').attr("value");*}
-        {*let deliveryDate = $("#delivery_date").val();*}
-
-
-        {*let data = 'select-region='+region+'&kad_id='+kad+'&time_id='+time+'&point_id='+point+'&city_id='+city+'&delivery_date='+deliveryDate+'&delivery-type='+deliverytype+'&cart_id='+{$cart_id};*}
-
-        {*$.ajax({*}
-            {*type: 'POST',*}
-            {*url: '/index.php?fc=module&module=axiomuspostcarrier&controller=validationoneclick',*}
-            {*data: data,*}
-            {*success: function(data) {*}
-                {*data = JSON.parse(data);*}
-
-            {*}*}
-        {*})*}
-    {*}*}
-
     $("button[name = 'processCarrier']").click(function(){
-//        let region_delivery = $('#select-delivery-region option:selected').attr("value");
-//        if(region_delivery === "0" || region_delivery==="1" ) {
-//        $("input[name='delivery_option[13]']").val('13');
-        radios = $("input[name='delivery_option[13]']");
-            if(radios.is(':checked') === false) {
-            radios.filter('[value=507]').prop('checked', true);
-            }
+        SelectPost()
     });
+
+
+
+    function SelectPost() {
+        let deliverytype = $('input[name=delivery-type]:checked').val();
+        let region =  $('#select-delivery-region option:selected').attr("value");
+        let point = $('#select-point option:selected').attr("value");
+        let kad = $('#select-delivery-kad option:selected').attr("value");
+        let time = $('#select-delivery-time option:selected').attr("value");
+        let city = $('#select-delivery-city option:selected').attr("value");
+        let deliveryDate = $("#delivery_date").val();
+
+
+        let data = 'select-region='+region+'&kad_id='+kad+'&time_id='+time+'&point_id='+point+'&city_id='+city+'&delivery_date='+deliveryDate+'&delivery-type='+deliverytype+'&cart_id='+{$cart_id};
+
+        $.ajax({
+            type: 'POST',
+            url: '/index.php?fc=module&module=axiomuspostcarrier&controller=validationoneclick',
+            data: data,
+            success: function(data) {
+                console.log(data);
+                data = JSON.parse(data);
+                console.log(data);
+            }
+        })
+    }
+
+//    $("button[name = 'processCarrier']").click(function(){
+////        let region_delivery = $('#select-delivery-region option:selected').attr("value");
+////        if(region_delivery === "0" || region_delivery==="1" ) {
+////        $("input[name='delivery_option[13]']").val('13');
+//        console.log('test');
+//        $("#delivery_option_5_1").click();
+//    });
 
 
 });
