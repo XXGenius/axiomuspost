@@ -12,7 +12,7 @@
     <h2>Оформление заказа</h2>
     <h3>Данные заказа</h3>
      <h4>Сумма заказа: {$productprice}р.</h4>
-    <form id="carryform" action="{$link->getModuleLink('axiomuspostcarrier', 'validationoneclick', [], true)|escape:'html'}" method="post">
+    {*<form id="carryform" action="{$link->getModuleLink('axiomuspostcarrier', 'validationoneclick', [], true)|escape:'html'}" method="post">*}
         <h4 id="delivery-price-block" style=" display:none">Сумма доставки: <img src="/img/loader.gif" id="delivery-price-loader"><span id="delivery-price"></span></h4>
         <div class="row">
             <div class="delivery-checkout">
@@ -27,10 +27,13 @@
                         </div>
                     </fieldset>
                 </div>
+
             </div>
         </div>
+
+
         <div class="row opt-delivery" style="display:none">
-            <div class="col-md-4 col-lg-4 col-sm-4 col-xs-6" id="select-delivery-region-block">
+            <div class="col-md-3 col-lg-3 col-sm-4 col-xs-6" id="select-delivery-region-block">
                 <div class="form-group">
                     <label for="select-delivery-region">Выберите место доставки</label>
                     <select class="form-control" id="select-delivery-region">
@@ -40,10 +43,14 @@
                     </select>
                 </div>
             </div>
-            <div class="col-md-4 col-lg-4 col-sm-4 col-xs-6" id="select-delivery-city-loader" style="display:none">
+            <div class="col-md-3 col-lg-3 col-sm-4 col-xs-6">
+                <label for="delivery-date">Дата доставки:</label>
+                <input type="text" class="is_required form-control" data-validate="isGenericName" id="delivery_date" name="delivery-date" value="{$tomorrow|date_format:"%d.%m.%Y"}" />
+            </div>
+            <div class="col-md-3 col-lg-3 col-sm-4 col-xs-6" id="select-delivery-city-loader" style="display:none">
                 <img src="/img/loader.gif" style="margin-top: 20px">
             </div>
-            <div class="col-md-4 col-lg-4 col-sm-4 col-xs-6" id="select-delivery-city-block" style="display:none">
+            <div class="col-md-3 col-lg-3 col-sm-4 col-xs-6" id="select-delivery-city-block" style="display:none">
                 <div class="delivery-pecom form-group">
                     <label for="select-delivery-city">Уточните Город</label>
                     <select class="form-control" name="select-delivery-city"  id="select-delivery-city">
@@ -51,10 +58,10 @@
                     </select>
                 </div>
             </div>
-            <div class="col-md-4 col-lg-4 col-sm-4 col-xs-6" id="select-delivery-kad-loader" style="display:none">
+            <div class="col-md-3 col-lg-3 col-sm-4 col-xs-6" id="select-delivery-kad-loader" style="display:none">
                 <img src="/img/loader.gif" style="margin-top: 20px">
             </div>
-            <div class="col-md-4 col-lg-4 col-sm-4 col-xs-6" id="select-delivery-kad-block" style="display:none">
+            <div class="col-md-3 col-lg-3 col-sm-4 col-xs-6" id="select-delivery-kad-block" style="display:none">
                 <div class="delivery-moscow form-group">
                     <label for="select-delivery-kad">удалённость от МКАДа</label>
                     <select class="form-control carry-moscow" id="select-delivery-kad">
@@ -64,10 +71,10 @@
                     </select>
                 </div>
             </div>
-            <div class="col-md-4 col-lg-4 col-sm-4 col-xs-6" id="select-delivery-time-loader" style="display:none">
+            <div class="col-md-3 col-lg-3 col-sm-4 col-xs-6" id="select-delivery-time-loader" style="display:none">
                 <img src="/img/loader.gif" style="margin-top: 20px">
             </div>
-            <div class="col-md-4 col-lg-4 col-sm-4 col-xs-6" id="select-delivery-time-block" style="display:none">
+            <div class="col-md-3 col-lg-3 col-sm-4 col-xs-6" id="select-delivery-time-block" style="display:none">
                 <div class="delivery-moscow form-group">
                     <label for="select-delivery-time">Время доставки</label>
                     <select class="form-control " id="select-delivery-time">
@@ -115,104 +122,12 @@
                 </div>
             </div>
         </div>
-
-
-        <h3>Заполните данные для доставки</h3>
-        <p>* - поля, обязательные для заполнения</p>
-
-        <div class="opt-delivery" style="display:none">
-            <!-- PERSONAL info row  NAME -->
-            <div class="row">
-                <div class="col-md-4 col-sm-4 col-lg-4 col-xs-12">
-                    <label class="sr-only" for="lastname">Фамилия</label>
-                    <input type="text" class="form-control col-md-4 col-sm-4 col-xs-12" name="lastname" placeholder="Фамилия">
-                </div>
-                <div class="col-md-4 col-sm-4 col-lg-4 col-xs-12">
-                    <label class="sr-only" for="firstname">Имя</label>
-                    <input type="text" class="form-control col-md-4 col-sm-4 col-xs-12" name="firstname" placeholder="Имя">
-                </div>
-                <div class="col-md-4 col-sm-4 col-lg-4 col-xs-12">
-                    <label class="sr-only" for="patronymic">Отчество</label>
-                    <input type="text" class="form-control col-md-4 col-sm-4 col-xs-12" name="patronymic" placeholder="Отчество">
-                </div>
-            </div>
-            <!-- PERSONAL info row  CITY -->
-            <div class="row">
-                <div class="col-md-4 col-sm-4 col-lg-4 col-xs-12">
-                    <label class="sr-only" for="city">Город</label>
-                    <input type="text" class="form-control col-md-4 col-sm-4 col-xs-12" name="city" id="city" placeholder="город">
-                </div>
-                <div class="col-md-4 col-sm-4 col-lg-4 col-xs-12">
-                    <label class="sr-only" for="email">Email</label>
-                    <input type="text" class="form-control col-md-4 col-sm-4 col-xs-12" name="email" placeholder="Email">
-                </div>
-                <div class="col-md-4 col-sm-4 col-lg-4 col-xs-12">
-                    <label class="sr-only" for="phone">Телефон</label>
-                    <input type="text" class="form-control col-md-4 col-sm-4 col-xs-12" name="phone" placeholder="Телефон">
-                </div>
-            </div>
-            <!-- PERSONAL info row  CITY -->
-            <div class="row">
-                <div class="col-md-4 col-sm-4 col-lg-4 col-xs-12">
-                    <label class="sr-only" for="street">Улица</label>
-                    <input type="text" class="form-control col-md-4 col-sm-4 col-xs-12" name="street" placeholder="Улица">
-                </div>
-                <div class="col-md-2 col-sm-2 col-lg-2 col-xs-12">
-                    <label class="sr-only" for="home">Дом</label>
-                    <input type="text" class="form-control col-md-4 col-sm-4 col-xs-12" name="home" placeholder="Дом">
-                </div>
-                <div class="col-md-2 col-sm-2 col-lg-2 col-xs-12">
-                    <label class="sr-only" for="housing">Корпус</label>
-                    <input type="text" class="form-control col-md-4 col-sm-4 col-xs-12" name="housing" placeholder="Корпус">
-                </div>
-                <div class="col-md-2 col-sm-2 col-lg-2 col-xs-12">
-                    <label class="sr-only" for="entrance">Домофон</label>
-                    <input type="text" class="form-control col-md-4 col-sm-4 col-xs-12" name="entrance" placeholder="Домофон">
-                </div>
-                <div class="col-md-2 col-sm-2 col-lg-2 col-xs-12">
-                    <label class="sr-only" for="apartament">Квартира</label>
-                    <input type="text" class="form-control col-md-4 col-sm-4 col-xs-12" name="apartament" placeholder="Квартира">
-                </div>
-            </div>
-
-        </div>
-
-
-        <div class="form-group opt-carry">
-            <div class="row">
-                <div class="col-md-4 col-sm-4 col-lg-4 col-xs-12">
-                    <label class="sr-only" for="lastname">Фамилия</label>
-                    <input type="text" class="form-control col-md-4 col-sm-4 col-xs-12"  name="lastname-carry" placeholder="Фамилия">
-                </div>
-                <div class="col-md-4 col-sm-4 col-lg-4 col-xs-12">
-                    <label class="sr-only" for="firstname">Имя</label>
-                    <input type="text" class="form-control col-md-4 col-sm-4 col-xs-12" name="firstname-carry" placeholder="Имя">
-                </div>
-                <div class="col-md-4 col-sm-4 col-lg-4 col-xs-12">
-                    <label class="sr-only" for="patronymic">Отчество</label>
-                    <input type="text" class="form-control col-md-4 col-sm-4 col-xs-12" name="patronymic-carry" placeholder="Отчество">
-                </div>
-            </div>
-            <!-- PERSONAL info row  CITY -->
-            <div class="row">
-                <div class="col-md-4 col-sm-4 col-lg-4 col-xs-12">
-                    <label class="sr-only" for="email">Email</label>
-                    <input type="text" class="form-control col-md-4 col-sm-4 col-xs-12" name="email-carry" placeholder="Email">
-                </div>
-                <div class="col-md-4 col-sm-4 col-lg-4 col-xs-12">
-                    <label class="sr-only" for="phone">Телефон</label>
-                    <input type="text" class="form-control col-md-4 col-sm-4 col-xs-12" name="phone-carry" placeholder="Телефон">
-                </div>
-            </div>
-            <button type="submit" name="processCarrier" class="button btn btn-default standard-checkout button-medium">
-            <span>
-                {l s='Продолжить' mod='axiomuspostcarrier'}
-                <i class="icon-chevron-right right"></i>
-            </span>
-            </button>
-        </div>
-    </form>
-
+        <button type="submit" name="processCarrier" class="button btn btn-default standard-checkout button-medium">
+                                <span>
+                                    {l s='Сохранить' mod='axiomuspostcarrier'}
+                                    <i class="icon-chevron-right right"></i>
+                                </span>
+        </button>
 </div>
 
 <script>
@@ -423,134 +338,54 @@ $(document).ready(function (){
 
     $("#select-region").change();
 
-
-    $("#carryform").validate({
-        rules:{
-            lastname:{
-                required: true,
-            },
-            firstname:{
-                required: true,
-            },
-            patronymic:{
-                required: true,
-            },
-            email:{
-                required: true,
-                email: true
-            },
-            phone:{
-                required: true,
-                number: true,
-//                max_length: 12,
-//                min_length: 9
-            },
-        },
-        messages:{
-            lastname:{
-                required: "Это поле обязательно для заполнения",
-            },
-            firstname:{
-                required: "Это поле обязательно для заполнения",
-            },
-            patronymic:{
-                required: "Это поле обязательно для заполнения",
-            },
-            email:{
-                required: "Это поле обязательно для заполнения",
-            },
-            phone:{
-                required: "Это поле обязательно для заполнения",
-                minlength: "Введите номер без восьмёрки",
-                maxlength: "Введите номер без восьмёрки",
-            },
+//    $('.delivery_options_address').hide();
+//    $('#message').hide();
+//    $('.carrier_title').hide();
+//    $('.order_carrier_content div:last p').hide();
+//    $('#HOOK_PAYMENT p:first').hide();
 
 
-        }
+    $('#delivery_date').datepicker({ minDate: 0});
 
+    {*$("button[name = 'processCarrier']").click(function(){*}
+        {*SelectPost()*}
+    {*});*}
+
+
+
+    {*function SelectPost() {*}
+        {*let deliverytype = $('input[name=delivery-type]:checked').val();*}
+        {*let region =  $('#select-delivery-region option:selected').attr("value");*}
+        {*let point = $('#select-point option:selected').attr("value");*}
+        {*let kad = $('#select-delivery-kad option:selected').attr("value");*}
+        {*let time = $('#select-delivery-time option:selected').attr("value");*}
+        {*let city = $('#select-delivery-city option:selected').attr("value");*}
+        {*let deliveryDate = $("#delivery_date").val();*}
+
+
+        {*let data = 'select-region='+region+'&kad_id='+kad+'&time_id='+time+'&point_id='+point+'&city_id='+city+'&delivery_date='+deliveryDate+'&delivery-type='+deliverytype+'&cart_id='+{$cart_id};*}
+
+        {*$.ajax({*}
+            {*type: 'POST',*}
+            {*url: '/index.php?fc=module&module=axiomuspostcarrier&controller=validationoneclick',*}
+            {*data: data,*}
+            {*success: function(data) {*}
+                {*data = JSON.parse(data);*}
+
+            {*}*}
+        {*})*}
+    {*}*}
+
+    $("button[name = 'processCarrier']").click(function(){
+//        let region_delivery = $('#select-delivery-region option:selected').attr("value");
+//        if(region_delivery === "0" || region_delivery==="1" ) {
+//        $("input[name='delivery_option[13]']").val('13');
+        radios = $("input[name='delivery_option[13]']");
+            if(radios.is(':checked') === false) {
+            radios.filter('[value=507]').prop('checked', true);
+            }
     });
 
-    $("#deliveryform").validate({
-        rules:{
-            lastname:{
-                required: true,
-            },
-            firstname:{
-                required: true,
-            },
-            patronymic:{
-                required: true,
-            },
-            email:{
-                required: true,
-                email: true
-            },
-            phone:{
-                required: true,
-                number: true,
-                max_length: 10,
-                min_length: 9
-            },
-            city:{
-                required: true,
-            },
-            house:{
-                required: true,
-            },
-            apartament:{
-                required: true,
-            },
-            street:{
-                required: true,
-            },
-            housing:{
-                required: true,
-            },
-            entrance:{
-                required: true,
-            },
-        },
-        messages:{
-            lastname:{
-                required: "Это поле обязательно для заполнения",
-            },
-            firstname:{
-                required: "Это поле обязательно для заполнения",
-            },
-            patronymic:{
-                required: "Это поле обязательно для заполнения",
-            },
-            email:{
-                required: "Это поле обязательно для заполнения",
-            },
-            phone:{
-                required: "Это поле обязательно для заполнения",
-                minlength: "Введите номер без восьмёрки",
-                maxlength: "Введите номер без восьмёрки",
-            },
-            city:{
-                required: "Это поле обязательно для заполнения",
-            },
-            house:{
-                required: "Это поле обязательно для заполнения",
-            },
-            apatament:{
-                required: "Это поле обязательно для заполнения",
-            },
-            street:{
-                required: "Это поле обязательно для заполнения",
-            },
-             housing:{
-                required: "Это поле обязательно для заполнения",
-            },
-            entrance:{
-                required: "Это поле обязательно для заполнения",
-            },
-
-
-        }
-
-    });
 
 });
 </script>

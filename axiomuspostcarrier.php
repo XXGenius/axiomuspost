@@ -1301,6 +1301,7 @@ class axiomuspostcarrier extends CarrierModule
      * @param $params
      */
     public function hookDisplayBeforeCarrier($params){
+        $this->context->controller->addJqueryUI('ui.datepicker');
         $a = 1;
 //        return '<input type="checkbox" name="my_module_collection_point" value="1" /> Click here to use the collection point';
         $cart = $this->context->cart;
