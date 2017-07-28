@@ -20,10 +20,10 @@
                     <fieldset class="form-group" > <h3>Выберите тип перевозки</h3>
                         <label for="exampleSelect1"></label>
                         <div class="form-check">
-                            <label class="form-check-label delivery-type" id="opt-delivery-parent"><input type="radio" name="delivery-type" value="0" id="opt-carry" checked>Самовывоз</label>
+                            <label class="form-check-label delivery-type" id="opt-delivery-parent"><input type="radio" name="delivery-type" value="1" id="opt-carry" checked>Самовывоз</label>
                         </div>
                         <div class="form-check">
-                            <label class="form-check-label delivery-type"><input type="radio" name="delivery-type" value="1" id="opt-delivery">Доставка до двери</label>
+                            <label class="form-check-label delivery-type"><input type="radio" name="delivery-type" value="0" id="opt-delivery">Доставка до двери</label>
                         </div>
                     </fieldset>
                 </div>
@@ -338,10 +338,10 @@ $(document).ready(function (){
 
     $("#select-region").change();
 
-//    $('.delivery_options_address').hide();
-//    $('#message').hide();
-//    $('.carrier_title').hide();
-//    $('.order_carrier_content div:last p').hide();
+    $('.delivery_options_address').hide();
+    $('#message').hide();
+    $('.carrier_title').hide();
+    $('.order_carrier_content div:last p').hide();
 //    $('#HOOK_PAYMENT p:first').hide();
 
 
