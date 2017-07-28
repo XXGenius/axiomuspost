@@ -1314,7 +1314,7 @@ class axiomuspostcarrier extends CarrierModule
             'tomorrow' => strtotime('+1 day'),
             'this_path' => $this->_path,
             'this_path_bw' => $this->_path,
-
+            'productprice' => $cart->getordertotal(),
             'cart_id' => $cart->id,
             'this_path_ssl' => Tools::getShopDomainSsl(true, true).__PS_BASE_URI__.'modules/'.$this->name.'/'
         ));

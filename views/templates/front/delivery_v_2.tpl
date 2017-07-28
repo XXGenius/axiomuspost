@@ -345,7 +345,9 @@ $(document).ready(function (){
     $('.carrier_title').hide();
     $('.order_carrier_content div:last p').hide();
 //    $('#HOOK_PAYMENT p:first').hide();
-
+    $('.cheque').hide();
+    $('.bankwire').hide();
+    $('.page-heading:last').hide();
 
     $('#delivery_date').datepicker({ minDate: 0});
 
@@ -375,6 +377,9 @@ $(document).ready(function (){
                 console.log(data);
                 data = JSON.parse(data);
                 console.log(data);
+                $('.cheque').show();
+                $('.bankwire').show();
+                $('.page-heading:last').show();
             }
         })
     }
