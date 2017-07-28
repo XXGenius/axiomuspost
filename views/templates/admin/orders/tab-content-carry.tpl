@@ -37,7 +37,7 @@
     </div>
     {if ($axiomus_succes)}
         <div class="row">
-            <div>Отправлено в систему Axiomus, через <b>{$delivery_name}</b> код: <b>{$axiomus_succes_code}</b></div>
+            <div>Отправлено в систему <b>{$delivery_name}</b> код: <b>{$axiomus_succes_code}</b></div>
             <button type="submit" class="btn btn-danger pull-right" id="submitSendToAxiomusReturn">Анулировать заявку</button>
         </div>
     {/if}
