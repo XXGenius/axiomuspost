@@ -27,7 +27,7 @@ class axiomuspostcarrierCarryPointModuleFrontController extends ModuleFrontContr
             echo json_encode($city);
             exit;
         }else if($_POST['data_id'] == 2){
-            $sql = ("SELECT  id, city_name as 'name' FROM ps_axiomus_cache_carry_pecom GROUP BY city_name");
+            $sql = ("SELECT  id, city_name as 'name' FROM ps_axiomus_cache_carry_pecom WHERE city_name!='Москва' AND city_name != 'Санкт-Петербург' AND city_name != 'Алматы' GROUP BY city_name ");
             $city= Db::getInstance()->executeS($sql);
             echo json_encode($city);
             exit;

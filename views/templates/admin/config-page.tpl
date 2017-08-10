@@ -491,7 +491,7 @@
                                     <thead>
                                     <tr>
                                         <th><span class="title_box ">id</span></th>
-
+                                        <th><span class="title_box ">Тип доставки</span></th>
                                         <th><span class="title_box ">Тип веса</span></th>
                                         <th><span class="title_box ">Сумма</span></th>
                                         <th></th>
@@ -502,12 +502,16 @@
 
                                     <tr class="current-edit">
                                         <td></td>
-
+                                        <td>
+                                            <select class="form-control " id="mscw-axiomus-weightprice-carry" name="mscw-axiomus-weightprice-carry">
+                                                <option value="0" >Доставка</option>
+                                                <option value="1">Самовывоз</option>
+                                        </td>
 
                                         <td>
                                             <select class="form-control " id="mscw-axiomus-weightprice-type" name="mscw-axiomus-weightprice-type">
                                                 {foreach from=$AxiomusPost->getAllWeightType('Москва') key=k item=line}
-                                                    <option value="{$k+1}">{$line.name}</option>
+                                                    <option value="{$line.id}">{$line.name}</option>
                                                 {/foreach}
                                             </select>
                                         </td>
@@ -528,12 +532,15 @@
                                         <tr>
                                             <form action="{$smarty.server.REQUEST_URI|escape:'html':'UTF-8'}&amp;" method="post"">
                                             <td><input type="hidden" name="mscw-axiomus-weightprice-id" class="form-control" value="{$line.id}">{$line.id}</td>
-
+                                            <td>
+                                                <select class="form-control " id="mscw-axiomus-weightprice-carry" name="mscw-axiomus-weightprice-carry">
+                                                    <option value="{$line.carry}" >{if $line.carry == 0}Доставка{/if}{if $line.carry == 1}Самовывоз{/if}</option>
+                                            </td>
 
                                             <td>
                                                 <select class="form-control " id="mscw-axiomus-weightprice-type" name="mscw-axiomus-weightprice-type">
                                                     {foreach from=$AxiomusPost->getAllWeightType('Москва') key=k item=linetype}
-                                                        <option value="{$k}" {if ($line.type == $linetype.id)}selected{/if}>{$linetype.name}</option>
+                                                        <option value="{$linetype.id}" {if ($line.type == $linetype.id)}selected{/if}>{$linetype.name}</option>
                                                     {/foreach}
                                                 </select>
                                             </td>
@@ -1252,6 +1259,7 @@
                                         <thead>
                                         <tr>
                                             <th><span class="title_box ">id</span></th>
+                                            <th><span class="title_box ">Тип доставки</span></th>
                                             <th><span class="title_box ">Тип веса</span></th>
                                             <th><span class="title_box ">Сумма</span></th>
                                             <th></th>
@@ -1263,9 +1271,14 @@
                                         <tr class="current-edit">
                                             <td></td>
                                             <td>
+                                                <select class="form-control " id="ptr-axiomus-weightprice-carry" name="ptr-axiomus-weightprice-carry">
+                                                    <option value="0" >Доставка</option>
+                                                    <option value="1">Самовывоз</option>
+                                            </td>
+                                            <td>
                                                 <select class="form-control " id="ptr-axiomus-weightprice-type" name="ptr-axiomus-weightprice-type">
                                                     {foreach from=$AxiomusPost->getAllWeightType('Санкт-Петербург') key=k item=line}
-                                                        <option value="{$k+1}">{$line.name}</option>
+                                                        <option value="{$line.id}">{$line.name}</option>
                                                     {/foreach}
                                                 </select>
                                             </td>
@@ -1287,9 +1300,13 @@
                                                 <form action="{$smarty.server.REQUEST_URI|escape:'html':'UTF-8'}&amp;" method="post"">
                                                 <td><input type="hidden" name="ptr-axiomus-weightprice-id" class="form-control" value="{$line.id}">{$line.id}</td>
                                                 <td>
+                                                    <select class="form-control " id="ptr-axiomus-weightprice-carry" name="ptr-axiomus-weightprice-carry">
+                                                        <option value="{$line.carry}" >{if $line.carry == 0}Доставка{/if}{if $line.carry == 1}Самовывоз{/if}</option>
+                                                </td>
+                                                <td>
                                                     <select class="form-control " id="ptr-axiomus-weightprice-type" name="ptr-axiomus-weightprice-type">
                                                         {foreach from=$AxiomusPost->getAllWeightType('Санкт-Петербург') key=k item=linetype}
-                                                            <option value="{$k}" {if ($line.type == $linetype.id)}selected{/if}>{$linetype.name}</option>
+                                                            <option value="{$linetype.id}" {if ($line.type == $linetype.id)}selected{/if}>{$linetype.name}</option>
                                                         {/foreach}
                                                     </select>
                                                 </td>
@@ -1802,12 +1819,12 @@
                     <div class="panel">
                         <div class="panel-heading">
                             <i class="icon-AdminAdmin"></i>
-                            Самовывоз ПЭК
+                            настройки ПЭК
                         </div>
                         <form action="{$smarty.server.REQUEST_URI|escape:'html':'UTF-8'}&amp;" method="post"">
                         <div id="setting-form" class="form-horizontal">
                             <div class="form-group">
-                                <label class="control-label col-lg-2">{l s='Стоимость для самовывоза'}</label>
+                                <label class="control-label col-lg-2">{l s='Наценка для регионов'}</label>
                                 <div class="col-lg-4">
                                     <input type="text" id="region-carry-pecom-price" class="" name="region-carry-pecom-price" value="{$AxiomusPost->getCarryPriceByName('регионы', 'pecom')}">
                                 </div>

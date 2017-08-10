@@ -6,29 +6,33 @@
     {*<script rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>*}
     <script type="text/javascript" src="https://cdn.jsdelivr.net/jquery.validation/1.15.1/jquery.validate.min.js"></script>
 </head>
+<div id="weighterror" style="display:none;">
+    <p class="warning">Слишком большой вес. Выберите меньше товара!</p>
+</div>
 
-
-<div class="container">
-    <h2>Оформление заказа</h2>
-    <h3>Данные заказа</h3>
-     <h4>Сумма заказа: {$productprice}р.</h4>
-    {*<form id="carryform" action="{$link->getModuleLink('axiomuspostcarrier', 'validationoneclick', [], true)|escape:'html'}" method="post">*}
-        <h4 id="delivery-price-block" style=" display:none">Сумма доставки: <img src="/img/loader.gif" id="delivery-price-loader"><span id="delivery-price"></span></h4>
+<div class="container axiomus">
+    
         <div class="row">
             <div class="delivery-checkout">
-                <div class="col-md-12">
+                <div class="col-md-8">
                     <fieldset class="form-group" > <h3>Выберите тип перевозки</h3>
                         <label for="exampleSelect1"></label>
                         <div class="form-check">
-                            <label class="form-check-label delivery-type" id="opt-delivery-parent"><input type="radio" name="delivery-type" value="1" id="opt-carry" checked>Самовывоз</label>
+                            <label class="form-check-label delivery-type" id="opt-delivery-parent"><input type="radio" name="delivery-type" value="1" id="opt-carry" checked></label><span class="pad"> Самовывоз</span>
+                            <label class="form-check-label delivery-type"><input type="radio" name="delivery-type" value="0" id="opt-delivery" ></label><span class="pad">  Доставка до двери</span>
                         </div>
-                        <div class="form-check">
-                            <label class="form-check-label delivery-type"><input type="radio" name="delivery-type" value="0" id="opt-delivery">Доставка до двери</label>
-                        </div>
-                    </fieldset>
+                        </fieldset>
                 </div>
-
             </div>
+            <div class="col-md-4">
+                <h3>Данные заказа</h3>
+                <h4>Сумма заказа: {$productprice}р.</h4>
+                <h4>Вес: {$weight}кг</>
+                <p  id="weight" style="display: none;">{$weight}</p>
+                {*<form id="carryform" action="{$link->getModuleLink('axiomuspostcarrier', 'validationoneclick', [], true)|escape:'html'}" method="post">*}
+                 <h4 id="delivery-price-block" style=" display:none">Сумма доставки: <img src="/img/loader.gif" id="delivery-price-loader"><span id="delivery-price"></span></h4>
+            </div>
+
         </div>
 
 
@@ -63,7 +67,7 @@
             </div>
             <div class="col-md-3 col-lg-3 col-sm-4 col-xs-6" id="select-delivery-kad-block" style="display:none">
                 <div class="delivery-moscow form-group">
-                    <label for="select-delivery-kad">удалённость от МКАДа</label>
+                    <label for="select-delivery-kad">Удалённость от центра</label>
                     <select class="form-control carry-moscow" id="select-delivery-kad">
                         <option>в пределах МКАД</option>
                         <option>до 5 км от МКАД</option>
@@ -88,7 +92,7 @@
         </div>
 
         <div class="row opt-carry">
-            <div class="col-md-4 col-lg-4 col-sm-4 col-xs-6">
+            <div class="col-md-4 col-lg-2 col-sm-4 col-xs-6">
                 <div class="form-group">
                     <label for="select-region">Выберите место доставки</label>
                     <select class="form-control" name="select-region" id="select-region">
@@ -101,7 +105,7 @@
             <div class="col-md-4 col-lg-4 col-sm-4 col-xs-6" id="select-city-loader" style="display:none">
                 <img src="/img/loader.gif" style="margin-top: 20px">
             </div>
-            <div class="col-md-4 col-lg-4 col-sm-4 col-xs-6" id="select-city-block" style="display:none">
+            <div class="col-md-4 col-lg-2 col-sm-4 col-xs-6" id="select-city-block" style="display:none">
                 <div class="form-group">
                     <label for="select-city">Укажите город:</label>
                     <select class="form-control" name="select-city" id="select-city">
@@ -122,7 +126,7 @@
                 </div>
             </div>
         </div>
-        <button type="submit" name="processCarrier" class="button btn btn-default standard-checkout button-medium">
+        <button type="submit" name="processCarrier" class="button btn btn-default standard-checkout button-medium" style="margin-top: 20px;">
                                 <span>
                                     {l s='Сохранить' mod='axiomuspostcarrier'}
                                     <i class="icon-chevron-right right"></i>
@@ -146,12 +150,12 @@ $(document).ready(function (){
             $('.opt-carry').hide();
             $('.opt-delivery').show();
             $("#select-delivery-region").change();
-            $('#select-delivery-region-block div.selector').css("width", '100%');
-            $('#select-delivery-region-block span').css("width", '100%');
-            $('#select-delivery-kad-block div.selector').css("width", '100%');
-            $('#select-delivery-kad-block span').css("width", '100%');
-            $('#select-delivery-time-block div.selector').css("width", '100%');
-            $('#select-delivery-time-block span').css("width", '100%');
+            $('#select-delivery-region-block div.selector').css("width", '80%');
+            $('#select-delivery-region-block span').css("width", '80%');
+            $('#select-delivery-kad-block div.selector').css("width", '80%');
+            $('#select-delivery-kad-block span').css("width", '80%');
+            $('#select-delivery-time-block div.selector').css("width", '80%');
+            $('#select-delivery-time-block span').css("width", '80%');
 
         }
     });
@@ -261,7 +265,7 @@ $(document).ready(function (){
             success: function(data) {
                 data = JSON.parse(data);
                 if (data.error) {
-                    $('#delivery-price').text('будет доступна после оформления заказа');
+                    $('#delivery-price').text('Бесплатно');
                     $('#delivery-price-loader').hide(); //ToDo Спрятать индикатор загрузки
                 }else{
                     console.log(data);
@@ -322,7 +326,7 @@ $(document).ready(function (){
             success: function(data) {
                 data = JSON.parse(data);
                 if (data.error) {
-                    $('#delivery-price').text('будет доступна после оформления заказа');
+                    $('#delivery-price').text('бесплатно');
                     $('#delivery-price-loader').hide(); //ToDo Спрятать индикатор загрузки
                 }else{
                     console.log(data);
@@ -344,11 +348,11 @@ $(document).ready(function (){
     $('#message').hide();
     $('.carrier_title').hide();
     $('.order_carrier_content div:last p').hide();
-//    $('#HOOK_PAYMENT p:first').hide();
     $('.cheque').hide();
     $('.bankwire').hide();
     $('.page-heading:last').hide();
-
+    $('.selector span').hide();
+    $('.cart_total_delivery').hide();
     $('#delivery_date').datepicker({ minDate: 0});
 
     $("button[name = 'processCarrier']").click(function(){
@@ -359,7 +363,7 @@ $(document).ready(function (){
 
     function SelectPost() {
         let deliverytype = $('input[name=delivery-type]:checked').val();
-        let region =  $('#select-delivery-region option:selected').attr("value");
+        let region =  $('#select-region option:selected').attr("value");
         let point = $('#select-point option:selected').attr("value");
         let kad = $('#select-delivery-kad option:selected').attr("value");
         let time = $('#select-delivery-time option:selected').attr("value");
@@ -383,15 +387,16 @@ $(document).ready(function (){
             }
         })
     }
+    let weight = $("#weight").text();
+    console.log(weight);
+    if (weight > 25){
+        $('.axiomus').hide();
+        $('#weighterror').show();
+    }else{
+        $('.axiomus').show();
+        $('#weighterror').hide();
 
-//    $("button[name = 'processCarrier']").click(function(){
-////        let region_delivery = $('#select-delivery-region option:selected').attr("value");
-////        if(region_delivery === "0" || region_delivery==="1" ) {
-////        $("input[name='delivery_option[13]']").val('13');
-//        console.log('test');
-//        $("#delivery_option_5_1").click();
-//    });
-
-
+    }
+   $('div.selector span').hide();
 });
 </script>

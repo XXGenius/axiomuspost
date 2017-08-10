@@ -148,12 +148,12 @@ class AdminAxiomusConfigController extends ModuleAdminController
         if (Tools::isSubmit('submitMscwAxiomusWeightPrice')) {
             $this->maintab = 0;
             $this->subtab = 4;
-            $this->module->AxiomusPost->insertWeightPrice('Москва', 'axiomus',$_POST['mscw-axiomus-weightprice-carry'], $_POST['mscw-axiomus-weightprice-type'], $_POST['mscw-axiomus-weightprice-sum']);
+            $this->module->AxiomusPost->insertWeightPrice('Москва',  $_POST['mscw-axiomus-weightprice-type'], $_POST['mscw-axiomus-weightprice-sum'],$_POST['mscw-axiomus-weightprice-carry']);
         }
         if (Tools::isSubmit('updateMscwAxiomusWeightPrice')) {
             $this->maintab = 0;
             $this->subtab = 4;
-            $this->module->AxiomusPost->updateWeightPrice($_POST['mscw-axiomus-weightprice-id'], 'Москва', 'axiomus',$_POST['mscw-axiomus-weightprice-carry'], $_POST['mscw-axiomus-weightprice-type'], $_POST['mscw-axiomus-weightprice-sum']);
+            $this->module->AxiomusPost->updateWeightPrice( 'Москва', $_POST['mscw-axiomus-weightprice-type'], $_POST['mscw-axiomus-weightprice-sum'],$_POST['mscw-axiomus-weightprice-carry']);
         }
         if (Tools::isSubmit('deleteMscwAxiomusWeightPrice')) {
             $this->maintab = 0;
@@ -288,12 +288,12 @@ class AdminAxiomusConfigController extends ModuleAdminController
         if (Tools::isSubmit('submitPtrAxiomusWeightPrice')) {
             $this->maintab = 1;
             $this->subtab = 4;
-            $this->module->AxiomusPost->insertWeightPrice('Санкт-Петербург', $_POST['ptr-axiomus-weightprice-type'], $_POST['ptr-axiomus-weightprice-sum']);
+            $this->module->AxiomusPost->insertWeightPrice('Санкт-Петербург', $_POST['ptr-axiomus-weightprice-type'], $_POST['ptr-axiomus-weightprice-sum'], $_POST['ptr-axiomus-weightprice-carry']);
         }
         if (Tools::isSubmit('updatePtrAxiomusWeightPrice')) {
             $this->maintab = 1;
             $this->subtab = 4;
-            $this->module->AxiomusPost->updateWeightPrice($_POST['ptr-axiomus-weightprice-id'], 'Санкт-Петербург',$_POST['ptr-axiomus-weightprice-carry'], $_POST['ptr-axiomus-weightprice-type'], $_POST['ptr-axiomus-weightprice-sum']);
+            $this->module->AxiomusPost->updateWeightPrice($_POST['ptr-axiomus-weightprice-id'], 'Санкт-Петербург', $_POST['ptr-axiomus-weightprice-type'], $_POST['ptr-axiomus-weightprice-sum'], $_POST['ptr-axiomus-weightprice-carry']);
         }
         if (Tools::isSubmit('deletePtrAxiomusWeightPrice')) {
             $this->maintab = 1;

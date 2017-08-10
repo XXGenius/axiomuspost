@@ -854,7 +854,7 @@ public $pecomDeliveryNeededAddressComment;
         if (!isset($result)){
             return false;
         }elseif (!isset($result->error)) {
-            $sum = $result->transfers[0]->costTotal;
+            $sum = $result->transfers[0]->costTotal ;
 
             if ($is_carry) {
                 $res = Db::getInstance()->autoExecuteWithNullValues('ps_axiomus_pecom_carry', [
@@ -862,6 +862,7 @@ public $pecomDeliveryNeededAddressComment;
                     'city' => (string)$city,
                     'costTotal' => (int)$sum,
                     'receiverCityId' => (int)$code['bitrixId'],
+                    'price' => (int)$price
                 ], 'INSERT');
             }else{
                 $res = Db::getInstance()->autoExecuteWithNullValues('ps_axiomus_pecom_price_delivery', [
@@ -869,6 +870,7 @@ public $pecomDeliveryNeededAddressComment;
                     'city' => (string)$city,
                     'costTotal' => (int)$sum,
                     'receiverCityId' => (int)$code['bitrixId'],
+                    'price' => (int)$price
                 ], 'INSERT');
             }
             return $sum;
